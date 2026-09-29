@@ -30,19 +30,25 @@ func initServer() {
 
 	mux := http.NewServeMux()
 
-	// Root & Status Check
+	// Root status check
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" || r.URL.Path == "/api" || r.URL.Path == "/api/" || r.URL.Path == "/api/index.go" {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_ = json.NewEncoder(w).Encode(map[string]any{
-				"status":  "UP",
-				"service": "TelkomSecure Go Backend",
-				"version": "2.4",
-			})
-			return
-		}
-		http.NotFound(w, r)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"status":   "UP",
+			"service":  "TelkomSecure Go Backend",
+			"version":  "2.4",
+			"path":     r.URL.Path,
+			"endpoints": []string{
+				"/health",
+				"/api/v1/subscription/check",
+				"/api/v1/telemetry/events",
+				"/api/v1/dashboard/stats",
+				"/api/v1/dashboard/subscribers",
+				"/api/v1/dashboard/threats",
+				"/api/v1/ndp/simulate-purchase",
+			},
+		})
 	})
 
 	// Health check
@@ -79,18 +85,24 @@ func initServer() {
 func Handler(w http.ResponseWriter, r *http.Request) {
 	once.Do(initServer)
 
-	// In Vercel serverless functions, rewrites pass the original path via query param or headers
-	if pathParam := r.URL.Query().Get("path"); pathParam != "" {
-		if !strings.HasPrefix(pathParam, "/") {
-			pathParam = "/" + pathParam
-		}
-		r.URL.Path = pathParam
-	} else if matched := r.Header.Get("x-matched-path"); matched != "" && matched != "/api/index.go" {
-		r.URL.Path = matched
+	// Determine original requested path
+	path := r.URL.Path
+	if qPath := r.URL.Query().Get("path"); qPath != "" {
+		path = qPath
+	} else if matched := r.Header.Get("x-matched-path"); matched != "" {
+		path = matched
 	} else if fwd := r.Header.Get("x-forwarded-uri"); fwd != "" {
 		parts := strings.SplitN(fwd, "?", 2)
-		r.URL.Path = parts[0]
+		path = parts[0]
 	}
+
+	// Normalize prefix
+	path = strings.TrimPrefix(path, "/api/index.go")
+	path = strings.TrimPrefix(path, "/api/index")
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+	r.URL.Path = path
 
 	httpHandler.ServeHTTP(w, r)
 }
