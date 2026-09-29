@@ -1,6 +1,7 @@
 import { DashboardStats, NdpOrderRequest, Subscriber, ThreatEvent } from '@/types';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://backend-psi-snowy-96.vercel.app';
+const rawUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://backend-psi-snowy-96.vercel.app';
+const BASE_URL = rawUrl.replace(/\/+$/, '');
 
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   const res = await fetch(`${BASE_URL}/api/v1/dashboard/stats`, {
