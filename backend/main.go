@@ -71,6 +71,10 @@ func main() {
 	mux.HandleFunc("/api/v1/dashboard/threats", apiHandler.ListThreats)
 	mux.Handle("/api/v1/dashboard/stream", broker)
 
+	// Big Data Streaming Export Endpoints (Chunked Transfer)
+	mux.HandleFunc("/api/v1/export/threats", apiHandler.ExportThreatsStream)
+	mux.HandleFunc("/api/v1/export/subscribers", apiHandler.ExportSubscribersStream)
+
 	// Admin & Customer Care Helpdesk Endpoints
 	mux.HandleFunc("/api/v1/admin/subscribers/search", apiHandler.SearchSubscribers)
 	mux.HandleFunc("/api/v1/admin/resend-code", apiHandler.ResendActivationCode)

@@ -12,6 +12,7 @@ import { DeviceIntegrityDesk } from '@/components/DeviceIntegrityDesk';
 import { ReportDesk } from '@/components/ReportDesk';
 import { LoginModal } from '@/components/LoginModal';
 import { getCurrentOperator, logoutOperator, SOCOperator } from '@/lib/auth';
+import { playCriticalThreatAlert } from '@/lib/soundAlert';
 import {
   fetchDashboardStats,
   fetchSubscribers,
@@ -125,6 +126,9 @@ export default function SOCDashboard() {
         try {
           const newThreat: ThreatEvent = JSON.parse(e.data);
           setThreats((prev) => [newThreat, ...prev.slice(0, 49)]);
+          if (newThreat.severity === 'CRITICAL' || newThreat.severity === 'HIGH') {
+            playCriticalThreatAlert();
+          }
           setStats((prev) => {
             if (!prev) return prev;
             return {

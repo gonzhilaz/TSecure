@@ -5,6 +5,7 @@ import '../mocks/mock_backend_data.dart';
 import '../models/active_period.dart';
 import '../models/user_session.dart';
 import 'device_hardware_service.dart';
+import 'offline_telemetry_queue.dart';
 
 class TelkomselBackendService {
   static const String _baseUrl = String.fromEnvironment(
@@ -96,9 +97,36 @@ class TelkomselBackendService {
       request.write(payload);
       final response = await request.close().timeout(const Duration(seconds: 3));
       debugPrint('[BackendService] Threat telemetry sent: ${response.statusCode}');
+      _flushOfflineQueue();
     } catch (e) {
-      debugPrint('[BackendService] Failed to send telemetry: $e');
+      debugPrint('[BackendService] Telemetry failed, queueing offline: $e');
+      await OfflineTelemetryQueue.enqueueThreat(
+        msisdn: msisdn,
+        mobileId: mobileId,
+        threatType: threatType,
+        target: target,
+        severity: severity,
+        description: description,
+        actionTaken: actionTaken,
+      );
     }
+  }
+
+  Future<void> _flushOfflineQueue() async {
+    try {
+      final pending = await OfflineTelemetryQueue.dequeueAll();
+      if (pending.isEmpty) return;
+      for (final item in pending) {
+        final client = HttpClient();
+        client.connectionTimeout = const Duration(seconds: 2);
+        final uri = Uri.parse('$_baseUrl/api/v1/telemetry/events');
+        final req = await client.postUrl(uri);
+        req.headers.set('Content-Type', 'application/json');
+        req.write(jsonEncode(item));
+        await req.close();
+      }
+      debugPrint('[BackendService] Flushed ${pending.length} offline threats');
+    } catch (_) {}
   }
 
   /// Requests SMS OTP from Telkomsel Backend

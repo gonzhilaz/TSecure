@@ -2,17 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  FileText,
-  Download,
-  Calendar,
-  ShieldAlert,
-  FileSpreadsheet,
-  Printer,
-  Search,
-  Filter,
-  CheckCircle2,
-  Database,
-  Layers,
+  FileText, Download, FileSpreadsheet, Printer, Search, Filter, CheckCircle2, Database,
 } from 'lucide-react';
 import { Subscriber, ThreatEvent, DashboardStats } from '@/types';
 import { exportToCSV, exportToExcel, exportToPDFReport } from '@/lib/exportUtils';
@@ -128,6 +118,11 @@ export const ReportDesk: React.FC<ReportDeskProps> = ({
     });
   };
 
+  const handleStreamBackendCSV = () => {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://backend-i3wy.vercel.app';
+    window.open(`${backendUrl.replace(/\/+$/, '')}/api/v1/export/threats?limit=10000`, '_blank');
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Banner: Export & Time Filters */}
@@ -154,6 +149,15 @@ export const ReportDesk: React.FC<ReportDeskProps> = ({
             >
               <Download className="w-4 h-4 text-slate-500" />
               <span>Ekspor CSV</span>
+            </button>
+
+            <button
+              onClick={handleStreamBackendCSV}
+              className="flex items-center gap-1.5 py-2 px-3 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 text-xs font-bold rounded-xl transition-all shadow-xs active:scale-95"
+              title="Stream jutaan log dari backend Go via HTTP Flusher"
+            >
+              <Database className="w-4 h-4 text-purple-600" />
+              <span>Stream CSV (Jutaan Data)</span>
             </button>
 
             <button

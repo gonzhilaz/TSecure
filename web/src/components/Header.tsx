@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Shield, Radio, Activity, RefreshCw, LogOut, User } from 'lucide-react';
+import { Shield, Radio, Activity, RefreshCw, LogOut, User, Volume2, VolumeX } from 'lucide-react';
 import { SOCOperator } from '@/lib/auth';
+import { isSoundEnabled, setSoundEnabled } from '@/lib/soundAlert';
 
 interface HeaderProps {
   isConnected: boolean;
@@ -20,6 +21,17 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
 }) => {
   const [timeStr, setTimeStr] = useState<string>('');
+  const [soundActive, setSoundActive] = useState<boolean>(true);
+
+  useEffect(() => {
+    setSoundActive(isSoundEnabled());
+  }, []);
+
+  const handleToggleSound = () => {
+    const next = !soundActive;
+    setSoundActive(next);
+    setSoundEnabled(next);
+  };
 
   useEffect(() => {
     const updateTime = () => {
@@ -85,6 +97,19 @@ export const Header: React.FC<HeaderProps> = ({
             <Activity className="w-3.5 h-3.5 text-[#007eb4]" />
             <span>{timeStr || 'Loading...'}</span>
           </div>
+
+          {/* Sound Alert Toggle */}
+          <button
+            onClick={handleToggleSound}
+            className={`p-2 rounded-lg border text-xs transition-all active:scale-95 shadow-xs ${
+              soundActive
+                ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700'
+                : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-400'
+            }`}
+            title={soundActive ? 'Audio Alert Ancaman: AKTIF' : 'Audio Alert Ancaman: MATI'}
+          >
+            {soundActive ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+          </button>
 
           {/* Refresh Action */}
           <button
