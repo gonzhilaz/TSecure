@@ -8,7 +8,7 @@ import '../models/user_session.dart';
 class TelkomselBackendService {
   static const String _baseUrl = String.fromEnvironment(
     'BACKEND_URL',
-    defaultValue: 'https://backend-psi-snowy-96.vercel.app',
+    defaultValue: 'https://backend-i3wy.vercel.app',
   );
 
   /// Request: Cek Masa Aktif (Validasi)
