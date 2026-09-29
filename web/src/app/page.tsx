@@ -9,6 +9,9 @@ import { SubscriberTable } from '@/components/SubscriberTable';
 import { AdminTabNav, DashboardTab } from '@/components/AdminTabNav';
 import { CustomerDiagnosticsDesk } from '@/components/CustomerDiagnosticsDesk';
 import { DeviceIntegrityDesk } from '@/components/DeviceIntegrityDesk';
+import { ReportDesk } from '@/components/ReportDesk';
+import { LoginModal } from '@/components/LoginModal';
+import { getCurrentOperator, logoutOperator, SOCOperator } from '@/lib/auth';
 import {
   fetchDashboardStats,
   fetchSubscribers,
@@ -18,13 +21,30 @@ import {
 import { DashboardStats, Subscriber, ThreatEvent } from '@/types';
 
 export default function SOCDashboard() {
-  const [activeTab, setActiveTab] = useState<DashboardTab>('helpdesk');
+  const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
+  const [operator, setOperator] = useState<SOCOperator | null>(null);
+  const [isAuthChecked, setIsAuthChecked] = useState<boolean>(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [threats, setThreats] = useState<ThreatEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState<boolean>(false);
+
+  useEffect(() => {
+    const current = getCurrentOperator();
+    setOperator(current);
+    setIsAuthChecked(true);
+  }, []);
+
+  const handleLoginSuccess = (op: SOCOperator) => {
+    setOperator(op);
+  };
+
+  const handleLogout = () => {
+    logoutOperator();
+    setOperator(null);
+  };
 
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
@@ -149,7 +169,14 @@ export default function SOCDashboard() {
         isConnected={isConnected}
         onRefresh={handleManualRefresh}
         isRefreshing={isRefreshing}
+        operator={operator}
+        onLogout={handleLogout}
       />
+
+      {/* Login Screen Modal if Unauthenticated */}
+      {isAuthChecked && !operator && (
+        <LoginModal onLoginSuccess={handleLoginSuccess} />
+      )}
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pb-12 pt-2">
         {/* KPI Metrics */}
@@ -192,7 +219,17 @@ export default function SOCDashboard() {
           <DeviceIntegrityDesk subscribers={subscribers} />
         )}
 
-        {/* Tab 4: NDP / Billing Simulator (Vertical Stack) */}
+        {/* Tab 4: Laporan & Ekspor Audit (Reports) */}
+        {activeTab === 'reports' && (
+          <ReportDesk
+            threats={threats}
+            subscribers={subscribers}
+            stats={stats}
+            operator={operator}
+          />
+        )}
+
+        {/* Tab 5: NDP / Billing Simulator (Vertical Stack) */}
         {activeTab === 'ndp_simulator' && (
           <div className="space-y-6">
             <NdpSimulator onSubscriberUpdated={handleSubscriberUpdated} />

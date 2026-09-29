@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Shield, Headphones, Smartphone, Cpu } from 'lucide-react';
+import { Shield, Headphones, Smartphone, Cpu, FileText } from 'lucide-react';
 
-export type DashboardTab = 'overview' | 'helpdesk' | 'device_integrity' | 'ndp_simulator';
+export type DashboardTab = 'overview' | 'helpdesk' | 'device_integrity' | 'ndp_simulator' | 'reports';
 
 interface AdminTabNavProps {
   activeTab: DashboardTab;
@@ -35,25 +35,31 @@ export const AdminTabNav: React.FC<AdminTabNavProps> = ({
   }[] = [
     {
       id: 'overview',
-      label: 'SOC & Threat Monitoring',
+      label: 'SOC & Telemetri',
       description: 'Live telemetry & threat intelligence',
       icon: Shield,
     },
     {
       id: 'helpdesk',
-      label: 'Customer Care & License Desk',
-      description: 'Pencarian unik, masa aktif, SMS, & lisensi',
+      label: 'Customer Care & Lisensi',
+      description: 'Pencarian unik, masa aktif, & lisensi',
       icon: Headphones,
       badgeCount: helpdeskIssues,
       badgeColor: 'bg-[#ed0226] text-white',
     },
     {
       id: 'device_integrity',
-      label: 'Device Integrity & SIM Watch',
-      description: 'Root, jailbreak, & SIM swap audit',
+      label: 'Device Integrity & SIM',
+      description: 'Root, tamper, & SIM swap audit',
       icon: Smartphone,
       badgeCount: integrityIssues,
       badgeColor: 'bg-[#f59e0b] text-white',
+    },
+    {
+      id: 'reports',
+      label: 'Laporan & Ekspor Audit',
+      description: 'Download CSV, Excel, & PDF resmi',
+      icon: FileText,
     },
     {
       id: 'ndp_simulator',
@@ -65,7 +71,7 @@ export const AdminTabNav: React.FC<AdminTabNavProps> = ({
 
   return (
     <div className="bg-white border border-[#e9bcb8]/80 rounded-2xl p-2 shadow-sm mb-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

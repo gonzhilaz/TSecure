@@ -1,15 +1,24 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Shield, Radio, Activity, RefreshCw } from 'lucide-react';
+import { Shield, Radio, Activity, RefreshCw, LogOut, User } from 'lucide-react';
+import { SOCOperator } from '@/lib/auth';
 
 interface HeaderProps {
   isConnected: boolean;
   onRefresh: () => void;
   isRefreshing: boolean;
+  operator?: SOCOperator | null;
+  onLogout?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ isConnected, onRefresh, isRefreshing }) => {
+export const Header: React.FC<HeaderProps> = ({
+  isConnected,
+  onRefresh,
+  isRefreshing,
+  operator,
+  onLogout,
+}) => {
   const [timeStr, setTimeStr] = useState<string>('');
 
   useEffect(() => {
@@ -87,6 +96,29 @@ export const Header: React.FC<HeaderProps> = ({ isConnected, onRefresh, isRefres
             <RefreshCw className={`w-3.5 h-3.5 text-[#5e3f3c] ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>Sync</span>
           </button>
+
+          {/* Operator Profile & Logout */}
+          {operator && (
+            <div className="flex items-center pl-2 ml-1 border-l border-[#e2e8f0] space-x-2">
+              <div className="hidden lg:flex flex-col text-right">
+                <span className="text-xs font-bold text-[#0b132b] leading-tight flex items-center justify-end gap-1">
+                  <User className="w-3 h-3 text-[#be001c]" />
+                  {operator.name}
+                </span>
+                <span className="text-[10px] text-[#778ca2] font-semibold">
+                  {operator.role}
+                </span>
+              </div>
+              <button
+                onClick={onLogout}
+                className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-xs font-bold text-[#be001c] transition-all active:scale-95 shadow-xs"
+                title="Keluar dari akun SOC"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
