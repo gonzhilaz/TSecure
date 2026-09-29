@@ -46,27 +46,27 @@ func (s *SubscriptionService) CheckActivePeriod(msisdn, mobileID, deviceModel, o
 	sub.LastCheckedAt = now
 	s.store.SaveSubscriber(sub)
 
-	isExpired := !sub.IsActive || now.After(sub.ActivePeriodEnd)
+	isPendingActivation := sub.ActivationStatus == "PENDING_ACTIVATION"
+	isExpired := !isPendingActivation && (!sub.IsActive || now.After(sub.ActivePeriodEnd))
 	daysRemaining := int(math.Ceil(sub.ActivePeriodEnd.Sub(now).Hours() / 24))
-	if daysRemaining < 0 {
+	if daysRemaining < 0 || isPendingActivation {
 		daysRemaining = 0
 	}
 
-	licenseKey := ""
-	if !isExpired {
-		licenseKey = sub.KasperskyLicenseKey
-		if licenseKey == "" {
-			licenseKey = "6KYKJ-65T6T-WMVBD-NNPEG"
-		}
+	licenseKey := sub.KasperskyLicenseKey
+	if isPendingActivation {
+		licenseKey = ""
 	}
 
 	msg := "Masa aktif paket aktif dan terlindungi penuh."
-	if isExpired {
+	if isPendingActivation {
+		msg = "Paket terdaftar di NDP Telkomsel. Silakan selesaikan prosedur aktivasi lisensi pada perangkat."
+	} else if isExpired {
 		msg = "Masa aktif paket telah berakhir. Silakan perpanjang paket di MyTelkomsel."
 	}
 
 	return model.ActivePeriodResponse{
-		IsValid:               !isExpired,
+		IsValid:               !isExpired && !isPendingActivation,
 		IsExpired:             isExpired,
 		IsPendingProvisioning: sub.ActivationStatus == "PENDING_PROVISIONING",
 		ActivationStatus:      sub.ActivationStatus,
@@ -85,6 +85,10 @@ func (s *SubscriptionService) SimulatePurchase(req model.NdpOrderRequest) *model
 
 func (s *SubscriptionService) SimulateExpire(msisdn string) (*model.Subscriber, bool) {
 	return s.store.SimulateNdpExpire(msisdn)
+}
+
+func (s *SubscriptionService) SimulateUnactivated(msisdn string) (*model.Subscriber, bool) {
+	return s.store.SimulateNdpUnactivated(msisdn)
 }
 
 func (s *SubscriptionService) ResendActivationCode(msisdn string) (*model.Subscriber, error) {
@@ -189,7 +193,12 @@ func (s *SubscriptionService) ActivateLicense(req model.LicenseActivationRequest
 	}
 
 	now := time.Now()
-	if !sub.IsActive || now.After(sub.ActivePeriodEnd) {
+	if sub.ActivationStatus == "PENDING_ACTIVATION" {
+		sub.IsActive = true
+		sub.ActivePeriodStart = now
+		sub.ActivePeriodEnd = now.Add(30 * 24 * time.Hour)
+		sub.KasperskyExpiryDate = sub.ActivePeriodEnd
+	} else if !sub.IsActive || now.After(sub.ActivePeriodEnd) {
 		return model.LicenseActivationResponse{
 			Success:          false,
 			ActivationStatus: "EXPIRED",

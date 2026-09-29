@@ -23,7 +23,7 @@ class ProfileController extends ChangeNotifier {
     this.backendService,
   }) {
     kasperskySdk.addListener(_onSdkUpdated);
-    _syncActivePeriod();
+    loadProfileData();
   }
 
   ViewState get state => _state;
@@ -31,11 +31,10 @@ class ProfileController extends ChangeNotifier {
   ActivePeriod? get activePeriod => _activePeriod;
 
   void _onSdkUpdated() {
-    _syncActivePeriod();
     notifyListeners();
   }
 
-  void _syncActivePeriod() {
+  void _fallbackSyncActivePeriod() {
     final inst = kasperskySdk.installationId;
     final shortId = inst.length >= 8 ? inst.substring(0, 8) : inst;
     _activePeriod = ActivePeriod(
@@ -69,17 +68,28 @@ class ProfileController extends ChangeNotifier {
           mobileId: mobileId,
         );
         _activePeriod = period;
-        if (!period.isValid || period.isExpired) {
-          kasperskySdk.deactivateSdk(reason: 'Masa aktif paket berakhir di backend');
-        } else if (period.isActivated && !kasperskySdk.isInitialized) {
+
+        if (period.isPendingActivation) {
+          // Scenario 1: Belum Aktif -> SDK harus dormant/deactivated
+          kasperskySdk.deactivateSdk(
+            reason: 'Perangkat belum melakukan aktivasi lisensi NDP',
+          );
+        } else if (!period.isValid || period.isExpired) {
+          // Scenario 3: Masa Aktif Habis (Lisensi Ada) -> Policy Guard deactivates SDK
+          kasperskySdk.deactivateSdk(
+            reason: 'Masa aktif paket telah berakhir di NDP Telkomsel',
+          );
+        } else if (period.isActivated) {
+          // Scenario 2: Masa Aktif Ada -> Initialize genuine native SDK
           await kasperskySdk.initKasperskySdk(
             mobileId: mobileId,
             hasActivePeriod: true,
             expiryDate: period.expiryDate,
+            licenseKey: period.licenseKey,
           );
         }
       } else {
-        _syncActivePeriod();
+        _fallbackSyncActivePeriod();
       }
 
       _state = ViewState.success;
@@ -90,7 +100,7 @@ class ProfileController extends ChangeNotifier {
     }
   }
 
-  /// Sinkronkan Ulang lisensi Kaspersky B2B dari menu Profil
+  /// Sinkronkan Ulang / Prosedur Aktivasi lisensi Kaspersky B2B dari menu Profil
   Future<bool> retryActivation() async {
     _state = ViewState.loading;
     notifyListeners();
@@ -114,10 +124,15 @@ class ProfileController extends ChangeNotifier {
             mobileId: mobileId,
           );
           _activePeriod = period;
+          final String resolvedKey = (period.licenseKey.isNotEmpty)
+              ? period.licenseKey
+              : (res['license_key'] as String? ?? '');
+
           await kasperskySdk.initKasperskySdk(
             mobileId: mobileId,
             hasActivePeriod: true,
             expiryDate: period.expiryDate,
+            licenseKey: resolvedKey,
           );
           _state = ViewState.success;
           notifyListeners();

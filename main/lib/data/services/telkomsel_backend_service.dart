@@ -55,6 +55,7 @@ class TelkomselBackendService {
                   : 'Masa aktif paket telah berakhir. Silakan perpanjang di MyTelkomsel.'),
           activationStatus: data['activation_status'] ?? (isValid ? 'ACTIVATED' : 'NOT_SUBSCRIBED'),
           isPendingProvisioning: data['is_pending_provisioning'] == true,
+          licenseKey: data['license_key'] ?? '',
         );
       }
     } catch (e) {

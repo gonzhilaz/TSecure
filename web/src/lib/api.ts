@@ -57,6 +57,18 @@ export async function simulateNdpExpire(msisdn: string): Promise<{ status: strin
   return res.json();
 }
 
+export async function simulateNdpUnactivated(msisdn: string): Promise<{ status: string; subscriber: Subscriber }> {
+  const res = await fetch(`${BASE_URL}/api/v1/ndp/simulate-unactivated`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ msisdn }),
+  });
+  if (!res.ok) {
+    throw new Error(`Unactivated simulation failed: ${res.statusText}`);
+  }
+  return res.json();
+}
+
 export async function searchSubscribers(query = '', status = ''): Promise<Subscriber[]> {
   const params = new URLSearchParams();
   if (query) params.set('q', query);

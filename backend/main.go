@@ -64,6 +64,7 @@ func main() {
 	// NDP / MyTelkomsel Simulation Endpoints
 	mux.HandleFunc("/api/v1/ndp/simulate-purchase", apiHandler.SimulateNdpPurchase)
 	mux.HandleFunc("/api/v1/ndp/simulate-expire", apiHandler.SimulateNdpExpire)
+	mux.HandleFunc("/api/v1/ndp/simulate-unactivated", apiHandler.SimulateNdpUnactivated)
 
 	// SOC Dashboard Endpoints
 	mux.HandleFunc("/api/v1/dashboard/stats", apiHandler.GetDashboardStats)

@@ -44,6 +44,8 @@ class SecurityFeatureSheet extends StatefulWidget {
 
 class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
   late bool _isEnabled;
+  Map<String, dynamic>? _rootAuditResult;
+  bool _isCheckingRoot = false;
 
   @override
   void initState() {
@@ -63,7 +65,7 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
     return true;
   }
 
-  void _onToggle(bool value) {
+  void _toggleStatus(bool value) {
     setState(() => _isEnabled = value);
     final title = widget.featureTitle.toLowerCase();
     if (title.contains('web')) widget.sdk.toggleWebFilter(value);
@@ -154,7 +156,7 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
       return _FeatureConfig(
         title: 'Fake Apps Detector',
         icon: Icons.warning_amber_rounded,
-        engine: 'BlackWall RASP + Kaspersky AppControl',
+        engine: 'Kaspersky AppControl + Integrity Engine',
         description: 'Memverifikasi sertifikat cryptographic APK dan mencegah aplikasi tiruan/repackaged.',
         actionLabel: 'Pindai Integritas APK',
         onAction: () {
@@ -164,24 +166,45 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
         telemetry: [
           _Row('Integritas Paket', _isEnabled ? 'Terverifikasi Utuh' : 'Nonaktif'),
           _Row('Injeksi DEX / Hook', '0 Modifikasi Terdeteksi'),
-          _Row('Anti-Tampering', 'BlackWall Hardening Aktif'),
+          _Row('Anti-Tampering', 'Hardening Aktif'),
           _Row('Validasi Tanda Tangan', 'v1/v2/v3 Scheme Resmi'),
         ],
       );
     }
     if (title.contains('device')) {
+      final isRooted = _rootAuditResult?['isRooted'] == true;
+      final rootCause = _rootAuditResult?['rootCause'] as String? ?? 'Bersih (Terverifikasi)';
       return _FeatureConfig(
         title: 'Device Reputation',
         icon: Icons.phone_android,
-        engine: 'Kaspersky Integrity & SELinux Auditor',
+        engine: 'Kaspersky RootDetector v5.21',
         description: 'Menilai kesehatan dan integritas firmware sistem operasi dari eksploitasi root atau debugging ilegal.',
-        actionLabel: 'Cek Integritas Perangkat',
-        actionMessage: 'Hasil Integritas: Perangkat 100% murni tanpa root!',
+        actionLabel: _isCheckingRoot ? 'Memeriksa Root...' : 'Cek Integritas Perangkat',
+        onAction: () async {
+          setState(() => _isCheckingRoot = true);
+          final res = await widget.sdk.checkRoot();
+          if (!mounted) return;
+          setState(() {
+            _rootAuditResult = res;
+            _isCheckingRoot = false;
+          });
+          final rooted = res['isRooted'] == true;
+          final cause = res['rootCause'] ?? 'Bersih';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(rooted
+                  ? '🚨 PERINGATAN: Perangkat Terindikasi Root! ($cause)'
+                  : '✅ Integritas Terverifikasi: Perangkat Bersih Tanpa Root'),
+              backgroundColor: rooted ? AppColors.statusDanger : AppColors.statusSafe,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        },
         telemetry: [
-          _Row('Skor Integritas', '100% Terlindungi Maksimal'),
-          _Row('Status Root / Magisk', 'Tidak Ditemukan (Bersih)'),
+          _Row('Status Root / Magisk', _rootAuditResult == null ? 'Siap Diaudit' : (isRooted ? 'Terdeteksi Root!' : 'Bersih (Murni)')),
+          _Row('Detail Audit Root', _rootAuditResult == null ? 'Tekan Tombol Cek' : rootCause),
+          _Row('Mesin Audit', 'Kaspersky RootDetector'),
           _Row('Status SELinux', 'Enforcing (Aktif)'),
-          _Row('Patch Keamanan OS', 'September 2026'),
         ],
       );
     }
@@ -248,69 +271,63 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: _isEnabled
-                        ? AppColors.primary
-                        : AppColors.slateDivider,
-                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    cfg.icon,
-                    color: _isEnabled ? Colors.white : AppColors.navyDeep,
-                    size: 26,
-                  ),
+                  child: Icon(cfg.icon, color: AppColors.primary, size: 24),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        cfg.title,
-                        style: AppTypography.headlineSm.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.navyDeep,
-                        ),
-                      ),
+                      Text(cfg.title, style: AppTypography.headlineSm),
                       const SizedBox(height: 2),
                       Text(
                         cfg.engine,
-                        style: AppTypography.bodySm.copyWith(
-                          color: AppColors.slateMuted,
-                          fontSize: 12,
+                        style: AppTypography.labelSm.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Switch(
+                Switch.adaptive(
                   value: _isEnabled,
+                  onChanged: _toggleStatus,
                   activeThumbColor: AppColors.primary,
-                  onChanged: _onToggle,
                 ),
               ],
             ),
             const SizedBox(height: 14),
-            Text(
-              cfg.description,
-              style: AppTypography.bodySm.copyWith(color: AppColors.slateMid),
-            ),
-            const SizedBox(height: 18),
+            Text(cfg.description, style: AppTypography.bodySm.copyWith(color: AppColors.slateMuted, height: 1.4)),
+            const SizedBox(height: 20),
             Container(
-              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(14),
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.slateBorder),
               ),
+              padding: const EdgeInsets.all(16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (int i = 0; i < cfg.telemetry.length; i++) ...[
-                    _buildRow(cfg.telemetry[i].label, cfg.telemetry[i].value),
-                    if (i < cfg.telemetry.length - 1)
-                      const Divider(color: AppColors.slateBorder, height: 16),
-                  ],
+                  Text(
+                    'TELEMETRI & STATUS OPERASIONAL',
+                    style: AppTypography.labelSm.copyWith(
+                      color: AppColors.slateMuted,
+                      letterSpacing: 0.8,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ...cfg.telemetry.map((row) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _buildRow(row.label, row.value),
+                  )),
                 ],
               ),
             ),
@@ -322,9 +339,7 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 onPressed: () {
                   if (cfg.onAction != null) {
@@ -341,10 +356,7 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
                     );
                   }
                 },
-                child: Text(
-                  cfg.actionLabel,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
+                child: Text(cfg.actionLabel, style: const TextStyle(fontWeight: FontWeight.w700)),
               ),
             ),
             const SizedBox(height: 10),
@@ -363,10 +375,7 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
         Expanded(
           child: Text(
             value,
-            style: AppTypography.bodySm.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppColors.navyDeep,
-            ),
+            style: AppTypography.bodySm.copyWith(fontWeight: FontWeight.w600, color: AppColors.navyDeep),
             textAlign: TextAlign.right,
           ),
         ),

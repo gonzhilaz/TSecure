@@ -273,6 +273,26 @@ func (s *Storage) SimulateNdpExpire(msisdn string) (*model.Subscriber, bool) {
 	return &copied, true
 }
 
+func (s *Storage) SimulateNdpUnactivated(msisdn string) (*model.Subscriber, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	cleaned := cleanMsisdn(msisdn)
+	sub, exists := s.subscribers[cleaned]
+	if !exists {
+		return nil, false
+	}
+	sub.IsActive = false
+	sub.ActivationStatus = "PENDING_ACTIVATION"
+	sub.ActivePeriodStart = time.Time{}
+	sub.ActivePeriodEnd = time.Time{}
+	sub.KasperskyLicenseKey = ""
+	sub.KasperskyExpiryDate = time.Time{}
+	sub.MobileID = ""
+	_ = s.saveToFile()
+	copied := *sub
+	return &copied, true
+}
+
 func (s *Storage) GetDashboardStats() model.DashboardStats {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -347,39 +367,26 @@ func cleanMsisdn(msisdn string) string {
 }
 
 func (s *Storage) loadFromFile() error {
-	if s.persistPath == "" {
-		return nil
-	}
+	if s.persistPath == "" { return nil }
 	data, err := os.ReadFile(s.persistPath)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	var dump struct {
 		Subscribers map[string]*model.Subscriber `json:"subscribers"`
 		Threats     []model.ThreatEvent          `json:"threats"`
 	}
-	if err := json.Unmarshal(data, &dump); err != nil {
-		return err
-	}
+	if err := json.Unmarshal(data, &dump); err != nil { return err }
 	s.subscribers = dump.Subscribers
 	s.threats = dump.Threats
 	return nil
 }
 
 func (s *Storage) saveToFile() error {
-	if s.persistPath == "" {
-		return nil
-	}
+	if s.persistPath == "" { return nil }
 	dump := struct {
 		Subscribers map[string]*model.Subscriber `json:"subscribers"`
 		Threats     []model.ThreatEvent          `json:"threats"`
-	}{
-		Subscribers: s.subscribers,
-		Threats:     s.threats,
-	}
+	}{Subscribers: s.subscribers, Threats: s.threats}
 	data, err := json.MarshalIndent(dump, "", "  ")
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	return os.WriteFile(s.persistPath, data, 0644)
 }

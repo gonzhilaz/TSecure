@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Smartphone, Zap, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
-import { simulateNdpPurchase, simulateNdpExpire } from '@/lib/api';
+import { Smartphone, Zap, AlertTriangle, CheckCircle2, ShieldOff, Clock } from 'lucide-react';
+import { simulateNdpPurchase, simulateNdpExpire, simulateNdpUnactivated } from '@/lib/api';
 import { Subscriber } from '@/types';
 
 interface NdpSimulatorProps {
@@ -13,11 +13,33 @@ export const NdpSimulator: React.FC<NdpSimulatorProps> = ({ onSubscriberUpdated 
   const [msisdn, setMsisdn] = useState<string>('081299887766');
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<{
-    type: 'purchase' | 'expire';
+    type: 'purchase' | 'expire' | 'unactivated';
     subscriber: Subscriber;
     message: string;
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const handleUnactivated = async () => {
+    if (!msisdn.trim()) {
+      setErrorMsg('Masukkan nomor MSISDN terlebih dahulu');
+      return;
+    }
+    setErrorMsg(null);
+    setLoadingAction('unactivated');
+    try {
+      const res = await simulateNdpUnactivated(msisdn.trim());
+      setLastResult({
+        type: 'unactivated',
+        subscriber: res.subscriber,
+        message: 'Status di-set: BELUM AKTIF (Masa Aktif & Lisensi Kosong, Wajib Aktivasi)!',
+      });
+      onSubscriberUpdated(res.subscriber);
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Gagal simulasi unactivated');
+    } finally {
+      setLoadingAction(null);
+    }
+  };
 
   const handlePurchase = async (durationDays: number, packageName: string) => {
     if (!msisdn.trim()) {
@@ -36,7 +58,7 @@ export const NdpSimulator: React.FC<NdpSimulatorProps> = ({ onSubscriberUpdated 
       setLastResult({
         type: 'purchase',
         subscriber: res.subscriber,
-        message: `Berhasil aktivasi ${packageName} (+${durationDays} hari)!`,
+        message: `Status di-set: MASA AKTIF ADA (+${durationDays} hari & Lisensi Real Aktif)!`,
       });
       onSubscriberUpdated(res.subscriber);
     } catch (err: unknown) {
@@ -58,7 +80,7 @@ export const NdpSimulator: React.FC<NdpSimulatorProps> = ({ onSubscriberUpdated 
       setLastResult({
         type: 'expire',
         subscriber: res.subscriber,
-        message: 'Masa aktif berhasil dipaksa kedaluwarsa (Expired)!',
+        message: 'Status di-set: MASA AKTIF HABIS (Expired di NDP, Lisensi Tetap Ada)!',
       });
       onSubscriberUpdated(res.subscriber);
     } catch (err: unknown) {
@@ -103,33 +125,39 @@ export const NdpSimulator: React.FC<NdpSimulatorProps> = ({ onSubscriberUpdated 
           <p className="text-[11px] text-[#778ca2] mt-1">Default: Pixel 6 (081299887766)</p>
         </div>
 
-        {/* Buttons */}
+        {/* Buttons: 3 Pure Testing Scenarios */}
         <div className="md:col-span-8 flex flex-wrap gap-2.5 pt-2 md:pt-4">
+          {/* Skenario 1: Belum Aktif */}
+          <button
+            onClick={handleUnactivated}
+            disabled={loadingAction !== null}
+            className="flex-1 min-w-[170px] flex items-center justify-center space-x-1.5 px-3 py-2.5 rounded-lg bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] text-[#334155] text-xs font-bold active:scale-95 disabled:opacity-50 transition-all cursor-pointer shadow-xs"
+            title="Masa aktif kosong & lisensi kosong. Wajib aktivasi pada perangkat."
+          >
+            <ShieldOff className="w-4 h-4 text-[#64748b]" />
+            <span>{loadingAction === 'unactivated' ? 'Memproses...' : '⚪ 1. Belum Aktif (Wajib Aktivasi)'}</span>
+          </button>
+
+          {/* Skenario 2: Masa Aktif Ada (+30 Hari & Lisensi Real) */}
           <button
             onClick={() => handlePurchase(30, 'Telkomsel Secure Guard 30 Hari')}
             disabled={loadingAction !== null}
-            className="flex-1 min-w-[170px] flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg bg-[#ed0226] hover:bg-[#be001c] text-white text-xs font-bold shadow-sm shadow-[#ed0226]/30 active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+            className="flex-1 min-w-[170px] flex items-center justify-center space-x-1.5 px-3 py-2.5 rounded-lg bg-[#ed0226] hover:bg-[#be001c] text-white text-xs font-bold shadow-sm shadow-[#ed0226]/30 active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+            title="Masa aktif valid 30 hari & lisensi real dari backend."
           >
             <CheckCircle2 className="w-4 h-4 text-white" />
-            <span>{loadingAction === 'p30' ? 'Memproses...' : '+30 Hari (Rp 15.000)'}</span>
+            <span>{loadingAction === 'p30' ? 'Memproses...' : '🟢 2. Masa Aktif Ada (+30 Hari)'}</span>
           </button>
 
-          <button
-            onClick={() => handlePurchase(365, 'Telkomsel Enterprise 1 Tahun')}
-            disabled={loadingAction !== null}
-            className="flex-1 min-w-[170px] flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg bg-[#545d7c] hover:bg-[#3a405a] text-white text-xs font-bold active:scale-95 disabled:opacity-50 transition-all cursor-pointer shadow-xs"
-          >
-            <Clock className="w-4 h-4 text-[#dbe1ff]" />
-            <span>{loadingAction === 'p365' ? 'Memproses...' : '+1 Tahun (Enterprise)'}</span>
-          </button>
-
+          {/* Skenario 3: Masa Aktif Habis (Expired di NDP, Lisensi Ada) */}
           <button
             onClick={handleExpire}
             disabled={loadingAction !== null}
-            className="flex-1 min-w-[150px] flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg bg-[#fff0ef] hover:bg-[#ffdad7] border border-[#e9bcb8] text-[#be001c] text-xs font-bold active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+            className="flex-1 min-w-[170px] flex items-center justify-center space-x-1.5 px-3 py-2.5 rounded-lg bg-[#fff0ef] hover:bg-[#ffdad7] border border-[#e9bcb8] text-[#be001c] text-xs font-bold active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+            title="Masa aktif habis di NDP Telkomsel, namun lisensi fisik masih ada."
           >
             <AlertTriangle className="w-4 h-4 text-[#ba1a1a]" />
-            <span>{loadingAction === 'expire' ? 'Memproses...' : 'Paksa Expired'}</span>
+            <span>{loadingAction === 'expire' ? 'Memproses...' : '🔴 3. Masa Aktif Habis (Lisensi Ada)'}</span>
           </button>
         </div>
       </div>

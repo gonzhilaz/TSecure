@@ -144,6 +144,20 @@ class PemindaianScreen extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.85),
             ),
           ),
+          if (sdk.currentScanningFile.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, left: 20, right: 20),
+              child: Text(
+                sdk.currentScanningFile,
+                style: AppTypography.labelSm.copyWith(
+                  color: Colors.white.withValues(alpha: 0.75),
+                  fontSize: 11,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ),
         ],
       );
     }

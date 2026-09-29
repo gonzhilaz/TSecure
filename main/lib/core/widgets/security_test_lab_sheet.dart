@@ -22,10 +22,7 @@ class SecurityTestLabSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => SecurityTestLabSheet(
-        sdk: sdk,
-        initialTab: initialTab,
-      ),
+      builder: (_) => SecurityTestLabSheet(sdk: sdk, initialTab: initialTab),
     );
   }
 
@@ -40,39 +37,19 @@ class _SecurityTestLabSheetState extends State<SecurityTestLabSheet>
 
   bool _isCheckingUrl = false;
   Map<String, dynamic>? _urlResult;
-
   bool _isScanningEicar = false;
   Map<String, dynamic>? _eicarResult;
 
-  final List<Map<String, String>> _testUrls = [
-    {
-      'title': 'Kaspersky Phishing Test',
-      'url': 'http://www.kaspersky.com/antiphishing_test',
-      'type': 'PHISHING',
-      'org': 'Kaspersky Lab Official',
-    },
-    {
-      'title': 'AMTSO Phishing Standard',
-      'url': 'https://www.amtso.org/check-desktop-phishing-page/',
-      'type': 'PHISHING',
-      'org': 'AMTSO Global Standard',
-    },
-    {
-      'title': 'Kaspersky Malicious Web (WMUF)',
-      'url': 'http://www.kaspersky.com/test/wmuf',
-      'type': 'MALWARE',
-      'org': 'Kaspersky Lab Malware Test',
-    },
+  final List<Map<String, String>> _testUrls = const [
+    {'title': 'Kaspersky Phishing Test', 'url': 'http://www.kaspersky.com/antiphishing_test', 'type': 'PHISHING', 'org': 'Kaspersky Lab Official'},
+    {'title': 'AMTSO Phishing Standard', 'url': 'https://www.amtso.org/check-desktop-phishing-page/', 'type': 'PHISHING', 'org': 'AMTSO Global Standard'},
+    {'title': 'Kaspersky Malicious Web (WMUF)', 'url': 'http://www.kaspersky.com/test/wmuf', 'type': 'MALWARE', 'org': 'Kaspersky Lab Malware Test'},
   ];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(
-      length: 2,
-      vsync: this,
-      initialIndex: widget.initialTab,
-    );
+    _tabController = TabController(length: 2, vsync: this, initialIndex: widget.initialTab);
     widget.sdk.requestNotificationPermission();
   }
 
@@ -85,36 +62,15 @@ class _SecurityTestLabSheetState extends State<SecurityTestLabSheet>
 
   Future<void> _checkTargetUrl(String url) async {
     if (url.trim().isEmpty) return;
-    setState(() {
-      _isCheckingUrl = true;
-      _urlResult = null;
-    });
-
+    setState(() { _isCheckingUrl = true; _urlResult = null; });
     final res = await widget.sdk.checkUrl(url.trim());
-
-    if (mounted) {
-      setState(() {
-        _isCheckingUrl = false;
-        _urlResult = res;
-      });
-    }
+    if (mounted) setState(() { _isCheckingUrl = false; _urlResult = res; });
   }
 
   Future<void> _runEicarScan() async {
-    setState(() {
-      _isScanningEicar = true;
-      _eicarResult = null;
-    });
-
-    await Future.delayed(const Duration(milliseconds: 500));
+    setState(() { _isScanningEicar = true; _eicarResult = null; });
     final res = await widget.sdk.testScanEicar();
-
-    if (mounted) {
-      setState(() {
-        _isScanningEicar = false;
-        _eicarResult = res;
-      });
-    }
+    if (mounted) setState(() { _isScanningEicar = false; _eicarResult = res; });
   }
 
   @override
@@ -127,93 +83,56 @@ class _SecurityTestLabSheetState extends State<SecurityTestLabSheet>
       ),
       child: Column(
         children: [
-          _buildDragHandle(),
-          _buildHeader(),
-          _buildTabBar(),
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 40, height: 4,
+              decoration: BoxDecoration(color: AppColors.slateBorder, borderRadius: BorderRadius.circular(2)),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                  child: const Icon(Icons.science_outlined, color: AppColors.primary, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Laboratorium Uji Keamanan', style: AppTypography.headlineMd),
+                      const SizedBox(height: 2),
+                      Text('Validasi Deteksi Kaspersky KSN & AMTSO', style: AppTypography.bodySm.copyWith(color: AppColors.slateMuted)),
+                    ],
+                  ),
+                ),
+                IconButton(icon: const Icon(Icons.close, color: AppColors.slateMuted), onPressed: () => Navigator.pop(context)),
+              ],
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            decoration: BoxDecoration(color: AppColors.slateSurface, borderRadius: BorderRadius.circular(12)),
+            child: TabBar(
+              controller: _tabController,
+              indicator: BoxDecoration(color: AppColors.navyDeep, borderRadius: BorderRadius.circular(12)),
+              labelColor: Colors.white,
+              unselectedLabelColor: AppColors.slateMuted,
+              labelStyle: AppTypography.bodySm.copyWith(fontWeight: FontWeight.w600),
+              indicatorSize: TabBarIndicatorSize.tab,
+              tabs: const [Tab(text: 'Uji Web Filter'), Tab(text: 'Uji Antivirus EICAR')],
+            ),
+          ),
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [
-                _buildWebFilterTab(),
-                _buildEicarTab(),
-              ],
+              children: [_buildWebFilterTab(), _buildEicarTab()],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDragHandle() {
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.only(top: 12, bottom: 8),
-        width: 40,
-        height: 4,
-        decoration: BoxDecoration(
-          color: AppColors.slateBorder,
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.science_outlined, color: AppColors.primary, size: 24),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Laboratorium Uji Keamanan', style: AppTypography.headlineMd),
-                const SizedBox(height: 2),
-                Text(
-                  'Validasi Deteksi Kaspersky KSN & AMTSO',
-                  style: AppTypography.bodySm.copyWith(color: AppColors.slateMuted),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.close, color: AppColors.slateMuted),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabBar() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.slateSurface,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        indicator: BoxDecoration(
-          color: AppColors.navyDeep,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        labelColor: Colors.white,
-        unselectedLabelColor: AppColors.slateMuted,
-        labelStyle: AppTypography.bodySm.copyWith(fontWeight: FontWeight.w600),
-        indicatorSize: TabBarIndicatorSize.tab,
-        tabs: const [
-          Tab(text: 'Uji Web Filter'),
-          Tab(text: 'Uji Antivirus EICAR'),
         ],
       ),
     );
@@ -223,10 +142,7 @@ class _SecurityTestLabSheetState extends State<SecurityTestLabSheet>
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        Text(
-          'Pilih URL Uji Standar AMTSO & Kaspersky:',
-          style: AppTypography.labelLg.copyWith(color: AppColors.navyDeep),
-        ),
+        Text('Pilih URL Uji Standar AMTSO & Kaspersky:', style: AppTypography.labelLg.copyWith(color: AppColors.navyDeep)),
         const SizedBox(height: 10),
         ..._testUrls.map((item) => _buildTestUrlTile(item)),
         const SizedBox(height: 16),
@@ -244,10 +160,7 @@ class _SecurityTestLabSheetState extends State<SecurityTestLabSheet>
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   filled: true,
                   fillColor: AppColors.slateSurface,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.slateBorder),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.slateBorder)),
                 ),
               ),
             ),
@@ -277,32 +190,16 @@ class _SecurityTestLabSheetState extends State<SecurityTestLabSheet>
     final isPhishing = item['type'] == 'PHISHING';
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: AppColors.slateSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.slateBorder),
-      ),
+      decoration: BoxDecoration(color: AppColors.slateSurface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.slateBorder)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         leading: Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: (isPhishing ? Colors.amber : Colors.red).withValues(alpha: 0.12),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            isPhishing ? Icons.phishing_outlined : Icons.pest_control_outlined,
-            color: isPhishing ? Colors.amber[800] : Colors.red[700],
-            size: 20,
-          ),
+          decoration: BoxDecoration(color: (isPhishing ? Colors.amber : Colors.red).withValues(alpha: 0.12), shape: BoxShape.circle),
+          child: Icon(isPhishing ? Icons.phishing_outlined : Icons.pest_control_outlined, color: isPhishing ? Colors.amber[800] : Colors.red[700], size: 20),
         ),
         title: Text(item['title']!, style: AppTypography.bodySm.copyWith(fontWeight: FontWeight.w700)),
-        subtitle: Text(
-          '${item['org']} • ${item['url']}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTypography.bodySm.copyWith(color: AppColors.slateMuted, fontSize: 10),
-        ),
+        subtitle: Text('${item['org']} • ${item['url']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTypography.bodySm.copyWith(color: AppColors.slateMuted, fontSize: 10)),
         trailing: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
@@ -319,31 +216,33 @@ class _SecurityTestLabSheetState extends State<SecurityTestLabSheet>
   }
 
   Widget _buildUrlResultCard(Map<String, dynamic> res) {
+    final sdkVerified = res['sdkVerified'] == true;
     final isSafe = res['isSafe'] == true;
     final verdict = res['verdict'] ?? (isSafe ? 'AMAN' : 'BERBAHAYA');
-    final score = res['score'] ?? (isSafe ? 100 : 15);
     final desc = res['description'] ?? '';
+
+    final Color color = !sdkVerified ? Colors.amber : (isSafe ? Colors.green : Colors.red);
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isSafe ? Colors.green.withValues(alpha: 0.06) : Colors.red.withValues(alpha: 0.06),
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isSafe ? Colors.green.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(isSafe ? Icons.check_circle : Icons.warning_amber_rounded, color: isSafe ? Colors.green : Colors.red, size: 28),
+              Icon(!sdkVerified ? Icons.info_outline : (isSafe ? Icons.check_circle : Icons.warning_amber_rounded), color: color, size: 28),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Hasil Inspeksi: $verdict', style: AppTypography.labelLg.copyWith(color: isSafe ? Colors.green[800] : Colors.red[800], fontWeight: FontWeight.w800)),
-                    Text('Skor Keamanan: $score/100', style: AppTypography.bodySm.copyWith(color: AppColors.slateMuted)),
+                    Text('Hasil KSN: $verdict', style: AppTypography.labelLg.copyWith(color: color, fontWeight: FontWeight.w800)),
+                    Text('SDK Verified: $sdkVerified', style: AppTypography.bodySm.copyWith(color: AppColors.slateMuted)),
                   ],
                 ),
               ),
@@ -351,23 +250,6 @@ class _SecurityTestLabSheetState extends State<SecurityTestLabSheet>
           ),
           const SizedBox(height: 10),
           Text(desc, style: AppTypography.bodySm.copyWith(color: AppColors.navyDeep)),
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-            child: Row(
-              children: [
-                const Icon(Icons.notifications_active, color: AppColors.primary, size: 16),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    isSafe ? 'Riwayat dicatat di Aktivitas Terakhir.' : 'Notifikasi Heads-Up terkirim & tercatat di Log Ancaman.',
-                    style: AppTypography.bodySm.copyWith(fontWeight: FontWeight.w600, fontSize: 10),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -396,7 +278,7 @@ class _SecurityTestLabSheetState extends State<SecurityTestLabSheet>
               ),
               const SizedBox(height: 8),
               Text(
-                'EICAR (European Institute for Computer Antivirus Research) adalah berkas uji standar non-destruktif untuk memvalidasi efektivitas mesin antivirus tanpa merusak perangkat.',
+                'EICAR adalah berkas uji standar non-destruktif untuk memvalidasi mesin antivirus nyata tanpa merusak sistem.',
                 style: AppTypography.bodySm.copyWith(color: AppColors.slateMuted),
               ),
             ],
@@ -430,31 +312,37 @@ class _SecurityTestLabSheetState extends State<SecurityTestLabSheet>
   }
 
   Widget _buildEicarResultCard(Map<String, dynamic> res) {
-    final threatName = res['threatName'] ?? 'EICAR-Test-File';
-    final threatType = res['threatType'] ?? 'Virus';
-    final severity = res['severity'] ?? 'HIGH';
+    final isRealThreat = res['isThreat'] == true;
+    final threatName = res['threatName'] ?? 'Tidak Terdeteksi';
+    final threatType = res['threatType'] ?? 'None';
     final desc = res['description'] ?? '';
+    final sdkVerified = res['sdkVerified'] == true;
+
+    final MaterialColor color = isRealThreat ? Colors.red : Colors.amber;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.06),
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.pest_control_outlined, color: Colors.red, size: 28),
+              Icon(isRealThreat ? Icons.pest_control_outlined : Icons.info_outline, color: color, size: 28),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Ancaman Terdeteksi: $threatName', style: AppTypography.labelLg.copyWith(color: Colors.red[800], fontWeight: FontWeight.w800)),
-                    Text('Tipe: $threatType • Bahaya: $severity', style: AppTypography.bodySm.copyWith(color: AppColors.slateMuted)),
+                    Text(
+                      isRealThreat ? '🚨 Ancaman Terdeteksi: $threatName' : 'Hasil Uji: $threatName',
+                      style: AppTypography.labelLg.copyWith(color: color[800], fontWeight: FontWeight.w800),
+                    ),
+                    Text('Tipe: $threatType • SDK Verified: $sdkVerified', style: AppTypography.bodySm.copyWith(color: AppColors.slateMuted)),
                   ],
                 ),
               ),
@@ -462,23 +350,6 @@ class _SecurityTestLabSheetState extends State<SecurityTestLabSheet>
           ),
           const SizedBox(height: 10),
           Text(desc, style: AppTypography.bodySm.copyWith(color: AppColors.navyDeep)),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-            child: Row(
-              children: [
-                const Icon(Icons.check_circle_outline, color: Colors.green, size: 16),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Berkas uji berhasil diisolasi & dicatat ke Aktivitas Terakhir.',
-                    style: AppTypography.bodySm.copyWith(fontWeight: FontWeight.w600, fontSize: 10),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

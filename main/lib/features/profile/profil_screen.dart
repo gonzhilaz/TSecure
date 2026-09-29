@@ -10,6 +10,7 @@ import '../../core/widgets/tri_state_view.dart';
 import '../splash/splash_screen.dart';
 import 'profile_controller.dart';
 import 'widgets/account_info_card.dart';
+import 'widgets/kaspersky_diag_card.dart';
 import 'widgets/license_status_card.dart';
 
 class ProfilScreen extends StatefulWidget {
@@ -102,44 +103,48 @@ class _ProfilScreenState extends State<ProfilScreen> {
       body: TriStateView(
         state: controller.state,
         onRetry: controller.loadProfileData,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildTopHeader(context),
-              Transform.translate(
-                offset: const Offset(0, -50),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
-                    children: [
-                      _buildAvatar(),
-                      const SizedBox(height: 14),
-                      Text(
-                        controller.userSession?.name ?? 'R. Aryandi',
-                        style: AppTypography.headlineLg.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.navyDeep,
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: controller.loadProfileData,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                _buildTopHeader(context),
+                Transform.translate(
+                  offset: const Offset(0, -50),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Column(
+                      children: [
+                        _buildAvatar(),
+                        const SizedBox(height: 14),
+                        Text(
+                          controller.userSession?.name ?? 'R. Aryandi',
+                          style: AppTypography.headlineLg.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.navyDeep,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            '+62 82-141414-875 • ',
-                            style: AppTypography.bodySm.copyWith(
-                              color: AppColors.slateMuted,
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${controller.userSession?.msisdn ?? "+62 82-141414-875"} • ',
+                              style: AppTypography.bodySm.copyWith(
+                                color: AppColors.slateMuted,
+                              ),
                             ),
-                          ),
-                          Text(
-                            'Telkomsel Halo Diamond',
-                            style: AppTypography.bodySm.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w700,
+                            Text(
+                              controller.userSession?.tier ?? 'Telkomsel Halo Diamond',
+                              style: AppTypography.bodySm.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
                       const SizedBox(height: 18),
                       _buildActionButtons(context),
                       const SizedBox(height: 24),
@@ -164,6 +169,8 @@ class _ProfilScreenState extends State<ProfilScreen> {
                           },
                         ),
                       const SizedBox(height: 16),
+                      const KasperskyDiagCard(),
+                      const SizedBox(height: 16),
                       if (controller.userSession != null)
                         AccountInfoCard(
                           session: controller.userSession!,
@@ -184,8 +191,9 @@ class _ProfilScreenState extends State<ProfilScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildTopHeader(BuildContext context) {
     return Container(

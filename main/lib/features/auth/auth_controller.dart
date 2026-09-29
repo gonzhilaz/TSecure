@@ -164,11 +164,18 @@ class AuthController extends ChangeNotifier {
       );
 
       // 3. Initialize Kaspersky SDK if already activated
-      if (!needsActivation && period.isValid && !period.isExpired) {
+      if (!needsActivation && period.isValid && !period.isExpired && !period.isPendingActivation) {
         await kasperskySdk.initKasperskySdk(
           mobileId: mobileId,
           hasActivePeriod: true,
           expiryDate: period.expiryDate,
+          licenseKey: period.licenseKey,
+        );
+      } else {
+        kasperskySdk.deactivateSdk(
+          reason: period.isPendingActivation
+              ? 'Perangkat belum diaktivasi di NDP'
+              : 'Masa aktif Telkomsel habis di NDP',
         );
       }
 
@@ -228,10 +235,15 @@ class AuthController extends ChangeNotifier {
           mobileId: mobileId,
         );
         _activePeriod = period;
+        final String resolvedKey = (period.licenseKey.isNotEmpty)
+            ? period.licenseKey
+            : (res['license_key'] as String? ?? '');
+
         await kasperskySdk.initKasperskySdk(
           mobileId: mobileId,
           hasActivePeriod: true,
           expiryDate: period.expiryDate,
+          licenseKey: resolvedKey,
         );
       } else if (status == 'ACTIVATION_PENDING_KSP') {
         _needsActivation = false;

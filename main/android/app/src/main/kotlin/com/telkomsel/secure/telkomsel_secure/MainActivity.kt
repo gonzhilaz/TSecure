@@ -17,12 +17,12 @@ import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import com.telkomsel.blackwall.BlackWallGuard
 import com.telkomsel.secure.kaspersky.KasperskyNativeBridge
 
 class MainActivity : FlutterActivity() {
 
     private lateinit var kasperskyBridge: KasperskyNativeBridge
+    private var kasperskyChannel: MethodChannel? = null
 
     companion object {
         private const val TAG = "TelkomSecure-Native"
@@ -30,17 +30,6 @@ class MainActivity : FlutterActivity() {
         private const val CHANNEL_KASPERSKY = "com.taspenguard/ksp"
         private const val NOTIF_CHANNEL_ID = "telkom_security_threats"
         private const val REQUEST_CODE_NOTIF = 1001
-
-        init {
-            try {
-                System.loadLibrary("blackwall")
-                Log.i(TAG, "BlackWall RASP native engine successfully loaded.")
-            } catch (e: UnsatisfiedLinkError) {
-                Log.w(TAG, "BlackWall native library not present in this APK. Running in unshielded mode.")
-            } catch (e: Throwable) {
-                Log.e(TAG, "BlackWall initialization notice: ${e.message}")
-            }
-        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -49,24 +38,20 @@ class MainActivity : FlutterActivity() {
         createNotificationChannel()
         kasperskyBridge = KasperskyNativeBridge(applicationContext)
 
-        // 1. Channel com.telkomsel.secure/blackwall (RASP Defense & Telemetry)
+        val kspChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL_KASPERSKY)
+        kasperskyChannel = kspChannel
+
+        // 1. Channel com.telkomsel.secure/blackwall (Hardware & Device Telemetry)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL_BLACKWALL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "isShieldActive" -> {
-                    val active = try {
-                        BlackWallGuard.initNativeGuard(applicationContext, "")
-                    } catch (e: Throwable) {
-                        false
-                    }
+                    val active = kasperskyBridge.ensureAntivirusInitialized()
                     result.success(active)
                 }
                 "getThreatBitmask" -> {
-                    val mask = try {
-                        BlackWallGuard.getSecurityThreatBitmask()
-                    } catch (e: Throwable) {
-                        0
-                    }
-                    result.success(mask)
+                    val rootInfo = kasperskyBridge.checkRoot()
+                    val isRooted = rootInfo["isRooted"] as? Boolean ?: false
+                    result.success(if (isRooted) 1 else 0)
                 }
                 "getDeviceInfo" -> {
                     try {
@@ -95,7 +80,7 @@ class MainActivity : FlutterActivity() {
         }
 
         // 2. Channel com.taspenguard/ksp (Genuine Kaspersky Mobile Security SDK Engine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL_KASPERSKY).setMethodCallHandler { call, result ->
+        kspChannel.setMethodCallHandler { call, result ->
             when (call.method) {
                 "activateLicense" -> {
                     val licenseKey = call.argument<String>("licenseKey")
@@ -107,9 +92,63 @@ class MainActivity : FlutterActivity() {
                     val status = kasperskyBridge.buildSDKStatus()
                     result.success(status)
                 }
+                "checkRoot" -> {
+                    Thread {
+                        val rootResult = kasperskyBridge.checkRoot()
+                        runOnUiThread { result.success(rootResult) }
+                    }.start()
+                }
                 "startScan" -> {
-                    val started = kasperskyBridge.startScan()
-                    result.success(started)
+                    kasperskyBridge.startScan(
+                        onProgress = { scanned, total, currentFile ->
+                            runOnUiThread {
+                                kspChannel.invokeMethod("onScanProgress", mapOf(
+                                    "scanned" to scanned,
+                                    "total" to total,
+                                    "currentFile" to currentFile
+                                ))
+                            }
+                        },
+                        onThreat = { threatName, path, isMalware ->
+                            runOnUiThread {
+                                kspChannel.invokeMethod("onScanThreat", mapOf(
+                                    "threatName" to threatName,
+                                    "path" to path,
+                                    "isMalware" to isMalware
+                                ))
+                            }
+                        },
+                        onComplete = { scanned, threats, error ->
+                            runOnUiThread {
+                                kspChannel.invokeMethod("onScanComplete", mapOf(
+                                    "scanned" to scanned,
+                                    "threats" to threats,
+                                    "error" to error
+                                ))
+                            }
+                        }
+                    )
+                    result.success(true)
+                }
+                "setRealtimeProtection" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: true
+                    val success = kasperskyBridge.setRealtimeProtection(enabled) { name, type ->
+                        showSecurityAlertNotification(
+                            "🚨 Kaspersky Realtime Protection",
+                            "Ancaman terdeteksi dan diisolasi: $name ($type)",
+                            true
+                        )
+                        runOnUiThread {
+                            kspChannel.invokeMethod("onRealtimeThreat", mapOf(
+                                "name" to name,
+                                "type" to type
+                            ))
+                        }
+                    }
+                    result.success(success)
+                }
+                "setWebFilter", "setPuaScanner" -> {
+                    result.success(true)
                 }
                 "checkUrl" -> {
                     val url = call.argument<String>("url") ?: ""
@@ -137,9 +176,6 @@ class MainActivity : FlutterActivity() {
                     val message = call.argument<String>("message") ?: "Aktivitas mencurigakan terdeteksi."
                     val isThreat = call.argument<Boolean>("isThreat") ?: true
                     showSecurityAlertNotification(title, message, isThreat)
-                    result.success(true)
-                }
-                "setRealtimeProtection", "setWebFilter", "setPuaScanner" -> {
                     result.success(true)
                 }
                 else -> result.notImplemented()

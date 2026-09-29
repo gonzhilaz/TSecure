@@ -8,6 +8,7 @@ class ActivePeriod {
   final String statusMessage;
   final String activationStatus;
   final bool isPendingProvisioning;
+  final String licenseKey;
 
   const ActivePeriod({
     required this.packageName,
@@ -19,6 +20,7 @@ class ActivePeriod {
     required this.statusMessage,
     this.activationStatus = 'ACTIVATED',
     this.isPendingProvisioning = false,
+    this.licenseKey = '',
   });
 
   int get daysRemaining {
@@ -29,4 +31,5 @@ class ActivePeriod {
   bool get isExpired => DateTime.now().isAfter(expiryDate);
   bool get isPendingKsp => activationStatus == 'ACTIVATION_PENDING_KSP';
   bool get isActivated => activationStatus == 'ACTIVATED';
+  bool get isPendingActivation => activationStatus == 'PENDING_ACTIVATION';
 }

@@ -80,7 +80,7 @@ class SplashController extends ChangeNotifier {
       );
 
       // Step 3: Initialize Kaspersky SDK only if activePeriod is valid
-      if (activePeriod.isValid && !activePeriod.isExpired) {
+      if (activePeriod.isValid && !activePeriod.isExpired && !activePeriod.isPendingActivation) {
         _statusMessage = 'Initializing...';
         _progress = 0.90;
         notifyListeners();
@@ -88,6 +88,14 @@ class SplashController extends ChangeNotifier {
         await kasperskySdk.initKasperskySdk(
           mobileId: _mobileId!,
           hasActivePeriod: true,
+          licenseKey: activePeriod.licenseKey,
+          expiryDate: activePeriod.expiryDate,
+        );
+      } else {
+        kasperskySdk.deactivateSdk(
+          reason: activePeriod.isPendingActivation
+              ? 'Perangkat belum diaktivasi di NDP'
+              : 'Masa aktif Telkomsel habis di NDP',
         );
       }
 

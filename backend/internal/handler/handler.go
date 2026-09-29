@@ -119,6 +119,32 @@ func (h *APIHandler) SimulateNdpExpire(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *APIHandler) SimulateNdpUnactivated(w http.ResponseWriter, r *http.Request) {
+	msisdn := r.URL.Query().Get("msisdn")
+	if msisdn == "" {
+		var body struct {
+			MSISDN string `json:"msisdn"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		msisdn = body.MSISDN
+	}
+	if msisdn == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "msisdn is required"})
+		return
+	}
+	sub, found := h.svc.SimulateUnactivated(msisdn)
+	if !found {
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": "subscriber not found"})
+		return
+	}
+	h.broker.Broadcast("subscriber_updated", sub)
+	writeJSON(w, http.StatusOK, map[string]any{
+		"status":     "unactivated",
+		"message":    "Subscriber reset to unactivated state (empty license and active period).",
+		"subscriber": sub,
+	})
+}
+
 // ResendActivationCode resolves SMS delivery failure.
 func (h *APIHandler) ResendActivationCode(w http.ResponseWriter, r *http.Request) {
 	var req struct {

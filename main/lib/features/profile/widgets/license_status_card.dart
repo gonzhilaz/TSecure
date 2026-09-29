@@ -41,7 +41,29 @@ class LicenseStatusCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (activePeriod.isPendingKsp)
+              if (activePeriod.isPendingActivation)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.statusWarning.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.schedule_rounded, size: 12, color: AppColors.statusWarning),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Wajib Aktivasi',
+                        style: AppTypography.labelSm.copyWith(
+                          color: AppColors.statusWarning,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else if (activePeriod.isPendingKsp)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -57,6 +79,50 @@ class LicenseStatusCard extends StatelessWidget {
                         'Sinkronisasi',
                         style: AppTypography.labelSm.copyWith(
                           color: AppColors.statusWarning,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else if (!activePeriod.isValid || activePeriod.isExpired)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.statusDanger.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.cancel_rounded, size: 12, color: AppColors.statusDanger),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Masa Aktif Habis',
+                        style: AppTypography.labelSm.copyWith(
+                          color: AppColors.statusDanger,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.statusSafeEmerald.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.verified_rounded, size: 12, color: AppColors.statusSafeEmerald),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Aktif & Terlindungi',
+                        style: AppTypography.labelSm.copyWith(
+                          color: AppColors.statusSafeEmerald,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -94,7 +160,7 @@ class LicenseStatusCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        formattedDate,
+                        activePeriod.isPendingActivation ? 'Belum Diaktivasi' : formattedDate,
                         style: AppTypography.labelLg.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.navyDeep,
@@ -102,13 +168,17 @@ class LicenseStatusCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        !activePeriod.isValid || activePeriod.isExpired
-                            ? 'Masa aktif habis'
-                            : '${activePeriod.daysRemaining} hari lagi',
+                        activePeriod.isPendingActivation
+                            ? '0 hari tersisa'
+                            : (!activePeriod.isValid || activePeriod.isExpired
+                                ? 'Masa aktif habis'
+                                : '${activePeriod.daysRemaining} hari lagi'),
                         style: AppTypography.bodySm.copyWith(
-                          color: !activePeriod.isValid || activePeriod.isExpired
-                              ? AppColors.statusDanger
-                              : AppColors.statusSafeEmerald,
+                          color: activePeriod.isPendingActivation
+                              ? AppColors.statusWarning
+                              : (!activePeriod.isValid || activePeriod.isExpired
+                                  ? AppColors.statusDanger
+                                  : AppColors.statusSafeEmerald),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -136,7 +206,7 @@ class LicenseStatusCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${activePeriod.activeDeviceCount}',
+                        activePeriod.isPendingActivation ? '0' : '${activePeriod.activeDeviceCount}',
                         style: AppTypography.labelLg.copyWith(
                           fontWeight: FontWeight.w700,
                           color: AppColors.navyDeep,
@@ -144,7 +214,9 @@ class LicenseStatusCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Seluruh lisensi terpakai',
+                        activePeriod.isPendingActivation
+                            ? 'Menunggu aktivasi'
+                            : 'Lisensi terikat',
                         style: AppTypography.bodySm.copyWith(
                           color: AppColors.slateMuted,
                         ),
@@ -162,7 +234,56 @@ class LicenseStatusCard extends StatelessWidget {
               color: AppColors.slateMuted,
             ),
           ),
-          if (activePeriod.isPendingKsp) ...[
+          if (activePeriod.isPendingActivation) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.statusWarning.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.statusWarning.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.info_outline_rounded, size: 18, color: AppColors.statusWarning),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Prosedur Aktivasi Diperlukan',
+                        style: AppTypography.labelMd.copyWith(
+                          color: AppColors.statusWarning,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Paket terdaftar di NDP Telkomsel. Silakan selesaikan prosedur aktivasi untuk menerbitkan lisensi perangkat.',
+                    style: AppTypography.bodySm.copyWith(color: AppColors.navyDeep),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: onRetrySync,
+                      icon: const Icon(Icons.flash_on_rounded, size: 16, color: Colors.white),
+                      label: const Text(
+                        'Aktivasi Sekarang',
+                        style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else if (activePeriod.isPendingKsp) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
@@ -211,6 +332,31 @@ class LicenseStatusCard extends StatelessWidget {
                 ],
               ),
             ),
+          ] else if (!activePeriod.isValid || activePeriod.isExpired) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.statusDanger.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.statusDanger.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.gpp_bad_rounded, size: 20, color: AppColors.statusDanger),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Policy Guard: Masa aktif habis di NDP. Proteksi Kaspersky dinonaktifkan.',
+                      style: AppTypography.bodySm.copyWith(
+                        color: AppColors.statusDanger,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ] else if (activePeriod.isActivated) ...[
             const SizedBox(height: 12),
             Row(
@@ -218,7 +364,7 @@ class LicenseStatusCard extends StatelessWidget {
                 const Icon(Icons.verified_rounded, size: 16, color: AppColors.statusSafeEmerald),
                 const SizedBox(width: 6),
                 Text(
-                  'Perangkat Berhasil Dilindungi',
+                  'Perangkat Berhasil Dilindungi (Kaspersky B2B Aktif)',
                   style: AppTypography.labelSm.copyWith(
                     color: AppColors.statusSafeEmerald,
                     fontWeight: FontWeight.w700,
