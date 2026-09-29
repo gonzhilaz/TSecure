@@ -70,7 +70,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// Direct Dispatcher (bypasses any ServeMux matching issues)
 	switch path {
-	case "/", "/api":
+	case "/", "/api", "/api/index.go":
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(map[string]any{
