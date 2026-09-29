@@ -215,6 +215,12 @@ func (s *SubscriptionService) ActivateLicense(req model.LicenseActivationRequest
 	if req.MobileID != "" {
 		sub.MobileID = req.MobileID
 	}
+	if req.DeviceModel != "" {
+		sub.DeviceModel = req.DeviceModel
+	}
+	if req.OSVersion != "" {
+		sub.OSVersion = req.OSVersion
+	}
 	if sub.KasperskyLicenseKey == "" {
 		sub.KasperskyLicenseKey = "6KYKJ-65T6T-WMVBD-NNPEG"
 	}

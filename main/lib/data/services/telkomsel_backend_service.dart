@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../mocks/mock_backend_data.dart';
 import '../models/active_period.dart';
 import '../models/user_session.dart';
+import 'device_hardware_service.dart';
 
 class TelkomselBackendService {
   static const String _baseUrl = String.fromEnvironment(
@@ -20,8 +21,12 @@ class TelkomselBackendService {
     try {
       final client = HttpClient();
       client.connectionTimeout = const Duration(seconds: 3);
+      final deviceModel = await DeviceHardwareService.getDeviceModel();
+      final osVersion = await DeviceHardwareService.getOsVersion();
+      final encodedModel = Uri.encodeComponent(deviceModel);
+      final encodedOs = Uri.encodeComponent(osVersion);
       final uri = Uri.parse(
-        '$_baseUrl/api/v1/subscription/check?msisdn=$msisdn&mobile_id=$mobileId&device_model=Pixel6&os_version=Android14',
+        '$_baseUrl/api/v1/subscription/check?msisdn=$msisdn&mobile_id=$mobileId&device_model=$encodedModel&os_version=$encodedOs',
       );
       final request = await client.getUrl(uri);
       final response = await request.close().timeout(const Duration(seconds: 3));
@@ -170,12 +175,16 @@ class TelkomselBackendService {
     try {
       final client = HttpClient();
       client.connectionTimeout = const Duration(seconds: 4);
+      final deviceModel = await DeviceHardwareService.getDeviceModel();
+      final osVersion = await DeviceHardwareService.getOsVersion();
       final uri = Uri.parse('$_baseUrl/api/v1/auth/activate-license');
       final request = await client.postUrl(uri);
       request.headers.set('Content-Type', 'application/json');
       request.write(jsonEncode({
         'msisdn': msisdn,
         'mobile_id': mobileId,
+        'device_model': deviceModel,
+        'os_version': osVersion,
         'simulate_ksp_outage': simulateKspOutage,
         'simulate_pending_ndp': simulatePendingNdp,
       }));

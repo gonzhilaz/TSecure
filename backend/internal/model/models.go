@@ -164,6 +164,8 @@ type VerifyOtpResponse struct {
 type LicenseActivationRequest struct {
 	MSISDN             string `json:"msisdn"`
 	MobileID           string `json:"mobile_id"`
+	DeviceModel        string `json:"device_model,omitempty"`
+	OSVersion          string `json:"os_version,omitempty"`
 	SimulateKspOutage  bool   `json:"simulate_ksp_outage"`
 	SimulatePendingNDP bool   `json:"simulate_pending_ndp"`
 }

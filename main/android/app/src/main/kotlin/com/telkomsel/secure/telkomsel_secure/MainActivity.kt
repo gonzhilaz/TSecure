@@ -68,6 +68,28 @@ class MainActivity : FlutterActivity() {
                     }
                     result.success(mask)
                 }
+                "getDeviceInfo" -> {
+                    try {
+                        val manufacturer = Build.MANUFACTURER.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                        val model = Build.MODEL
+                        val deviceModel = if (model.startsWith(manufacturer, ignoreCase = true)) model else "$manufacturer $model"
+                        val osVersion = "Android ${Build.VERSION.RELEASE}"
+                        val info = mapOf(
+                            "deviceModel" to deviceModel,
+                            "osVersion" to osVersion,
+                            "manufacturer" to manufacturer,
+                            "model" to model,
+                            "brand" to Build.BRAND,
+                            "sdkInt" to Build.VERSION.SDK_INT
+                        )
+                        result.success(info)
+                    } catch (e: Throwable) {
+                        result.success(mapOf(
+                            "deviceModel" to "Android Device",
+                            "osVersion" to "Android ${Build.VERSION.RELEASE}"
+                        ))
+                    }
+                }
                 else -> result.notImplemented()
             }
         }
