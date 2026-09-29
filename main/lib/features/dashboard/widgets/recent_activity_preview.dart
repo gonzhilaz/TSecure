@@ -1,0 +1,110 @@
+import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../data/models/activity_log.dart';
+
+class RecentActivityPreview extends StatelessWidget {
+  final ActivityLog? latestLog;
+  final VoidCallback onViewAll;
+
+  const RecentActivityPreview({
+    super.key,
+    required this.latestLog,
+    required this.onViewAll,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Aktivitas Terakhir',
+              style: AppTypography.headlineSm.copyWith(
+                color: AppColors.navyDeep,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            InkWell(
+              onTap: onViewAll,
+              child: Row(
+                children: [
+                  Text(
+                    'Lihat Semua',
+                    style: AppTypography.labelMd.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 12,
+                    color: AppColors.primary,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceCard,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.slateBorder),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColors.slateDivider,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.verified_outlined,
+                    color: AppColors.navyDeep,
+                    size: 24,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      latestLog?.title ?? 'Pemindaian Sistem Lengkap',
+                      style: AppTypography.labelLg.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.navyDeep,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      latestLog?.description ??
+                          '0 ancaman ditemukan • 1.420 file diperiksa',
+                      style: AppTypography.bodySm.copyWith(
+                        color: AppColors.slateMuted,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}

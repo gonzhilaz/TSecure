@@ -1,0 +1,180 @@
+<mxfile host="app.diagrams.net" modified="2026-09-25T02:38:00.000Z" agent="Antigravity Architecture Generator" version="24.0.0" type="device">
+  <diagram id="shield_sdk_flow" name="Shield SDK Architecture &amp; Workflow">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE BLOCK -->
+        <mxCell id="title" value="TELKOMSEL SECURE — SHIELD SDK ARCHITECTURE &amp; KEY GOVERNANCE" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;fontColor=#0B132B;" vertex="1" parent="1">
+          <mxGeometry x="380" y="20" width="840" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="Decoupled Binary SDK Pattern with Dual-Key Governance &amp; Zero-Trust Runtime Activation" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#778CA2;" vertex="1" parent="1">
+          <mxGeometry x="420" y="60" width="760" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- SWIMLANES / DOMAIN CONTAINERS -->
+
+        <!-- CONTAINER 1: PRIVILEGED CORE (MASTER KEY HOLDER) -->
+        <mxCell id="lane1" value="PHASE 1: PRIVILEGED CORE (MASTER DEVELOPER)" style="swimlane;startSize=30;fillColor=#FFF0EF;strokeColor=#ED0226;fontStyle=1;fontSize=12;fontColor=#BE001C;rounded=1;arcSize=4;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="340" height="880" as="geometry" />
+        </mxCell>
+
+        <mxCell id="master_key" value="Master Developer Key&#xa;(GPG / Private Signing Key)&#xa;Held exclusively by You" style="shape=mxgraph.basic.polygon;polyCoords=[[0.1,0],[0.9,0],[1,0.5],[0.9,1],[0.1,1],[0,0.5]];fillColor=#ED0226;strokeColor=#BE001C;fontColor=#FFFFFF;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="lane1">
+          <mxGeometry x="40" y="60" width="260" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="priv_repo" value="Private Shield SDK Repo&#xa;(telkom_security_shield)&#xa;Contains:&#xa;• Native Kaspersky AAR&#xa;• MethodChannel Bridge&#xa;• C++ JNI Security Hooks&#xa;• Unobfuscated Logic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#ED0226;strokeWidth=2;fontColor=#0B132B;align=left;spacingLeft=15;" vertex="1" parent="lane1">
+          <mxGeometry x="40" y="180" width="260" height="150" as="geometry" />
+        </mxCell>
+
+        <mxCell id="build_task" value="Pre-Obfuscation Build Task&#xa;(R8 + ProGuard + Native Strip)&#xa;Transforms classes into&#xa;cryptic symbols &amp; removes logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1C2541;strokeColor=#0B132B;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="lane1">
+          <mxGeometry x="40" y="380" width="260" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="aar_artifact" value="OUTPUT ARTIFACT:&#xa;telkom_shield.aar&#xa;(Closed-Source Binary Package)&#xa;100% Black-Box Library" style="shape=component;whiteSpace=wrap;html=1;fillColor=#00C853;strokeColor=#008738;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="lane1">
+          <mxGeometry x="40" y="500" width="260" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="note_lane1" value="SECURITY ADVANTAGE:&#xa;Even if a rogue developer gets&#xa;access to the main project, they&#xa;NEVER see the Kaspersky code&#xa;or MethodChannel internals." style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#FFF8E1;strokeColor=#FFA000;fontColor=#8D6E63;fontSize=11;align=left;spacing=8;" vertex="1" parent="lane1">
+          <mxGeometry x="40" y="650" width="260" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="flow1_1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ED0226;strokeWidth=2;" edge="1" parent="lane1" source="master_key" target="priv_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow1_2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ED0226;strokeWidth=2;" edge="1" parent="lane1" source="priv_repo" target="build_task">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow1_3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ED0226;strokeWidth=2;" edge="1" parent="lane1" source="build_task" target="aar_artifact">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+
+        <!-- CONTAINER 2: MAIN APP TEAM (SAFE BUS FACTOR) -->
+        <mxCell id="lane2" value="PHASE 2: MAIN APP TEAM (BUS FACTOR SAFE)" style="swimlane;startSize=30;fillColor=#F4F6F9;strokeColor=#3A405A;fontStyle=1;fontSize=12;fontColor=#0B132B;rounded=1;arcSize=4;" vertex="1" parent="1">
+          <mxGeometry x="420" y="100" width="340" height="880" as="geometry" />
+        </mxCell>
+
+        <mxCell id="app_repo" value="Main Application Repository&#xa;(/main)&#xa;Collaborative Workspace" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3A405A;strokeWidth=2;fontColor=#0B132B;fontStyle=1;" vertex="1" parent="lane2">
+          <mxGeometry x="40" y="60" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="team_devs" value="General Dev Team&#xa;(UI, Features, QA, CI/CD)&#xa;Can develop freely without&#xa;licensing or security risks" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#E8EEF5;strokeColor=#3A405A;fontColor=#0B132B;" vertex="1" parent="lane2">
+          <mxGeometry x="120" y="160" width="100" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ui_modules" value="Flutter Feature Modules:&#xa;• Beranda / Dashboard&#xa;• Pemindaian Radar View&#xa;• Perangkat Telemetry&#xa;• Riwayat Log Viewer&#xa;• Profil &amp; Halo Tier" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#778CA2;fontColor=#0B132B;align=left;spacingLeft=15;" vertex="1" parent="lane2">
+          <mxGeometry x="40" y="290" width="260" height="130" as="geometry" />
+        </mxCell>
+
+        <mxCell id="app_build" value="Standard App Compilation&#xa;flutter build apk --release&#xa;--obfuscate&#xa;--split-debug-info=./symbols" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1C2541;strokeColor=#0B132B;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="lane2">
+          <mxGeometry x="40" y="470" width="260" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="release_apk" value="PRODUCTION APK / AAB&#xa;Distributed to Google Play&#xa;Contains only the binary stub" style="shape=component;whiteSpace=wrap;html=1;fillColor=#ED0226;strokeColor=#BE001C;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="lane2">
+          <mxGeometry x="40" y="600" width="260" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="flow2_1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3A405A;strokeWidth=2;" edge="1" parent="lane2" source="app_repo" target="team_devs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow2_2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3A405A;strokeWidth=2;" edge="1" parent="lane2" source="team_devs" target="ui_modules">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow2_3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3A405A;strokeWidth=2;" edge="1" parent="lane2" source="ui_modules" target="app_build">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow2_4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3A405A;strokeWidth=2;" edge="1" parent="lane2" source="app_build" target="release_apk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+
+        <!-- CONTAINER 3: RUNTIME ZERO-TRUST (SERVER & ENGINE) -->
+        <mxCell id="lane3" value="PHASE 3: RUNTIME ZERO-TRUST ACTIVATION &amp; KASPERSKY ENGINE" style="swimlane;startSize=30;fillColor=#E8F5E9;strokeColor=#00C853;fontStyle=1;fontSize=12;fontColor=#00695C;rounded=1;arcSize=4;" vertex="1" parent="1">
+          <mxGeometry x="800" y="100" width="760" height="880" as="geometry" />
+        </mxCell>
+
+        <!-- Sub-box: Client Phone -->
+        <mxCell id="client_phone" value="User Device (RAM)" style="swimlane;startSize=25;fillColor=#FFFFFF;strokeColor=#778CA2;fontColor=#0B132B;" vertex="1" parent="lane3">
+          <mxGeometry x="30" y="60" width="310" height="500" as="geometry" />
+        </mxCell>
+
+        <mxCell id="phone_launch" value="App Launch&#xa;Retrieves Mobile ID" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F6F9;strokeColor=#778CA2;fontColor=#0B132B;" vertex="1" parent="client_phone">
+          <mxGeometry x="25" y="40" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="phone_dormant" value="Kaspersky Engine State:&#xa;DORMANT (Locked)&#xa;Zero License Consumed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDAD7;strokeColor=#ED0226;fontColor=#BE001C;fontStyle=1;" vertex="1" parent="client_phone">
+          <mxGeometry x="25" y="120" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="phone_auth" value="User Enters MSISDN&#xa;Instant Network Auth Triggered" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F6F9;strokeColor=#778CA2;fontColor=#0B132B;" vertex="1" parent="client_phone">
+          <mxGeometry x="25" y="210" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="phone_init" value="Receive Dynamic Ticket&#xa;Decrypt in RAM Only&#xa;Execute: init(ticket, mobileId)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#00C853;fontColor=#10B981;fontStyle=1;" vertex="1" parent="client_phone">
+          <mxGeometry x="25" y="300" width="260" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="phone_active" value="Kaspersky Shields Active:&#xa;• Real-time File/App Shield&#xa;• Radar Malware Scanner&#xa;• Web Filter / Anti-Phishing&#xa;• Wi-Fi Security Audit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#00C853;strokeColor=#008738;fontColor=#FFFFFF;fontStyle=1;align=left;spacingLeft=15;" vertex="1" parent="client_phone">
+          <mxGeometry x="25" y="390" width="260" height="90" as="geometry" />
+        </mxCell>
+
+
+        <!-- Sub-box: Backend & Middleware -->
+        <mxCell id="backend_box" value="Telkomsel Secure Backend &amp; HYL-KSP" style="swimlane;startSize=25;fillColor=#FFFFFF;strokeColor=#0B132B;fontColor=#0B132B;" vertex="1" parent="lane3">
+          <mxGeometry x="400" y="60" width="330" height="500" as="geometry" />
+        </mxCell>
+
+        <mxCell id="req_validate" value="Req: Cek Masa Aktif&#xa;(MSISDN + Mobile ID)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F6F9;strokeColor=#0B132B;fontColor=#0B132B;" vertex="1" parent="backend_box">
+          <mxGeometry x="35" y="40" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="billing_check" value="Validate Billing &amp; Package:&#xa;• Query MyTelkomsel / NBP&#xa;• Verify activePeriod &gt; now&#xa;• Check device quota (1 Max)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1C2541;strokeColor=#0B132B;fontColor=#FFFFFF;align=left;spacingLeft=15;" vertex="1" parent="backend_box">
+          <mxGeometry x="35" y="120" width="260" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ticket_dispenser" value="DYNAMIC KEY DISPENSER:&#xa;Generate ephemeral signed&#xa;Kaspersky Activation Ticket&#xa;bound strictly to Mobile ID" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#ED0226;strokeColor=#BE001C;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="backend_box">
+          <mxGeometry x="35" y="240" width="260" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ksp_b2b_server" value="Kaspersky B2B Licensing Portal&#xa;Counts: += 1 B2B License&#xa;(Guarded from Over-Billing)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#ED0226;strokeWidth=2;fontColor=#0B132B;fontStyle=1;" vertex="1" parent="backend_box">
+          <mxGeometry x="35" y="370" width="260" height="80" as="geometry" />
+        </mxCell>
+
+
+        <!-- CROSS LANE INTER-CONNECTIONS -->
+        <mxCell id="link_aar_to_app" value="1. Distribute closed-source binary&#xa;(telkom_shield.aar)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00C853;strokeWidth=3;fontColor=#00695C;fontStyle=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="aar_artifact" target="app_build">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="645" />
+              <mxPoint x="360" y="610" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="link_client_to_backend" value="2. Cek Masa Aktif (Validation)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ED0226;strokeWidth=2;fontColor=#BE001C;fontStyle=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="phone_auth" target="req_validate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="link_backend_to_ticket" value="3. Dispense Signed Session Ticket" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00C853;strokeWidth=2;fontColor=#00695C;fontStyle=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="ticket_dispenser" target="phone_init">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="link_backend_to_ksp" value="Audit Log &amp; Quota Sync" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1C2541;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="backend_box" source="ticket_dispenser" target="ksp_b2b_server">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="link_ticket_to_active" value="4. Unlock Engine" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00C853;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="client_phone" source="phone_init" target="phone_active">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- SECURITY SUMMARY CALLOUT AT BOTTOM -->
+        <mxCell id="callout_banner" value="&lt;b&gt;CORE SECURITY ACHIEVEMENTS OF THIS PATTERN:&lt;/b&gt;&lt;br/&gt;1. &lt;b&gt;Team Independence (Bus Factor Solved):&lt;/b&gt; General developers can update UI and screens without access to Kaspersky secrets or bridge sources.&lt;br/&gt;2. &lt;b&gt;Anti-Reverse Engineering:&lt;/b&gt; The compiled APK contains no raw Kaspersky source code; symbols are stripped and binary-obfuscated.&lt;br/&gt;3. &lt;b&gt;Zero-Trust Licensing:&lt;/b&gt; Static keys are eliminated from the client. The SDK only runs with ephemeral tickets from Telkomsel Backend, completely stopping unauthorized license consumption (+1 billing)." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1C2541;strokeColor=#0B132B;fontColor=#FFFFFF;align=left;spacingLeft=25;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1000" width="1520" height="80" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

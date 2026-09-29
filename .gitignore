@@ -1,0 +1,40 @@
+# Operating System & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.log
+
+# Large Binaries, Mobile Builds & Archives (>10MB)
+*.zip
+*.apk
+*.aab
+*.idsig
+
+# Flutter & Dart
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.pub-cache/
+**/.pub/
+
+# Web & Next.js
+**/node_modules/
+**/.next/
+**/out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Go Backend
+server.exe
+backend/server.exe
+backend/server
+*.exe
+
+# Secrets & Environment variables
+.env
+.env.local
+.env.*.local

@@ -1,0 +1,129 @@
+<!DOCTYPE html><html lang="id" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<meta content="mobile_blank" name="shell-type">
+<title>Masuk - Telkomsel Security</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "brand-red": "#ED0226",
+            "brand-red-dark": "#BE001C",
+            "navy-dark": "#0B132B",
+            "slate-bg": "#F4F6F9"
+          },
+          fontFamily: {
+            sans: ["Public Sans", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #F4F6F9;
+      font-family: 'Public Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+<body class="bg-slate-bg text-navy-dark min-h-screen flex items-center justify-center p-0 select-none">
+<!-- Standard Mobile Viewport (390px x 844px) -->
+<main class="w-full max-w-[390px] h-[844px] bg-slate-bg flex flex-col justify-between overflow-hidden relative">
+<!-- Top Header Navigation -->
+<header class="w-full pt-10 px-6 pb-2 flex items-center justify-between shrink-0">
+<!-- Left placeholder for symmetrical balance -->
+<div class="w-10 h-10"></div>
+<!-- Brand Logo Center -->
+<div class="flex flex-col items-center justify-center text-center">
+<span class="text-[17px] font-bold text-navy-dark tracking-tight leading-none">Telkomsel</span>
+<span class="text-[10px] font-bold text-brand-red tracking-wider uppercase mt-1">Secure</span>
+</div>
+<!-- Right Options Button -->
+<button aria-label="Menu Opsi" class="w-10 h-10 rounded-full bg-white border border-gray-200/80 shadow-sm flex items-center justify-center text-gray-500 hover:text-navy-dark active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</header>
+<!-- Bottom Modal / Sheet Style Card -->
+<section class="w-full bg-white rounded-t-[36px] shadow-[0_-8px_30px_rgba(0,0,0,0.06)] border-t border-gray-100 flex-1 flex flex-col justify-between px-6 pt-3 pb-6 mt-4 z-20">
+<!-- Upper Section: Handle & Form -->
+<div class="flex flex-col">
+<!-- Top Drag Handle Indicator -->
+<div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+<!-- Sheet Header Title -->
+<div class="pb-4 border-b border-gray-100">
+<h1 class="text-2xl font-bold text-navy-dark tracking-tight leading-tight">Masuk</h1>
+<p class="text-xs text-gray-400 mt-1 font-normal">Gunakan nomor MyTelkomsel Anda</p>
+</div>
+<!-- Phone Input Section -->
+<div class="mt-6">
+<label class="block text-xs font-medium text-gray-500 mb-2" for="phone-input">
+            Nomor Ponsel
+          </label>
+<!-- Input Box -->
+<div class="flex items-center w-full h-14 bg-white border border-gray-200 rounded-2xl px-3.5 gap-2.5 transition-all focus-within:border-brand-red focus-within:ring-2 focus-within:ring-red-500/15">
+<!-- Flag & Country Code -->
+<div class="flex items-center gap-2 pl-0.5 shrink-0 select-none">
+<!-- Indonesian Flag -->
+<div class="w-6 h-4 rounded-[2px] overflow-hidden flex flex-col border border-gray-200">
+<div class="h-1/2 w-full bg-[#E11424]"></div>
+<div class="h-1/2 w-full bg-white"></div>
+</div>
+<span class="text-sm font-semibold text-navy-dark">+62</span>
+</div>
+<!-- Vertical Divider -->
+<div class="w-[1px] h-6 bg-gray-200 mx-1 shrink-0"></div>
+<!-- Number Input Field -->
+<input autocomplete="tel-national" class="flex-1 bg-transparent border-0 outline-none text-[15px] font-semibold text-navy-dark placeholder:text-gray-400 focus:ring-0 focus:outline-none tracking-wide px-1" id="phone-input" maxlength="16" placeholder="812-3456-7890" type="tel" value="812-3456-7890">
+</div>
+<!-- Terms and Privacy Agreement -->
+<div class="flex items-start gap-3 mt-4">
+<label class="relative flex items-center justify-center cursor-pointer mt-0.5 shrink-0">
+<input checked="" class="sr-only" type="checkbox">
+<div class="w-5 h-5 rounded-md bg-brand-red flex items-center justify-center text-white shadow-xs">
+<span class="material-symbols-outlined text-[15px] font-bold">check</span>
+</div>
+</label>
+<p class="text-xs text-gray-600 leading-snug">
+              Saya menyetujui <a class="text-brand-red font-medium underline underline-offset-2" href="javascript:void(0)">Ketentuan Layanan</a> &amp; <a class="text-brand-red font-medium underline underline-offset-2" href="javascript:void(0)">Kebijakan Privasi</a> Telkomsel (UU PDP No. 27/2022)
+            </p>
+</div>
+</div>
+</div>
+<!-- Bottom Actions & Notes -->
+<div class="flex flex-col mt-auto pt-4">
+<!-- CTA Submit Button -->
+<a class="w-full py-3.5 bg-brand-red hover:bg-brand-red-dark active:bg-brand-red-dark text-white font-semibold rounded-2xl shadow-lg shadow-red-500/20 text-center text-base transition-all flex items-center justify-center gap-2 active:scale-[0.99]" href="{{DATA:SCREEN:SCREEN_25}}">
+<span class="">Masuk</span>
+<span class="material-symbols-outlined text-[19px]">arrow_forward</span>
+</a>
+<!-- Network Security Badge Note -->
+<div class="flex items-center justify-center gap-1.5 mt-3.5">
+<span class="text-[11px] font-normal text-gray-500 text-center">
+            Autentikasi Instan Jaringan Telkomsel • Tanpa Kode OTP
+          </span>
+</div>
+<!-- Help & Contact Text -->
+<div class="text-center mt-2 px-2">
+<p class="text-xs text-gray-400 leading-normal">
+            Masuk instan tanpa OTP. Butuh bantuan? Hubungi <a class="text-gray-600 font-medium hover:underline" href="tel:188">GraPARI 188</a> atau <a class="text-brand-red font-medium hover:underline" href="javascript:void(0)">Veronika</a>
+</p>
+</div>
+<!-- iOS Home Indicator -->
+<div class="w-32 h-1 bg-navy-dark/80 rounded-full mx-auto mt-4 shrink-0"></div>
+</div>
+</section>
+</main>
+
+
+</body></html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html><html lang="id" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>Profil Keamanan - Telkomsel Mobile Security</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Public Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Public Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              red: '#ed0226',
+              darkRed: '#cc0220',
+              deepNavy: '#0B132B',
+              muted: '#778CA2',
+              bgLight: '#F7F9FC',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Layout Styles -->
+<style data-purpose="custom-layout">
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #E2E8F0;
+    }
+    /* Hide default scrollbars for iOS feel */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<!-- END: Custom Layout Styles -->
+</head>
+<body class="font-sans min-h-screen flex justify-center items-start text-brand-deepNavy">
+<!-- BEGIN: Mobile Container (iOS 393px standard frame) -->
+<div class="w-full max-w-[393px] min-h-screen bg-[#F7F9FC] shadow-2xl relative pb-28 flex flex-col selection:bg-brand-red selection:text-white" data-purpose="mobile-viewport">
+<!-- BEGIN: Top Banner & Hero Header -->
+<header class="relative w-full bg-gradient-to-b from-[#cc0220] via-[#ed0226] to-[#ed0226] pt-2 pb-14 px-5 text-white overflow-visible" data-purpose="profile-header">
+<!-- iOS Status Bar -->
+
+<!-- Navigation Action Buttons on Banner -->
+<div class="w-full flex items-center justify-between mt-1">
+<!-- Back Button Squircle -->
+<button aria-label="Kembali" class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20 active:scale-95 transition-transform" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Right Quick Settings Button -->
+<button aria-label="Pengaturan" class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20 active:scale-95 transition-transform" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</header>
+<!-- END: Top Banner & Hero Header -->
+<!-- BEGIN: User Identity & Action Buttons -->
+<section class="px-5 relative z-10 -mt-10" data-purpose="user-identity">
+<!-- Profile Avatar with Online Dot -->
+<div class="relative inline-block">
+<div class="w-20 h-20 rounded-full border-4 border-white shadow-md bg-[#ed0226] text-white flex items-center justify-center font-bold text-xl tracking-tight select-none">RA</div>
+<!-- Online Status Indicator -->
+<span class="absolute bottom-1 right-1 w-4 h-4 bg-[#10b981] border-2 border-white rounded-full"></span>
+</div>
+<!-- Identity Text -->
+<div class="mt-3">
+<h1 class="text-xl font-bold text-brand-deepNavy tracking-tight leading-snug">R. Aryandi</h1>
+<p class="text-xs font-medium text-brand-muted mt-0.5">+62 82-141414-875 • <span class="text-brand-red font-semibold">Telkomsel Halo Diamond</span></p>
+</div>
+<!-- Quick Action Row Buttons -->
+<div class="flex items-center space-x-2.5 mt-3.5" data-purpose="profile-action-buttons">
+<button aria-label="Kirim Pesan" class="w-9 h-9 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center text-slate-600 shadow-sm active:bg-slate-50 transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button aria-label="Edit Profil" class="w-9 h-9 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center text-slate-600 shadow-sm active:bg-slate-50 transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button aria-label="Bagikan" class="w-9 h-9 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center text-slate-600 shadow-sm active:bg-slate-50 transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button aria-label="Pilihan Lainnya" class="w-9 h-9 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center text-slate-600 shadow-sm active:bg-slate-50 transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M5 12h.01M12 12h.01M19 12h.01" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</section>
+<!-- END: User Identity & Action Buttons -->
+<!-- BEGIN: Main Content Body -->
+<main class="px-5 mt-5 space-y-4" data-purpose="profile-main-content">
+<!-- Subscription Status Card -->
+<section class="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_4px_20px_rgba(11,19,43,0.03)]" data-purpose="subscription-status-card">
+<div class="flex items-start justify-between">
+<div>
+
+<h2 class="text-sm font-bold text-brand-deepNavy mt-1.5">Mobile Security Ultimate</h2>
+<p class="text-[11px] text-brand-muted">Lisensi Korporasi &amp; Perlindungan Data</p>
+</div>
+<!-- Shield badge icon -->
+
+</div>
+<!-- Expiration details block -->
+<div class="mt-3.5 pt-3 border-t border-slate-100/80 grid grid-cols-2 gap-2 text-xs">
+<div class="bg-slate-50 rounded-xl p-2.5">
+<span class="text-[10px] text-brand-muted block uppercase font-semibold">Masa Berlaku</span>
+<span class="font-bold text-brand-deepNavy text-[12px] mt-0.5 block">14 Oktober 2026</span>
+<span class="text-[10px] text-emerald-600 font-medium">20 hari lagi</span>
+</div>
+<div class="bg-slate-50 rounded-xl p-2.5">
+<span class="text-[10px] text-brand-muted block uppercase font-semibold">Perangkat Aktif</span>
+<span class="font-bold text-brand-deepNavy text-[12px] mt-0.5 block">1</span>
+<span class="text-[10px] text-brand-muted font-medium">Seluruh lisensi terpakai<br></span>
+</div>
+</div>
+<!-- Card Action Link -->
+<div class="mt-3 flex items-center justify-between pt-1">
+<span class="text-[11px] text-slate-500 font-medium">Perpanjangan mengikuti paket My Telkomsel</span>
+
+</div>
+</section>
+<!-- About / Informasi Akun Card (Mirroring Reference Card) -->
+<section class="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_4px_20px_rgba(11,19,43,0.03)]" data-purpose="about-account-card">
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Informasi Akun</h3>
+<!-- Contact rows -->
+<div class="space-y-2.5 text-xs text-brand-deepNavy">
+
+<div class="flex items-center space-x-3">
+<div class="w-7 h-7 rounded-lg bg-slate-100/70 flex items-center justify-center text-slate-500 shrink-0">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="font-medium text-slate-700">+62 82-141414-875</span>
+</div>
+<div class="flex items-center space-x-3">
+<div class="w-7 h-7 rounded-lg bg-slate-100/70 flex items-center justify-center text-slate-500 shrink-0">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="font-medium text-slate-700">Bandung, Jawa Barat</span>
+</div>
+</div>
+<!-- Description Note -->
+<p class="text-[11px] leading-relaxed text-brand-muted mt-3 pt-2.5 border-t border-slate-100">
+          Perlindungan identitas &amp; enkripsi transmisi data cloud aktif 24/7 di seluruh jaringan Telkomsel.
+        </p>
+<!-- Pill Tags -->
+<div class="flex flex-wrap gap-1.5 mt-3">
+<span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">Telkomsel Guard</span>
+<span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">Halo VIP</span>
+<span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">Prioritas</span>
+</div>
+</section>
+<!-- Assigned Tasks / Security Tasks Section -->
+
+</main>
+<!-- END: Main Content Body -->
+<!-- BEGIN: Bottom Navigation Bar (Pixel-precise replication of IMAGE_6) -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[393px] bg-white border-t border-slate-100 shadow-[0_-4px_16px_rgba(11,19,43,0.06)] z-50 px-2 pt-1 pb-2" data-purpose="bottom-navigation">
+<div class="h-14 flex items-center justify-between px-3 relative">
+<!-- Tab 1: Beranda / Dashboard (Grid 2x2 icon) -->
+<a aria-label="Beranda" class="flex flex-col items-center justify-center w-12 h-full text-brand-muted hover:text-brand-deepNavy transition-colors" href="#dashboard">
+<svg class="w-6 h-6 stroke-current" fill="none" stroke-width="1.8" viewBox="0 0 24 24">
+<rect height="7" rx="1.5" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="3" y="14"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="14"></rect>
+</svg>
+</a>
+<!-- Tab 2: Perangkat / Devices (Smartphone icon) -->
+<a aria-label="Perangkat" class="flex flex-col items-center justify-center w-12 h-full text-brand-muted hover:text-brand-deepNavy transition-colors" href="#perangkat">
+<svg class="w-6 h-6 stroke-current" fill="none" stroke-width="1.8" viewBox="0 0 24 24">
+<rect height="20" rx="2.5" width="12" x="6" y="2"></rect>
+<circle cx="12" cy="18" fill="currentColor" r="0.75"></circle>
+</svg>
+</a>
+<!-- Tab 3: Center Elevated Scanner Action Button -->
+<div class="relative flex items-center justify-center -top-3">
+<button aria-label="Pindai Keamanan" class="w-13 h-13 p-3.5 bg-brand-red rounded-2xl shadow-lg shadow-red-500/40 text-white flex items-center justify-center active:scale-95 transition-transform" type="button">
+<!-- Document Scanner Target Icon -->
+<svg class="w-6 h-6 stroke-white" fill="none" stroke-width="2.2" viewBox="0 0 24 24">
+<!-- Corner brackets -->
+<path d="M3 8V5a2 2 0 012-2h3M16 3h3a2 2 0 012 2v3M21 16v3a2 2 0 01-2 2h-3M8 21H5a2 2 0 01-2-2v-3" stroke-linecap="round" stroke-linejoin="round"></path>
+<!-- Document card center -->
+<rect height="10" rx="1.5" stroke-width="1.8" width="9" x="7.5" y="7"></rect>
+<!-- Inner scan lines -->
+<path d="M10 10.5h4M10 13.5h4" stroke-linecap="round" stroke-width="1.8"></path>
+</svg>
+</button>
+</div>
+<!-- Tab 4: Riwayat / History (Clock counter-clockwise) -->
+<a aria-label="Riwayat Keamanan" class="flex flex-col items-center justify-center w-12 h-full text-brand-muted hover:text-brand-deepNavy transition-colors" href="#riwayat">
+<svg class="w-6 h-6 stroke-current" fill="none" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M12 8v4l2.5 2.5M3 12a9 9 0 101.55-5.02L3 9" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M3 4v5h5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</a>
+<!-- Tab 5: Active Tab - Profil / User (With Top Red Indicator Bar) -->
+<a aria-label="Profil" class="relative flex flex-col items-center justify-center w-12 h-full text-brand-red" href="#profil">
+<!-- Active Tab Indicator Line as seen in SCREEN_4 / IMAGE_6 -->
+<span class="absolute top-0 w-8 h-0.5 bg-brand-red rounded-full"></span>
+<svg class="w-6 h-6 stroke-current mt-0.5" fill="none" stroke-width="2" viewBox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</a>
+</div>
+<!-- iOS Home Indicator -->
+<div class="w-32 h-1 bg-[#0B132B]/20 rounded-full mx-auto mt-1 mb-0.5" data-purpose="ios-home-indicator"></div>
+</nav>
+<!-- END: Bottom Navigation Bar -->
+</div>
+<!-- END: Mobile Container -->
+
+
+
+
+
+
+
+
+</body></html>

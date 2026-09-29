@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="id" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<meta content="mobile_tab" name="shell-type">
+<title>Telkomsel Security - Beranda</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-canvas": "#F8FAFC",
+            "surface-resting": "#F1F5F9",
+            "border-subtle": "#E2E8F0",
+            "slate-muted": "#778CA2",
+            "navy-deep": "#0B132B",
+            "primary": "#ED0226",
+            "primary-hover": "#D80222",
+            "security-safe": "#10B981"
+          },
+          fontFamily: {
+            sans: ["'Public Sans'", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #F8FAFC;
+      font-family: 'Public Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+    ::-webkit-scrollbar { display: none; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-surface-canvas text-navy-deep antialiased">
+<div class="w-full max-w-[390px] mx-auto min-h-screen flex flex-col relative bg-surface-canvas shadow-xl">
+<!-- Top App Bar -->
+<header class="sticky top-0 w-full z-40 pt-safe bg-white/95 backdrop-blur-md border-b border-slate-100 px-5 pt-3 pb-3">
+<div class="flex items-center justify-between">
+<button aria-label="Notifikasi" class="relative w-10 h-10 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center text-slate-muted active:scale-95 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+<span class="material-symbols-outlined text-[20px] text-navy-deep">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary ring-2 ring-white"></span>
+</button>
+<h1 class="text-[17px] font-bold text-navy-deep tracking-tight">Dashboard</h1>
+<button aria-label="Profil Pengguna" class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-500 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col w-full pt-4 pb-28 px-5 space-y-4">
+<!-- Device Reputation Gauge -->
+<section class="flex flex-col items-center justify-center pt-2 pb-1">
+<div class="relative w-52 h-44 flex flex-col items-center justify-center">
+<!-- Arc Gauge SVG: semi-circular / horseshoe gauge -->
+<svg class="w-48 h-40 overflow-visible" viewBox="0 0 200 160">
+<!-- Background Arc -->
+<path d="M 30 145 A 75 75 0 1 1 170 145" fill="none" stroke="#F1F5F9" stroke-linecap="round" stroke-width="12"></path>
+<!-- Filled Red Active Arc (approx 98%) -->
+<path class="drop-shadow-[0_2px_8px_rgba(237,2,38,0.3)]" d="M 30 145 A 75 75 0 1 1 166 138" fill="none" stroke="#ED0226" stroke-linecap="round" stroke-width="12"></path>
+</svg>
+<!-- Central Gauge Information -->
+<div class="absolute inset-0 flex flex-col items-center justify-center pt-5 pt-12">
+<div class="flex items-baseline leading-none">
+<span class="text-[40px] font-black text-navy-deep tracking-tight">98</span>
+<span class="text-[20px] font-bold text-primary ml-0.5">%</span>
+</div>
+<div class="flex flex-col items-center text-center leading-tight mt-1">
+<span class="text-[10px] font-bold text-slate-muted uppercase tracking-wider">REPUTASI</span>
+<span class="text-[10px] font-bold text-slate-muted uppercase tracking-wider">PERANGKAT</span>
+</div>
+<div class="mt-2.5 px-3 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/70 flex items-center gap-1.5 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-security-safe"></span>
+<span class="text-[10px] font-semibold text-emerald-700">Terlindungi Maksimal</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Card 1: Perangkat Sangat Aman + Action Pindai -->
+<div class="w-full bg-white rounded-2xl border border-slate-200/80 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3">
+<div class="flex flex-col text-left min-w-0">
+<span class="text-[15px] font-bold text-navy-deep tracking-tight leading-tight">Perangkat Sangat Aman</span>
+<span class="text-[12px] text-slate-muted mt-1 truncate">Pemindaian terakhir: Hari ini, 09:42 WIB</span>
+</div>
+<button class="px-5 py-2 bg-primary hover:bg-primary-hover active:scale-95 text-white text-[13px] font-bold rounded-xl shadow-sm shadow-primary/25 transition-all flex-shrink-0">
+          Pindai
+        </button>
+</div>
+<!-- Card 2: Proteksi Real-Time + Green Toggle -->
+<div class="w-full bg-white rounded-2xl border border-slate-200/80 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex items-center justify-between gap-3">
+<div class="flex flex-col text-left min-w-0">
+<span class="text-[15px] font-bold text-navy-deep tracking-tight leading-tight">Proteksi Real-Time</span>
+<span class="text-[12px] text-slate-muted mt-1 truncate">Trojan &amp; ransomware aktif diblokir</span>
+</div>
+<!-- Active iOS Switch Toggle -->
+<div class="w-12 h-6 bg-emerald-500 rounded-full p-0.5 flex items-center justify-end flex-shrink-0 shadow-inner">
+<div class="w-5 h-5 bg-white rounded-full shadow-md"></div>
+</div>
+</div>
+<!-- Section: Fitur Keamanan -->
+<section class="flex flex-col gap-3 pt-2">
+<div class="flex items-center justify-between px-0.5">
+<h2 class="text-[16px] font-bold text-navy-deep tracking-tight">Fitur Keamanan</h2>
+</div>
+<div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)] grid grid-cols-4 gap-y-4 gap-x-2">
+<!-- 1. Web Filter -->
+<button class="flex flex-col items-center text-center gap-1.5 group active:scale-95 transition-transform">
+<div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-navy-deep border border-slate-200/70 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">vpn_lock</span>
+</div>
+<span class="text-[11px] font-medium text-navy-deep leading-tight truncate w-full">Web Filter</span>
+</button>
+<!-- 2. Realtime Scan -->
+<button class="flex flex-col items-center text-center gap-1.5 group active:scale-95 transition-transform">
+<div class="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-sm shadow-primary/25">
+<span class="material-symbols-outlined text-[24px]">verified_user</span>
+</div>
+<span class="text-[11px] font-medium text-navy-deep leading-tight truncate w-full">Realtime Scan</span>
+</button>
+<!-- 3. PUA Scanner -->
+<button class="flex flex-col items-center text-center gap-1.5 group active:scale-95 transition-transform">
+<div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-navy-deep border border-slate-200/70 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">policy</span>
+</div>
+<span class="text-[11px] font-medium text-navy-deep leading-tight truncate w-full">PUA Scanner</span>
+</button>
+<!-- 4. Wifi Safety -->
+<button class="flex flex-col items-center text-center gap-1.5 group active:scale-95 transition-transform">
+<div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-navy-deep border border-slate-200/70 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">wifi_tethering</span>
+</div>
+<span class="text-[11px] font-medium text-navy-deep leading-tight truncate w-full">Wifi Safety</span>
+</button>
+<!-- 5. Fake Apps -->
+<button class="flex flex-col items-center text-center gap-1.5 group active:scale-95 transition-transform">
+<div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-navy-deep border border-slate-200/70 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">warning</span>
+</div>
+<span class="text-[11px] font-medium text-navy-deep leading-tight truncate w-full">Fake Apps</span>
+</button>
+<!-- 6. Device Reputation -->
+<button class="flex flex-col items-center text-center gap-1.5 group active:scale-95 transition-transform">
+<div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-navy-deep border border-slate-200/70 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">screen_lock_portrait</span>
+</div>
+<span class="text-[11px] font-medium text-navy-deep leading-tight truncate w-full">Device Rep</span>
+</button>
+<!-- 7. Data Breach -->
+<button class="flex flex-col items-center text-center gap-1.5 group active:scale-95 transition-transform">
+<div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-navy-deep border border-slate-200/70 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">database</span>
+</div>
+<span class="text-[11px] font-medium text-navy-deep leading-tight truncate w-full">Data Breach</span>
+</button>
+<!-- 8. Lainnya -->
+<button class="flex flex-col items-center text-center gap-1.5 group active:scale-95 transition-transform">
+<div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-navy-deep border border-slate-200/70 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">apps</span>
+</div>
+<span class="text-[11px] font-medium text-navy-deep leading-tight truncate w-full">Lainnya</span>
+</button>
+</div>
+</section>
+<!-- Section: Aktivitas Terakhir -->
+<section class="flex flex-col gap-2.5 pt-2">
+<div class="flex items-center justify-between px-0.5">
+<h2 class="text-[16px] font-bold text-navy-deep tracking-tight">Aktivitas Terakhir</h2>
+<a class="inline-flex items-center gap-0.5 text-[12px] font-bold text-primary hover:text-primary-hover active:scale-95 transition-all" href="#">
+            Lihat Semua
+            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</a>
+</div>
+<div class="flex flex-col gap-2.5">
+<!-- Item 1: Pemindaian Sistem Lengkap -->
+<div class="bg-white rounded-2xl border border-slate-200/80 p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex items-start gap-3">
+<div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center flex-shrink-0 border border-slate-200/70">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1 text-left">
+<h3 class="text-[13px] font-bold text-navy-deep leading-snug truncate">Pemindaian Sistem Lengkap</h3>
+<p class="text-[11px] text-slate-muted truncate mt-0.5 font-normal">0 ancaman ditemukan • 1.420 file diperiksa</p>
+<span class="text-[10px] text-slate-muted mt-1 font-normal">Hari ini, 09:42 WIB</span>
+</div>
+</div>
+<!-- Item 2: Malware Dibersihkan -->
+<div class="bg-white rounded-2xl border border-slate-200/80 p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex items-start gap-3">
+<div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center flex-shrink-0 border border-slate-200/70">
+<span class="material-symbols-outlined text-[20px]">delete_sweep</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1 text-left">
+<h3 class="text-[13px] font-bold text-navy-deep leading-snug truncate">Malware Dibersihkan</h3>
+<p class="text-[11px] text-slate-muted truncate mt-0.5 font-normal">Trojan.AndroidOS.Agent berhasil dihapus dari Download</p>
+<span class="text-[10px] text-slate-muted mt-1 font-normal">Kemarin, 21:15 WIB</span>
+</div>
+</div>
+<!-- Item 3: Situs Berbahaya Diblokir -->
+<div class="bg-white rounded-2xl border border-slate-200/80 p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex items-start gap-3">
+<div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center flex-shrink-0 border border-slate-200/70">
+<span class="material-symbols-outlined text-[20px]">block</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1 text-left">
+<h3 class="text-[13px] font-bold text-navy-deep leading-snug truncate">Situs Berbahaya Diblokir</h3>
+<p class="text-[11px] text-slate-muted truncate mt-0.5 font-normal">Upaya phishing 'login-bank-palsu.net' dicegah</p>
+<span class="text-[10px] text-slate-muted mt-1 font-normal">18 Mei, 14:03 WIB</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Bottom Navigation Bar (5 tabs) -->
+<nav class="fixed bottom-0 w-full max-w-[390px] z-50 bg-white border-t border-slate-200/80 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+<div class="relative flex justify-around items-center h-[64px] px-2">
+<!-- 1. Beranda (Active) -->
+<a aria-current="page" aria-label="Beranda" class="relative flex items-center justify-center flex-1 h-full text-primary" href="#">
+<span class="absolute top-0 left-4 right-4 h-[3px] bg-primary rounded-b-sm"></span>
+<span class="material-symbols-outlined text-[24px]">grid_view</span>
+</a>
+<!-- 2. Perangkat -->
+<a aria-label="Perangkat" class="flex items-center justify-center flex-1 h-full text-slate-400 hover:text-navy-deep transition-all" href="#">
+<span class="material-symbols-outlined text-[24px]">smartphone</span>
+</a>
+<!-- 3. Center elevated Scan button -->
+<div class="flex items-center justify-center flex-1 -translate-y-2.5">
+<button aria-label="Scan Penuh" class="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/30 hover:bg-primary-hover active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[26px]">document_scanner</span>
+</button>
+</div>
+<!-- 4. Riwayat Aktivitas -->
+<a aria-label="Riwayat" class="flex items-center justify-center flex-1 h-full text-slate-400 hover:text-navy-deep transition-all" href="#">
+<span class="material-symbols-outlined text-[24px]">history</span>
+</a>
+<!-- 5. Profil -->
+<a aria-label="Profil" class="flex items-center justify-center flex-1 h-full text-slate-400 hover:text-navy-deep transition-all" href="#">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</a>
+</div>
+<!-- iOS Home Indicator -->
+<div class="w-36 h-1 bg-navy-deep rounded-full mx-auto my-1.5 opacity-90"></div>
+</nav>
+</div>
+
+
+</body></html>
