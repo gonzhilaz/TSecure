@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 
 	"telkomsecure-backend/internal/handler"
@@ -27,6 +29,21 @@ func initServer() {
 	apiHandler := handler.NewAPIHandler(subService, broker)
 
 	mux := http.NewServeMux()
+
+	// Root & Status Check
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" || r.URL.Path == "/api" || r.URL.Path == "/api/" || r.URL.Path == "/api/index.go" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"status":  "UP",
+				"service": "TelkomSecure Go Backend",
+				"version": "2.4",
+			})
+			return
+		}
+		http.NotFound(w, r)
+	})
 
 	// Health check
 	mux.HandleFunc("/health", apiHandler.Health)
@@ -61,5 +78,19 @@ func initServer() {
 // Handler is the entrypoint for Vercel Serverless Functions in Go
 func Handler(w http.ResponseWriter, r *http.Request) {
 	once.Do(initServer)
+
+	// In Vercel serverless functions, rewrites pass the original path via query param or headers
+	if pathParam := r.URL.Query().Get("path"); pathParam != "" {
+		if !strings.HasPrefix(pathParam, "/") {
+			pathParam = "/" + pathParam
+		}
+		r.URL.Path = pathParam
+	} else if matched := r.Header.Get("x-matched-path"); matched != "" && matched != "/api/index.go" {
+		r.URL.Path = matched
+	} else if fwd := r.Header.Get("x-forwarded-uri"); fwd != "" {
+		parts := strings.SplitN(fwd, "?", 2)
+		r.URL.Path = parts[0]
+	}
+
 	httpHandler.ServeHTTP(w, r)
 }

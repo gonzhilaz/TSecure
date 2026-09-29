@@ -1,6 +1,6 @@
 import { DashboardStats, NdpOrderRequest, Subscriber, ThreatEvent } from '@/types';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://backend-psi-snowy-96.vercel.app';
 
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   const res = await fetch(`${BASE_URL}/api/v1/dashboard/stats`, {

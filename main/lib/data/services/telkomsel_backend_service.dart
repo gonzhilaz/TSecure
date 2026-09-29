@@ -6,7 +6,10 @@ import '../models/active_period.dart';
 import '../models/user_session.dart';
 
 class TelkomselBackendService {
-  static const String _baseUrl = 'http://10.0.2.2:8080';
+  static const String _baseUrl = String.fromEnvironment(
+    'BACKEND_URL',
+    defaultValue: 'https://backend-psi-snowy-96.vercel.app',
+  );
 
   /// Request: Cek Masa Aktif (Validasi)
   /// Corresponds to: Mobile App -> Req: Cek Masa Aktif -> Backend Telkomsel Secure
