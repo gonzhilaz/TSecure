@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { StatsCards } from '@/components/StatsCards';
 import { NdpSimulator } from '@/components/NdpSimulator';
@@ -18,13 +18,19 @@ import {
   fetchSubscribers,
   fetchRecentThreats,
   createEventSource,
+  clearDashboardData,
 } from '@/lib/api';
 import { DashboardStats, Subscriber, ThreatEvent } from '@/types';
 
 export default function SOCDashboard() {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
-  const [operator, setOperator] = useState<SOCOperator | null>(null);
-  const [isAuthChecked, setIsAuthChecked] = useState<boolean>(false);
+  const [operator, setOperator] = useState<SOCOperator | null>(() => {
+    if (typeof window !== 'undefined') {
+      return getCurrentOperator();
+    }
+    return null;
+  });
+  const [isAuthChecked, setIsAuthChecked] = useState<boolean>(() => typeof window !== 'undefined');
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [threats, setThreats] = useState<ThreatEvent[]>([]);
@@ -33,9 +39,11 @@ export default function SOCDashboard() {
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
   useEffect(() => {
-    const current = getCurrentOperator();
-    setOperator(current);
-    setIsAuthChecked(true);
+    const frame = requestAnimationFrame(() => {
+      setOperator(getCurrentOperator());
+      setIsAuthChecked(true);
+    });
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   const handleLoginSuccess = (op: SOCOperator) => {
@@ -66,7 +74,7 @@ export default function SOCDashboard() {
     }
   };
 
-  const handleSubscriberUpdated = (updatedSub: Subscriber) => {
+  const handleSubscriberUpdated = useCallback((updatedSub: Subscriber) => {
     setSubscribers((prev) => {
       const index = prev.findIndex((s) => s.msisdn === updatedSub.msisdn);
       if (index >= 0) {
@@ -80,6 +88,32 @@ export default function SOCDashboard() {
     fetchDashboardStats()
       .then((s) => setStats(s))
       .catch(() => {});
+  }, []);
+
+  const handleClearData = async () => {
+    try {
+      await clearDashboardData();
+    } catch (err) {
+      console.warn('Backend clear endpoint call failed or offline:', err);
+    }
+    setThreats([]);
+    setSubscribers([]);
+    setStats({
+      total_subscribers: 0,
+      active_subscribers: 0,
+      expired_subscribers: 0,
+      pending_activation: 0,
+      sms_delivery_failed: 0,
+      desync_warnings: 0,
+      rooted_devices: 0,
+      sim_swap_alerts: 0,
+      total_threats_blocked: 0,
+      threats_today: 0,
+      kaspersky_quota_total: 100,
+      kaspersky_quota_used: 0,
+      average_security_score: 100,
+      recent_threats: [],
+    });
   };
 
   useEffect(() => {
@@ -150,6 +184,30 @@ export default function SOCDashboard() {
           console.error('Error parsing subscriber_updated SSE:', err);
         }
       });
+
+      const handleAllCleared = () => {
+        setThreats([]);
+        setSubscribers([]);
+        setStats({
+          total_subscribers: 0,
+          active_subscribers: 0,
+          expired_subscribers: 0,
+          pending_activation: 0,
+          sms_delivery_failed: 0,
+          desync_warnings: 0,
+          rooted_devices: 0,
+          sim_swap_alerts: 0,
+          total_threats_blocked: 0,
+          threats_today: 0,
+          kaspersky_quota_total: 100,
+          kaspersky_quota_used: 0,
+          average_security_score: 100,
+          recent_threats: [],
+        });
+      };
+
+      evtSource.addEventListener('threats_cleared', handleAllCleared);
+      evtSource.addEventListener('subscribers_cleared', handleAllCleared);
     } catch (err) {
       console.error('Could not initialize EventSource:', err);
     }
@@ -160,12 +218,28 @@ export default function SOCDashboard() {
         evtSource.close();
       }
     };
-  }, []);
+  }, [handleSubscriberUpdated]);
 
-  const smsFailedCount = subscribers.filter((s) => s.activation_status === 'SMS_FAILED').length;
-  const desyncCount = subscribers.filter((s) => s.desync_days > 0).length;
-  const rootedCount = subscribers.filter((s) => s.root_status === 'ROOT_DETECTED' || s.hook_status === 'HOOK_DETECTED').length;
-  const simSwapCount = subscribers.filter((s) => s.bound_iccid && s.current_iccid && s.bound_iccid !== s.current_iccid).length;
+  const { smsFailedCount, desyncCount, rootedCount, simSwapCount } = useMemo(() => {
+    let smsFailed = 0;
+    let desync = 0;
+    let rooted = 0;
+    let simSwap = 0;
+
+    for (const s of subscribers) {
+      if (s.activation_status === 'SMS_FAILED') smsFailed++;
+      if (s.desync_days > 0) desync++;
+      if (s.root_status === 'ROOT_DETECTED' || s.hook_status === 'HOOK_DETECTED') rooted++;
+      if (s.bound_iccid && s.current_iccid && s.bound_iccid !== s.current_iccid) simSwap++;
+    }
+
+    return {
+      smsFailedCount: smsFailed,
+      desyncCount: desync,
+      rootedCount: rooted,
+      simSwapCount: simSwap,
+    };
+  }, [subscribers]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fff8f7]">
@@ -173,6 +247,7 @@ export default function SOCDashboard() {
         isConnected={isConnected}
         onRefresh={handleManualRefresh}
         isRefreshing={isRefreshing}
+        onClearData={handleClearData}
         operator={operator}
         onLogout={handleLogout}
       />
@@ -203,7 +278,7 @@ export default function SOCDashboard() {
               <SubscriberTable subscribers={subscribers} loading={loading} />
             </div>
             <div className="lg:col-span-5">
-              <ThreatFeed threats={threats} loading={loading} />
+              <ThreatFeed threats={threats} loading={loading} onClear={handleClearData} />
             </div>
           </div>
         )}
@@ -214,13 +289,16 @@ export default function SOCDashboard() {
             subscribers={subscribers}
             onSubscriberUpdated={handleSubscriberUpdated}
             onRefresh={handleManualRefresh}
-            loading={isRefreshing}
+            loading={loading || isRefreshing}
           />
         )}
 
         {/* Tab 3: Device Integrity & SIM Watch */}
         {activeTab === 'device_integrity' && (
-          <DeviceIntegrityDesk subscribers={subscribers} />
+          <DeviceIntegrityDesk
+            subscribers={subscribers}
+            loading={loading || isRefreshing}
+          />
         )}
 
         {/* Tab 4: Laporan & Ekspor Audit (Reports) */}
@@ -230,6 +308,7 @@ export default function SOCDashboard() {
             subscribers={subscribers}
             stats={stats}
             operator={operator}
+            loading={loading || isRefreshing}
           />
         )}
 

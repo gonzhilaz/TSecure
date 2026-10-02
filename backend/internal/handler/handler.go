@@ -322,6 +322,16 @@ func (h *APIHandler) ActivateLicense(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+func (h *APIHandler) ClearDashboardData(w http.ResponseWriter, r *http.Request) {
+	h.svc.ClearAllData()
+	h.broker.Broadcast("threats_cleared", map[string]string{"status": "cleared"})
+	h.broker.Broadcast("subscribers_cleared", map[string]string{"status": "cleared"})
+	writeJSON(w, http.StatusOK, map[string]any{
+		"status":  "success",
+		"message": "Dashboard subscribers, threats, and logs cleared successfully.",
+	})
+}
+
 func (h *APIHandler) CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

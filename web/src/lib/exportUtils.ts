@@ -3,7 +3,7 @@ import { Subscriber, ThreatEvent } from '@/types';
 /**
  * Escapes fields for CSV according to RFC 4180
  */
-function escapeCSV(val: any): string {
+function escapeCSV(val: unknown): string {
   if (val === null || val === undefined) return '';
   const str = String(val);
   if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
@@ -18,7 +18,7 @@ function escapeCSV(val: any): string {
 export function exportToCSV(
   filename: string,
   headers: { label: string; key: string }[],
-  data: Record<string, any>[]
+  data: any[]
 ) {
   const headerRow = headers.map((h) => escapeCSV(h.label)).join(',');
   const rows = data.map((item) =>
@@ -46,7 +46,7 @@ export function exportToExcel(
   filename: string,
   sheetName: string,
   headers: { label: string; key: string }[],
-  data: Record<string, any>[]
+  data: any[]
 ) {
   const headerCells = headers
     .map(

@@ -243,3 +243,12 @@ func (s *SubscriptionService) ActivateLicense(req model.LicenseActivationRequest
 		LicenseKey:       sub.KasperskyLicenseKey,
 	}, nil
 }
+
+func (s *SubscriptionService) ClearThreatsAndLogs() {
+	s.store.ClearThreatsAndLogs()
+}
+
+func (s *SubscriptionService) ClearAllData() {
+	s.store.ClearAllData()
+}
+
