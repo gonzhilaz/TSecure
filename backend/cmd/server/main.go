@@ -60,6 +60,8 @@ func main() {
 	mux.HandleFunc("/api/v1/auth/activate-license", apiHandler.ActivateLicense)
 	mux.HandleFunc("/api/v1/subscription/check", apiHandler.CheckActivePeriod)
 	mux.HandleFunc("/api/v1/telemetry/events", apiHandler.ReportTelemetry)
+	mux.HandleFunc("/api/v1/app/check-update", apiHandler.CheckAppUpdate)
+	mux.HandleFunc("/api/v1/app/download-latest", apiHandler.DownloadLatestApk)
 
 	// NDP / MyTelkomsel Simulation Endpoints
 	mux.HandleFunc("/api/v1/ndp/simulate-purchase", apiHandler.SimulateNdpPurchase)
@@ -70,6 +72,8 @@ func main() {
 	mux.HandleFunc("/api/v1/dashboard/stats", apiHandler.GetDashboardStats)
 	mux.HandleFunc("/api/v1/dashboard/subscribers", apiHandler.ListSubscribers)
 	mux.HandleFunc("/api/v1/dashboard/threats", apiHandler.ListThreats)
+	mux.HandleFunc("/api/v1/dashboard/clear", apiHandler.ClearDashboardData)
+	mux.HandleFunc("/api/v1/admin/clear-threats", apiHandler.ClearDashboardData)
 	mux.Handle("/api/v1/dashboard/stream", broker)
 
 	// Big Data Streaming Export Endpoints (Chunked Transfer)
