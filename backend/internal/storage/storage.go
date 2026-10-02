@@ -33,8 +33,8 @@ func NewStorage(persistPath string) *Storage {
 }
 
 func (s *Storage) seedInitialData() {
-	now := time.Now()
-	s.subscribers = generateInitialSeed(now)
+	s.subscribers = make(map[string]*model.Subscriber)
+	s.threats = make([]model.ThreatEvent, 0)
 }
 
 func (s *Storage) GetSubscriber(msisdn string) (*model.Subscriber, bool) {
