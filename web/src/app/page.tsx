@@ -1,12 +1,15 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { StatsCards } from '@/components/StatsCards';
+import { ThreatLocationMap } from '@/components/ThreatLocationMap';
+import { ThreatAnalytics } from '@/components/ThreatAnalytics';
+import { ThreatMapDesk } from '@/components/ThreatMapDesk';
 import { NdpSimulator } from '@/components/NdpSimulator';
 import { ThreatFeed } from '@/components/ThreatFeed';
 import { SubscriberTable } from '@/components/SubscriberTable';
-import { AdminTabNav, DashboardTab } from '@/components/AdminTabNav';
 import { CustomerDiagnosticsDesk } from '@/components/CustomerDiagnosticsDesk';
 import { DeviceIntegrityDesk } from '@/components/DeviceIntegrityDesk';
 import { PhishingIntelDesk } from '@/components/PhishingIntelDesk';
@@ -24,10 +27,14 @@ import {
   createEventSource,
   clearDashboardData,
 } from '@/lib/api';
-import { DashboardStats, Subscriber, ThreatEvent } from '@/types';
+import { DashboardStats, Subscriber, ThreatEvent, DashboardTab } from '@/types';
 
 export default function SOCDashboard() {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false);
+  const [selectedMapCity, setSelectedMapCity] = useState<string>('');
+
   const [operator, setOperator] = useState<SOCOperator | null>(() => {
     if (typeof window !== 'undefined') {
       return getCurrentOperator();
@@ -98,7 +105,7 @@ export default function SOCDashboard() {
     try {
       await clearDashboardData();
     } catch (err) {
-      console.warn('Backend clear endpoint call failed or offline:', err);
+      console.warn('Backend clear endpoint failed:', err);
     }
     setThreats([]);
     setSubscribers([]);
@@ -137,7 +144,7 @@ export default function SOCDashboard() {
           setThreats(threatsData);
         }
       } catch (err) {
-        console.error('Failed to initialize SOC dashboard data:', err);
+        console.error('Init SOC dashboard data error:', err);
       } finally {
         if (!ignore) {
           setLoading(false);
@@ -147,22 +154,14 @@ export default function SOCDashboard() {
 
     initData();
 
-    // Connect to Golang Backend SSE Stream
+    // SSE Connection
     let evtSource: EventSource | null = null;
     try {
       evtSource = createEventSource();
 
-      evtSource.onopen = () => {
-        setIsConnected(true);
-      };
-
-      evtSource.addEventListener('connected', () => {
-        setIsConnected(true);
-      });
-
-      evtSource.onerror = () => {
-        setIsConnected(false);
-      };
+      evtSource.onopen = () => setIsConnected(true);
+      evtSource.addEventListener('connected', () => setIsConnected(true));
+      evtSource.onerror = () => setIsConnected(false);
 
       evtSource.addEventListener('threat_alert', (e: MessageEvent) => {
         try {
@@ -192,35 +191,10 @@ export default function SOCDashboard() {
           console.error('Error parsing subscriber_updated SSE:', err);
         }
       });
-
-      const handleAllCleared = () => {
-        setThreats([]);
-        setSubscribers([]);
-        setStats({
-          total_subscribers: 0,
-          active_subscribers: 0,
-          expired_subscribers: 0,
-          pending_activation: 0,
-          sms_delivery_failed: 0,
-          desync_warnings: 0,
-          rooted_devices: 0,
-          sim_swap_alerts: 0,
-          total_threats_blocked: 0,
-          threats_today: 0,
-          kaspersky_quota_total: 100,
-          kaspersky_quota_used: 0,
-          average_security_score: 100,
-          recent_threats: [],
-        });
-      };
-
-      evtSource.addEventListener('threats_cleared', handleAllCleared);
-      evtSource.addEventListener('subscribers_cleared', handleAllCleared);
     } catch (err) {
       console.error('Could not initialize EventSource:', err);
     }
 
-    // Safety net: periodic background refresh to ensure metrics stay fresh even during reconnection
     const pollInterval = setInterval(() => {
       if (document.visibilityState === 'visible') {
         fetchDashboardStats()
@@ -238,130 +212,156 @@ export default function SOCDashboard() {
     };
   }, [handleSubscriberUpdated]);
 
-  const { smsFailedCount, desyncCount, rootedCount, simSwapCount } = useMemo(() => {
-    let smsFailed = 0;
-    let desync = 0;
-    let rooted = 0;
-    let simSwap = 0;
+  const { helpdeskIssues, integrityIssues } = useMemo(() => {
+    let helpdesk = 0;
+    let integrity = 0;
 
     for (const s of subscribers) {
-      if (s.activation_status === 'SMS_FAILED') smsFailed++;
-      if (s.desync_days > 0) desync++;
-      if (s.root_status === 'ROOT_DETECTED' || s.hook_status === 'HOOK_DETECTED') rooted++;
-      if (s.bound_iccid && s.current_iccid && s.bound_iccid !== s.current_iccid) simSwap++;
+      if (s.activation_status === 'SMS_FAILED' || s.desync_days > 0) helpdesk++;
+      if (s.root_status === 'ROOT_DETECTED' || s.hook_status === 'HOOK_DETECTED') integrity++;
+      if (s.bound_iccid && s.current_iccid && s.bound_iccid !== s.current_iccid) integrity++;
     }
 
-    return {
-      smsFailedCount: smsFailed,
-      desyncCount: desync,
-      rootedCount: rooted,
-      simSwapCount: simSwap,
-    };
+    return { helpdeskIssues: helpdesk, integrityIssues: integrity };
   }, [subscribers]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fff8f7]">
-      <Header
-        isConnected={isConnected}
-        onRefresh={handleManualRefresh}
-        isRefreshing={isRefreshing}
-        onClearData={handleClearData}
+    <div className="min-h-screen flex bg-[#f8fafc]">
+      {/* Sidebar Navigation */}
+      <Sidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        mobileOpen={mobileSidebarOpen}
+        onCloseMobile={() => setMobileSidebarOpen(false)}
         operator={operator}
         onLogout={handleLogout}
+        isConnected={isConnected}
+        helpdeskIssuesCount={helpdeskIssues}
+        integrityIssuesCount={integrityIssues}
       />
 
-      {/* Login Screen Modal if Unauthenticated */}
-      {isAuthChecked && !operator && (
-        <LoginModal onLoginSuccess={handleLoginSuccess} />
-      )}
-
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pb-12 pt-2">
-        {/* KPI Metrics */}
-        <StatsCards stats={stats} loading={loading} />
-
-        {/* Tab Navigation */}
-        <AdminTabNav
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          smsFailedCount={smsFailedCount}
-          desyncCount={desyncCount}
-          rootedCount={rootedCount}
-          simSwapCount={simSwapCount}
+      {/* Main Content Area */}
+      <div
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+          sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'
+        }`}
+      >
+        <Header
+          isConnected={isConnected}
+          onRefresh={handleManualRefresh}
+          isRefreshing={isRefreshing}
+          onClearData={handleClearData}
+          operator={operator}
+          onLogout={handleLogout}
+          onToggleMobileMenu={() => setMobileSidebarOpen(!mobileSidebarOpen)}
         />
 
-        {/* Tab 1: Overview & SOC Operations */}
-        {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-7 space-y-6">
+        {/* Unauthenticated Login Modal */}
+        {isAuthChecked && !operator && (
+          <LoginModal onLoginSuccess={handleLoginSuccess} />
+        )}
+
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+          {/* Top KPI Metrics Cards */}
+          <StatsCards stats={stats} loading={loading} />
+
+          {/* TAB 1: OVERVIEW (Map + Analytics + Table + Feed) */}
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              {/* GIS Map & Analytic Highlights */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-7">
+                  <ThreatLocationMap
+                    threats={threats}
+                    height="480px"
+                    selectedCity={selectedMapCity}
+                  />
+                </div>
+                <div className="lg:col-span-5">
+                  <ThreatFeed threats={threats} loading={loading} onClear={handleClearData} />
+                </div>
+              </div>
+
+              {/* Comprehensive Analytics Suite */}
+              <ThreatAnalytics
+                threats={threats}
+                onSelectCity={(city) => setSelectedMapCity(city)}
+              />
+
+              {/* Subscriber Fleet Table */}
               <SubscriberTable subscribers={subscribers} loading={loading} />
             </div>
-            <div className="lg:col-span-5">
-              <ThreatFeed threats={threats} loading={loading} onClear={handleClearData} />
+          )}
+
+          {/* TAB 2: DEDICATED GIS THREAT MAP */}
+          {activeTab === 'threat_map' && (
+            <ThreatMapDesk threats={threats} />
+          )}
+
+          {/* TAB 3: PHISHING INTEL DESK */}
+          {activeTab === 'phishing_intel' && (
+            <PhishingIntelDesk loading={loading || isRefreshing} />
+          )}
+
+          {/* TAB 4: HELPDESK & FLEET DIAGNOSTICS */}
+          {activeTab === 'helpdesk' && (
+            <CustomerDiagnosticsDesk
+              subscribers={subscribers}
+              onSubscriberUpdated={handleSubscriberUpdated}
+              onRefresh={handleManualRefresh}
+              loading={loading || isRefreshing}
+            />
+          )}
+
+          {/* TAB 5: DEVICE INTEGRITY & SIM WATCH */}
+          {activeTab === 'device_integrity' && (
+            <DeviceIntegrityDesk
+              subscribers={subscribers}
+              loading={loading || isRefreshing}
+            />
+          )}
+
+          {/* TAB 6: INGESTION GATEWAY & DLQ */}
+          {activeTab === 'ingestion_dlq' && (
+            <IngestionGatewayDesk />
+          )}
+
+          {/* TAB 7: USER MANAGEMENT & RBAC */}
+          {activeTab === 'users_rbac' && (
+            <UserManagementDesk />
+          )}
+
+          {/* TAB 8: DATABASE LIFECYCLE */}
+          {activeTab === 'db_maintenance' && (
+            <DatabaseLifecycleDesk />
+          )}
+
+          {/* TAB 9: AUDIT REPORTS */}
+          {activeTab === 'reports' && (
+            <ReportDesk
+              threats={threats}
+              subscribers={subscribers}
+              stats={stats}
+              operator={operator}
+              loading={loading || isRefreshing}
+            />
+          )}
+
+          {/* TAB 10: NDP SIMULATOR */}
+          {activeTab === 'ndp_simulator' && (
+            <div className="space-y-6">
+              <NdpSimulator onSubscriberUpdated={handleSubscriberUpdated} />
+              <SubscriberTable subscribers={subscribers} loading={loading} />
             </div>
-          </div>
-        )}
+          )}
+        </main>
 
-        {/* Tab: Phishing Threat Intel Desk */}
-        {activeTab === 'phishing_intel' && (
-          <PhishingIntelDesk loading={loading || isRefreshing} />
-        )}
-
-        {/* Tab 2: Customer Care & Diagnostic Helpdesk */}
-        {activeTab === 'helpdesk' && (
-          <CustomerDiagnosticsDesk
-            subscribers={subscribers}
-            onSubscriberUpdated={handleSubscriberUpdated}
-            onRefresh={handleManualRefresh}
-            loading={loading || isRefreshing}
-          />
-        )}
-
-        {/* Tab 3: Device Integrity & SIM Watch */}
-        {activeTab === 'device_integrity' && (
-          <DeviceIntegrityDesk
-            subscribers={subscribers}
-            loading={loading || isRefreshing}
-          />
-        )}
-
-        {/* Tab: Ingestion Gateway & Dead-Letter Queue */}
-        {activeTab === 'ingestion_dlq' && (
-          <IngestionGatewayDesk />
-        )}
-
-        {/* Tab: User Management & RBAC */}
-        {activeTab === 'users_rbac' && (
-          <UserManagementDesk />
-        )}
-
-        {/* Tab: Database Lifecycle & Maintenance */}
-        {activeTab === 'db_maintenance' && (
-          <DatabaseLifecycleDesk />
-        )}
-
-        {/* Tab 4: Laporan & Ekspor Audit (Reports) */}
-        {activeTab === 'reports' && (
-          <ReportDesk
-            threats={threats}
-            subscribers={subscribers}
-            stats={stats}
-            operator={operator}
-            loading={loading || isRefreshing}
-          />
-        )}
-
-        {/* Tab 5: NDP / Billing Simulator (Vertical Stack) */}
-        {activeTab === 'ndp_simulator' && (
-          <div className="space-y-6">
-            <NdpSimulator onSubscriberUpdated={handleSubscriberUpdated} />
-            <SubscriberTable subscribers={subscribers} loading={loading} />
-          </div>
-        )}
-      </main>
-
-      <footer className="border-t border-[#e9bcb8]/60 py-4 text-center text-xs text-[#778ca2] bg-white/60">
-        Telkomsel Secure • Kaspersky Mobile Security Ecosystem • Vigilance Modern Enterprise SOC
-      </footer>
+        <footer className="border-t border-[#e2e8f0] py-4 text-center text-xs text-[#94a3b8] bg-white">
+          Telkomsel Secure • Cyber SOC Command Center • Kaspersky Mobile Security Engine
+        </footer>
+      </div>
     </div>
   );
 }

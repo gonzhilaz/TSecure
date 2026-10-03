@@ -1,7 +1,18 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Shield, Radio, Activity, RefreshCw, LogOut, User, Volume2, VolumeX, Trash2 } from 'lucide-react';
+import {
+  Shield,
+  Radio,
+  Activity,
+  RefreshCw,
+  LogOut,
+  User,
+  Volume2,
+  VolumeX,
+  Trash2,
+  Menu,
+} from 'lucide-react';
 import { SOCOperator } from '@/lib/auth';
 import { isSoundEnabled, setSoundEnabled } from '@/lib/soundAlert';
 
@@ -12,6 +23,7 @@ interface HeaderProps {
   onClearData?: () => void;
   operator?: SOCOperator | null;
   onLogout?: () => void;
+  onToggleMobileMenu?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,6 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
   onClearData,
   operator,
   onLogout,
+  onToggleMobileMenu,
 }) => {
   const [timeStr, setTimeStr] = useState<string>('');
   const [soundActive, setSoundActive] = useState<boolean>(() => {
@@ -54,110 +67,108 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-[#e9bcb8]/60 px-6 py-3.5 mb-6 shadow-sm shadow-[#0b132b]/5">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left: Branding */}
-        <div className="flex items-center space-x-3.5">
-          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#be001c] to-[#ed0226] shadow-md shadow-[#be001c]/25">
-            <Shield className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="font-bold tracking-tight text-lg text-[#0b132b]">
-                TELKOMSEL <span className="text-[#ed0226]">SECURE</span>
-              </span>
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#ffe9e7] text-[#be001c] border border-[#e9bcb8] font-bold tracking-wide">
-                SOC v2.4
-              </span>
+    <header className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-md border-b border-[#e9bcb8]/60 px-4 sm:px-6 py-3 shadow-xs">
+      <div className="flex items-center justify-between">
+        {/* Left: Mobile Toggle & Title */}
+        <div className="flex items-center space-x-3">
+          {onToggleMobileMenu && (
+            <button
+              onClick={onToggleMobileMenu}
+              className="lg:hidden p-2 rounded-xl text-[#4a5568] hover:bg-[#fff0f0] transition-colors"
+              aria-label="Buka Menu"
+            >
+              <Menu className="w-5 h-5 text-[#be001c]" />
+            </button>
+          )}
+
+          <div className="flex items-center space-x-2.5">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-[#be001c] to-[#ed0226] text-white shadow-xs">
+              <Shield className="w-4 h-4" />
             </div>
-            <p className="text-xs text-[#778ca2] font-medium tracking-tight">
-              Security Operations Center • Kaspersky Mobile Security Engine
-            </p>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="font-extrabold tracking-tight text-sm sm:text-base text-[#0b132b]">
+                  TELKOMSEL <span className="text-[#ed0226]">SECURE</span>
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ffe9e7] text-[#be001c] border border-[#e9bcb8] font-bold">
+                  SOC v2.4
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Right: Live Telemetry Controls */}
-        <div className="flex items-center space-x-3">
-          {/* SSE Stream Status */}
+        {/* Right: Controls & Actions */}
+        <div className="flex items-center space-x-2.5">
+          {/* SSE Status */}
           <div
-            className={`hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-lg border text-xs font-semibold ${
+            className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-bold ${
               isConnected
                 ? 'bg-[#e8f5e9] border-[#a7f3d0] text-[#10b981]'
                 : 'bg-[#fff8e1] border-[#fde68a] text-[#f59e0b]'
             }`}
           >
             <Radio
-              className={`w-3.5 h-3.5 ${
+              className={`w-3 h-3 ${
                 isConnected ? 'text-[#10b981] animate-pulse' : 'text-[#f59e0b] animate-spin'
               }`}
             />
-            <span className="text-[#5e3f3c]">Stream:</span>
-            <span>{isConnected ? 'LIVE SSE' : 'RECONNECTING'}</span>
+            <span className="hidden sm:inline">Stream:</span>
+            <span>{isConnected ? 'LIVE' : 'OFFLINE'}</span>
           </div>
 
           {/* Clock */}
-          <div className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#f4f6f9] border border-[#e2e8f0] text-xs text-[#3a405a] font-mono">
-            <Activity className="w-3.5 h-3.5 text-[#007eb4]" />
-            <span>{timeStr || 'Loading...'}</span>
+          <div className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-[#f8fafc] border border-[#e2e8f0] text-[11px] text-[#475569] font-mono">
+            <Activity className="w-3 h-3 text-[#0284c7]" />
+            <span>{timeStr || '...'}</span>
           </div>
 
-          {/* Sound Alert Toggle */}
+          {/* Audio Alert Toggle */}
           <button
             onClick={handleToggleSound}
-            className={`p-2 rounded-lg border text-xs transition-all active:scale-95 shadow-xs ${
+            className={`p-1.5 rounded-lg border text-xs transition-all active:scale-95 ${
               soundActive
-                ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700'
-                : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-400'
+                ? 'bg-[#fff8e1] border-[#fde68a] text-[#b45309]'
+                : 'bg-[#f1f5f9] border-[#cbd5e1] text-[#94a3b8]'
             }`}
-            title={soundActive ? 'Audio Alert Ancaman: AKTIF' : 'Audio Alert Ancaman: MATI'}
+            title={soundActive ? 'Suara Alert: AKTIF' : 'Suara Alert: MATI'}
           >
             {soundActive ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
           </button>
 
-          {/* Refresh Action */}
+          {/* Refresh Button */}
           <button
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-white hover:bg-[#fff0ef] border border-[#e2e8f0] hover:border-[#e9bcb8] text-xs font-bold text-[#0b132b] transition-all active:scale-95 disabled:opacity-50 shadow-xs"
-            title="Refresh dashboard data"
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white hover:bg-[#fff5f5] border border-[#e2e8f0] text-xs font-bold text-[#0b132b] transition-all active:scale-95 disabled:opacity-50"
+            title="Sinkronisasi data"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#5e3f3c] ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Sync</span>
+            <RefreshCw className={`w-3 h-3 text-[#ed0226] ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Sync</span>
           </button>
 
-          {/* Clear / Reset Action */}
+          {/* Clear Data */}
           {onClearData && (
             <button
               onClick={onClearData}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-red-50 border border-slate-200 hover:border-red-200 text-xs font-semibold text-slate-700 hover:text-red-600 transition-all active:scale-95 shadow-xs"
-              title="Bersihkan riwayat ancaman dan log aktivitas untuk pengujian bersih"
+              className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white hover:bg-[#fff0f0] border border-[#e2e8f0] text-xs font-semibold text-[#dc2626] transition-all active:scale-95"
+              title="Bersihkan riwayat pengujian"
             >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Clear Data</span>
+              <Trash2 className="w-3 h-3" />
+              <span className="hidden md:inline">Reset</span>
             </button>
           )}
 
-          {/* Operator Profile & Logout */}
-          {operator && (
-            <div className="flex items-center pl-2 ml-1 border-l border-[#e2e8f0] space-x-2">
-              <div className="hidden lg:flex flex-col text-right">
-                <span className="text-xs font-bold text-[#0b132b] leading-tight flex items-center justify-end gap-1">
-                  <User className="w-3 h-3 text-[#be001c]" />
-                  {operator.name}
-                </span>
-                <span className="text-[10px] text-[#778ca2] font-semibold">
-                  {operator.role}
-                </span>
-              </div>
-              <button
-                onClick={onLogout}
-                className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-xs font-bold text-[#be001c] transition-all active:scale-95 shadow-xs"
-                title="Keluar dari akun SOC"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
-            </div>
+          {/* Operator Logout */}
+          {operator && onLogout && (
+            <button
+              onClick={onLogout}
+              className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-[#fff0f0] hover:bg-[#fee2e2] text-xs font-bold text-[#ed0226] transition-all active:scale-95"
+              title="Logout akun"
+            >
+              <LogOut className="w-3 h-3" />
+              <span className="hidden sm:inline">Keluar</span>
+            </button>
           )}
         </div>
       </div>

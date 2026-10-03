@@ -77,11 +77,16 @@ type ThreatEvent struct {
 	ID          string    `json:"id"`
 	MobileID    string    `json:"mobile_id"`
 	MSISDN      string    `json:"msisdn"`
-	ThreatType  string    `json:"threat_type"` // PHISHING, MALWARE, EICAR, SIM_WATCH, RASP
-	Target      string    `json:"target"`      // URL, file path, or component
+	ThreatType  string    `json:"threat_type"` // PHISHING, MALWARE, EICAR, SIM_WATCH, RASP, WIFI
+	Target      string    `json:"target"`      // URL, file path, SSID, or component
 	Severity    string    `json:"severity"`    // CRITICAL, HIGH, MEDIUM, LOW
 	Description string    `json:"description"`
 	ActionTaken string    `json:"action_taken"` // BLOCKED, ISOLATED, REPORTED
+	Latitude    float64   `json:"latitude"`
+	Longitude   float64   `json:"longitude"`
+	City        string    `json:"city"`
+	LocationTag string    `json:"location_tag"`
+	NetworkType string    `json:"network_type"` // e.g. "WiFi (Public)" or "Telkomsel 5G"
 	Timestamp   time.Time `json:"timestamp"`
 }
 

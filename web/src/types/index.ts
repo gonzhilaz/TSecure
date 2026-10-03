@@ -55,11 +55,16 @@ export interface ThreatEvent {
   id: string;
   mobile_id: string;
   msisdn: string;
-  threat_type: 'PHISHING' | 'MALWARE' | 'EICAR' | 'SIM_WATCH' | 'RASP' | string;
+  threat_type: 'PHISHING' | 'MALWARE' | 'EICAR' | 'SIM_WATCH' | 'RASP' | 'WIFI' | string;
   target: string;
   severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
   description: string;
   action_taken: 'BLOCKED' | 'ISOLATED' | 'REPORTED';
+  latitude?: number;
+  longitude?: number;
+  city?: string;
+  location_tag?: string;
+  network_type?: string;
   timestamp: string;
 }
 
@@ -204,7 +209,21 @@ export interface RetentionRunResult {
   threats_pruned: number;
   audit_pruned: number;
   dlq_pruned: number;
+  remaining_threats: number;
   executed_at: string;
 }
+
+export type DashboardTab =
+  | 'overview'
+  | 'threat_map'
+  | 'phishing_intel'
+  | 'helpdesk'
+  | 'device_integrity'
+  | 'ingestion_dlq'
+  | 'users_rbac'
+  | 'db_maintenance'
+  | 'reports'
+  | 'ndp_simulator';
+
 
 
