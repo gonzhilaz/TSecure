@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 	"sync"
 
@@ -32,7 +33,7 @@ func initServer() {
 
 	// Root & Status Check
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" || r.URL.Path == "/api" || r.URL.Path == "/api/" || r.URL.Path == "/api/index.go" {
+		if r.URL.Path == "/" || r.URL.Path == "/api" || r.URL.Path == "/api/" || r.URL.Path == "/api/index.go" || r.URL.Path == "/api/index" {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			_ = json.NewEncoder(w).Encode(map[string]any{
@@ -124,22 +125,66 @@ func initServer() {
 	httpHandler = apiHandler.CORSMiddleware(mux)
 }
 
+// resolvePath normalizes incoming paths from Vercel Serverless Function rewrites and headers
+func resolvePath(r *http.Request) string {
+	var target string
+
+	// 1. Check x-forwarded-uri (in Vercel, this reliably holds the original client request URI)
+	if fwd := r.Header.Get("x-forwarded-uri"); fwd != "" {
+		parts := strings.SplitN(fwd, "?", 2)
+		cleanFwd := parts[0]
+		if cleanFwd != "" && cleanFwd != "/api/index.go" && cleanFwd != "/api/index" && cleanFwd != "/api" {
+			target = cleanFwd
+			if len(parts) > 1 && r.URL.RawQuery == "" {
+				r.URL.RawQuery = parts[1]
+			}
+		}
+	}
+
+	// 2. Check "path" query parameter (from rewrite destination or direct invocation)
+	if target == "" {
+		if p := r.URL.Query().Get("path"); p != "" {
+			target = p
+		}
+	}
+
+	// 3. Check x-invoke-path
+	if target == "" {
+		if invoke := r.Header.Get("x-invoke-path"); invoke != "" && invoke != "/api/index.go" && invoke != "/api/index" && invoke != "/api" {
+			target = invoke
+		}
+	}
+
+	// 4. Check r.URL.Path
+	if target == "" {
+		if p := r.URL.Path; p != "" && p != "/api/index.go" && p != "/api/index" && p != "/api" {
+			target = p
+		}
+	}
+
+	if target == "" {
+		target = "/"
+	}
+
+	if !strings.HasPrefix(target, "/") {
+		target = "/" + target
+	}
+
+	cleaned := path.Clean(target)
+
+	// If request starts with /v1/, normalize to /api/v1/
+	if strings.HasPrefix(cleaned, "/v1/") {
+		cleaned = "/api" + cleaned
+	}
+
+	return cleaned
+}
+
 // Handler is the entrypoint for Vercel Serverless Functions in Go
 func Handler(w http.ResponseWriter, r *http.Request) {
 	once.Do(initServer)
 
-	// In Vercel serverless functions, rewrites pass the original path via query param or headers
-	if pathParam := r.URL.Query().Get("path"); pathParam != "" {
-		if !strings.HasPrefix(pathParam, "/") {
-			pathParam = "/" + pathParam
-		}
-		r.URL.Path = pathParam
-	} else if matched := r.Header.Get("x-matched-path"); matched != "" && matched != "/api/index.go" {
-		r.URL.Path = matched
-	} else if fwd := r.Header.Get("x-forwarded-uri"); fwd != "" {
-		parts := strings.SplitN(fwd, "?", 2)
-		r.URL.Path = parts[0]
-	}
+	r.URL.Path = resolvePath(r)
 
 	httpHandler.ServeHTTP(w, r)
 }

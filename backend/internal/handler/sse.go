@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 )
 
 // EventBroker coordinates Server-Sent Events (SSE) connections to dashboards.
@@ -72,8 +73,9 @@ func (b *EventBroker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Cache-Control", "no-cache, no-transform")
 	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("X-Accel-Buffering", "no")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	msgChan := make(chan string, 10)
@@ -83,15 +85,21 @@ func (b *EventBroker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		b.closeClients <- msgChan
 	}()
 
-	// Send initial ping
+	// Send initial ping so client immediately transitions to LIVE
 	fmt.Fprintf(w, "event: connected\ndata: {\"status\":\"connected\"}\n\n")
 	flusher.Flush()
+
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
 
 	notify := r.Context().Done()
 	for {
 		select {
 		case <-notify:
 			return
+		case <-ticker.C:
+			fmt.Fprintf(w, ": keepalive\n\n")
+			flusher.Flush()
 		case msg := <-msgChan:
 			fmt.Fprint(w, msg)
 			flusher.Flush()

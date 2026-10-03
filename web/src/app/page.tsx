@@ -156,6 +156,10 @@ export default function SOCDashboard() {
         setIsConnected(true);
       };
 
+      evtSource.addEventListener('connected', () => {
+        setIsConnected(true);
+      });
+
       evtSource.onerror = () => {
         setIsConnected(false);
       };
@@ -216,8 +220,18 @@ export default function SOCDashboard() {
       console.error('Could not initialize EventSource:', err);
     }
 
+    // Safety net: periodic background refresh to ensure metrics stay fresh even during reconnection
+    const pollInterval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchDashboardStats()
+          .then((s) => setStats(s))
+          .catch(() => {});
+      }
+    }, 10000);
+
     return () => {
       ignore = true;
+      clearInterval(pollInterval);
       if (evtSource) {
         evtSource.close();
       }
