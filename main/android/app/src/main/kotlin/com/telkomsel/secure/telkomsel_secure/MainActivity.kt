@@ -185,6 +185,9 @@ class MainActivity : FlutterActivity() {
                     )
                     result.success(true)
                 }
+                "pauseScan" -> result.success(kasperskyBridge.pauseScan())
+                "resumeScan" -> result.success(kasperskyBridge.resumeScan())
+                "stopScan" -> result.success(kasperskyBridge.stopScan())
                 "setRealtimeProtection" -> {
                     val enabled = call.argument<Boolean>("enabled") ?: true
                     val action = call.argument<String>("threatAction") ?: "delete"

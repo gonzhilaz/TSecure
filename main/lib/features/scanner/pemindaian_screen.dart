@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/services/permission_gate.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/scan_options_sheet.dart';
-import '../../core/widgets/scan_threat_detail_sheet.dart';
-import '../../data/models/activity_log.dart';
-import '../../data/models/threat_detail_item.dart';
-import '../../data/services/activity_log_repository.dart';
 import '../../data/services/kaspersky_sdk_bridge.dart';
 import '../../data/services/security_score_service.dart';
-import '../../data/services/threat_manager_service.dart';
 import 'widgets/radar_scan_widget.dart';
+import 'widgets/scan_action_pill.dart';
 
 class PemindaianScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -31,6 +25,7 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
   Widget build(BuildContext context) {
     final kasperskySdk = context.watch<KasperskySdkBridge>();
     final isScanning = kasperskySdk.scanStatus == ScanStatus.inProgress;
+    final isPaused = kasperskySdk.isScanPaused;
     final securityScore = SecurityScoreService.computeScore(
       kasperskySdk: kasperskySdk,
     );
@@ -43,7 +38,7 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              _buildTopBar(context, kasperskySdk),
+              _buildTopBar(context, kasperskySdk, isScanning || isPaused),
               const Spacer(),
               RadarScanWidget(
                 isScanning: isScanning,
@@ -51,9 +46,15 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
                 securityScore: securityScore,
               ),
               const Spacer(),
-              _buildStatusSection(isScanning, kasperskySdk),
+              _buildStatusSection(isScanning, isPaused, kasperskySdk),
               const SizedBox(height: 24),
-              _buildActionPill(context, isScanning, kasperskySdk),
+              ScanActionPill(
+                isScanning: isScanning,
+                isPaused: isPaused,
+                hasScannedInSession: _hasScannedInSession,
+                scanModeCode: _scanModeCode,
+                onScanStarted: () => setState(() => _hasScannedInSession = true),
+              ),
               const SizedBox(height: 32),
             ],
           ),
@@ -62,7 +63,7 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
     );
   }
 
-  Widget _buildTopBar(BuildContext context, KasperskySdkBridge kasperskySdk) {
+  Widget _buildTopBar(BuildContext context, KasperskySdkBridge kasperskySdk, bool activeScan) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
@@ -96,18 +97,20 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
             ),
           ),
           IconButton(
-            onPressed: () {
+            onPressed: activeScan ? null : () {
               ScanOptionsSheet.show(
                 context,
-                onSelect: (title, code) async {
-                  final ok = await PermissionGate.ensure(context, GateFeature.scan);
-                  if (!ok || !context.mounted) return;
+                onSelect: (title, code) {
                   setState(() {
                     _scanModeTitle = title;
                     _scanModeCode = code;
-                    _hasScannedInSession = true;
                   });
-                  kasperskySdk.runFullScan(scanMode: code);
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Mode $title dipilih. Tekan tombol Pindai untuk mulai.'),
+                    duration: const Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                  ));
                 },
               );
             },
@@ -122,7 +125,30 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
     );
   }
 
-  Widget _buildStatusSection(bool isScanning, KasperskySdkBridge sdk) {
+  Widget _buildStatusSection(bool isScanning, bool isPaused, KasperskySdkBridge sdk) {
+    if (isPaused) {
+      return Column(
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.pause_circle_filled_rounded, color: Colors.amberAccent, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'Pemindaian Dijeda',
+                style: AppTypography.headlineSm.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '${sdk.scannedFiles} file diperiksa • Ketuk Lanjutkan untuk meneruskan',
+            style: AppTypography.bodySm.copyWith(color: Colors.white.withValues(alpha: 0.9)),
+          ),
+        ],
+      );
+    }
+
     if (isScanning) {
       return Column(
         children: [
@@ -270,125 +296,6 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildActionPill(
-      BuildContext context, bool isScanning, KasperskySdkBridge sdk) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-      child: Column(
-        children: [
-          if (!isScanning && sdk.threatsDetected > 0) ...[
-            SizedBox(
-              height: 48,
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.statusDanger,
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                ),
-                icon: const Icon(Icons.shield_outlined, size: 20, color: AppColors.statusDanger),
-                label: Text(
-                  'Lihat & Tangani Ancaman (${sdk.threatsDetected})',
-                  style: AppTypography.labelLg.copyWith(
-                    color: AppColors.statusDanger,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                onPressed: () {
-                  final logRepo = context.read<ActivityLogRepository>();
-                  final now = DateTime.now();
-                  final log = (logRepo.latestLog != null && !logRepo.latestLog!.isSafe && logRepo.latestLog!.threats.isNotEmpty)
-                      ? logRepo.latestLog!
-                      : ActivityLog(
-                          id: 'scan-${now.millisecondsSinceEpoch}',
-                          title: '🚨 Pemindaian Selesai • ${sdk.threatsDetected} Ancaman',
-                          description: '${sdk.scannedFiles} Berkas Diperiksa',
-                          time: '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} WIB',
-                          date: now, icon: Icons.bug_report, category: LogCategory.pemindaian, isSafe: false,
-                          threats: List<ThreatDetailItem>.from(sdk.currentScanThreats),
-                        );
-                  ScanThreatDetailSheet.show(context, log: log, threatManager: context.read<ThreatManagerService>(), kasperskySdk: sdk);
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-          SizedBox(
-            height: 50,
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: (sdk.threatsDetected > 0 && !isScanning)
-                    ? Colors.white.withValues(alpha: 0.2)
-                    : Colors.white,
-                foregroundColor: (sdk.threatsDetected > 0 && !isScanning)
-                    ? Colors.white
-                    : AppColors.primary,
-                elevation: (sdk.threatsDetected > 0 && !isScanning) ? 0 : 4,
-                side: (sdk.threatsDetected > 0 && !isScanning)
-                    ? const BorderSide(color: Colors.white, width: 1.5)
-                    : BorderSide.none,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28),
-                ),
-              ),
-              onPressed: isScanning
-                  ? null
-                  : () async {
-                      if (!sdk.isInitialized) {
-                        await sdk.initKasperskySdk(
-                          mobileId: sdk.boundMobileId ?? 'MOBILE ID-DIRECT',
-                          hasActivePeriod: true,
-                        );
-                      }
-                      if (!sdk.isInitialized) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('Mesin Kaspersky Tidak Aktif: Masa aktif lisensi telah berakhir.'),
-                            backgroundColor: AppColors.statusDanger,
-                          ));
-                        }
-                        return;
-                      }
-                      if (!context.mounted) return;
-                      final ok = await PermissionGate.ensure(context, GateFeature.scan);
-                      if (!ok || !context.mounted) return;
-                      setState(() => _hasScannedInSession = true);
-                      sdk.runFullScan(scanMode: _scanModeCode);
-                    },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    isScanning
-                        ? Icons.hourglass_top_rounded
-                        : (_hasScannedInSession ? Icons.refresh : Icons.shield_rounded),
-                    size: 20,
-                    color: isScanning
-                        ? AppColors.slateMuted
-                        : ((sdk.threatsDetected > 0) ? Colors.white : AppColors.primary),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    isScanning ? 'Memindai...' : 'Pindai',
-                    style: AppTypography.labelLg.copyWith(
-                      color: isScanning ? AppColors.slateMuted : ((sdk.threatsDetected > 0) ? Colors.white : AppColors.primary),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

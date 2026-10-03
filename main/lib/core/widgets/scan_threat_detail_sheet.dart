@@ -90,8 +90,7 @@ class _ScanThreatDetailSheetState extends State<ScanThreatDetailSheet> {
     setState(() => _isProcessing = false);
     _showSnack(
       'Semua berkas dipindahkan ke Brankas Karantina.',
-      bg: AppColors.statusWarning,
-      action: SnackBarAction(label: 'Buka Brankas', textColor: Colors.white, onPressed: () => QuarantineVaultSheet.show(context)),
+      bg: AppColors.statusSafeEmerald,
     );
   }
 
@@ -233,13 +232,14 @@ class _ScanThreatDetailSheetState extends State<ScanThreatDetailSheet> {
     final isCleaned = threat.actionTaken == 'DIBERSIHKAN';
     final isQuar = threat.actionTaken == 'DIKARANTINA';
     final isAktif = threat.actionTaken == 'AKTIF';
+    final isFailed = threat.actionTaken == 'GAGAL';
     final statusColor = isCleaned ? AppColors.statusSafeEmerald : (isQuar ? AppColors.statusWarning : AppColors.statusDanger);
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.surface, borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: isAktif ? AppColors.statusDanger.withValues(alpha: 0.3) : AppColors.slateBorder),
+        border: Border.all(color: (isAktif || isFailed) ? AppColors.statusDanger.withValues(alpha: 0.3) : AppColors.slateBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,6 +296,26 @@ class _ScanThreatDetailSheetState extends State<ScanThreatDetailSheet> {
                 onPressed: _isProcessing ? null : () => _handleDeleteQuarantinedSingle(threat),
                 child: const Text('Hapus Permanen', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
               )),
+            ],
+          ) else if (isFailed) Row(
+            children: [
+              const Icon(Icons.error_outline_rounded, size: 14, color: AppColors.statusDanger),
+              const SizedBox(width: 6),
+              const Expanded(
+                child: Text(
+                  'Gagal memproses berkas (periksa izin)',
+                  style: TextStyle(color: AppColors.statusDanger, fontSize: 11, fontWeight: FontWeight.w600),
+                ),
+              ),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.statusDanger),
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                ),
+                onPressed: _isProcessing ? null : () => _handleClearSingle(threat),
+                child: const Text('Coba Hapus', style: TextStyle(color: AppColors.statusDanger, fontSize: 10, fontWeight: FontWeight.w700)),
+              ),
             ],
           ) else Row(
             children: const [

@@ -11,7 +11,7 @@ import 'threat_telemetry_dispatcher.dart';
 import 'url_filter_service.dart';
 import 'wifi_security_service.dart';
 
-enum ScanStatus { idle, inProgress, finished, error }
+enum ScanStatus { idle, inProgress, paused, finished, error }
 
 /// KasperskySdkBridge encapsulating native MethodChannel bridge (`com.taspenguard/ksp`)
 class KasperskySdkBridge extends ChangeNotifier {
@@ -64,6 +64,7 @@ class KasperskySdkBridge extends ChangeNotifier {
   String get boundSimSlot => _boundSimSlot; String get boundIccidMasked => _boundIccidMasked;
   String get emergencyContact => _emergencyContact; int get quarantineItemCount => _quarantineItemCount;
   bool get secureStorageEnabled => _secureStorageEnabled; ScanStatus get scanStatus => _scanStatus;
+  bool get isScanPaused => _scanStatus == ScanStatus.paused;
   double get scanProgress => _scanProgress; int get scannedFiles => _scannedFiles;
   int get totalFiles => _totalFiles; int get threatsDetected => _threatsDetected;
   String get currentScanningFile => _currentScanningFile; String? get scanErrorMessage => _scanErrorMessage;
@@ -156,20 +157,12 @@ class KasperskySdkBridge extends ChangeNotifier {
       case 'onRealtimeThreat':
         final name = call.arguments['name'] as String? ?? 'Malware';
         final path = call.arguments['path'] as String? ?? '';
-        final target = path.isNotEmpty ? path : name;
         _threatsDetected++; notifyListeners();
         await ThreatTelemetryDispatcher.recordAndReport(
-          logRepo: logRepository,
-          msisdn: _boundMobileId,
-          mobileId: _boundMobileId,
-          threatType: 'MALWARE',
-          target: target,
-          severity: 'CRITICAL',
-          title: 'Perlindungan Real-Time: $name',
-          description: 'Ancaman $name berhasil diisolasi oleh Kaspersky.',
-          actionTaken: 'ISOLATED',
-          icon: Icons.security,
-          category: LogCategory.pemindaian,
+          logRepo: logRepository, msisdn: _boundMobileId, mobileId: _boundMobileId,
+          threatType: 'MALWARE', target: path.isNotEmpty ? path : name, severity: 'CRITICAL',
+          title: 'Perlindungan Real-Time: $name', description: 'Ancaman $name berhasil diisolasi oleh Kaspersky.',
+          actionTaken: 'ISOLATED', icon: Icons.security, category: LogCategory.pemindaian,
         );
         break;
 
@@ -275,21 +268,9 @@ class KasperskySdkBridge extends ChangeNotifier {
   Future<bool> requestMiuiBackgroundPopup() => VendorCompatService.requestMiuiBackgroundPopup();
   Future<bool> openSamsungBatterySettings() => VendorCompatService.openSamsungBatterySettings();
   Future<Map<String, dynamic>> getVendorInfo() => VendorCompatService.getVendorInfo();
-
-  void togglePuaScanner(bool enabled) {
-    _puaScanner = enabled;
-    try { _channel.invokeMethod('setPuaScanner', {'enabled': enabled}); } catch (_) {}
-    notifyListeners();
-  }
-
-  Map<String, dynamic>? _wifiAuditData;
-  Map<String, dynamic>? get wifiAuditData => _wifiAuditData;
-  Future<Map<String, dynamic>> auditWifi() async {
-    final res = await WifiSecurityService.auditWifi();
-    _wifiAuditData = res; notifyListeners();
-    return res;
-  }
-
+  void togglePuaScanner(bool enabled) { _puaScanner = enabled; try { _channel.invokeMethod('setPuaScanner', {'enabled': enabled}); } catch (_) {} notifyListeners(); }
+  Map<String, dynamic>? _wifiAuditData; Map<String, dynamic>? get wifiAuditData => _wifiAuditData;
+  Future<Map<String, dynamic>> auditWifi() async { final res = await WifiSecurityService.auditWifi(); _wifiAuditData = res; notifyListeners(); return res; }
   void toggleWifiSafety(bool enabled) { _wifiSafety = enabled; notifyListeners(); }
   void toggleFakeApps(bool enabled) { _fakeAppsProtection = enabled; notifyListeners(); }
   void toggleDeviceRep(bool enabled) { _deviceReputation = enabled; notifyListeners(); }
@@ -340,6 +321,35 @@ class KasperskySdkBridge extends ChangeNotifier {
       _scanStatus = ScanStatus.error; _scanErrorMessage = e.toString(); notifyListeners();
     }
   }
+
+  Future<bool> pauseScan() async {
+    if (_scanStatus != ScanStatus.inProgress) return false;
+    try {
+      final ok = await _channel.invokeMethod<bool>('pauseScan') ?? false;
+      if (ok) { _scanStatus = ScanStatus.paused; notifyListeners(); }
+      return ok;
+    } catch (_) { return false; }
+  }
+
+  Future<bool> resumeScan() async {
+    if (_scanStatus != ScanStatus.paused) return false;
+    try {
+      final ok = await _channel.invokeMethod<bool>('resumeScan') ?? false;
+      if (ok) { _scanStatus = ScanStatus.inProgress; notifyListeners(); }
+      return ok;
+    } catch (_) { return false; }
+  }
+
+  Future<bool> stopScan() async {
+    if (_scanStatus != ScanStatus.inProgress && _scanStatus != ScanStatus.paused) return false;
+    try {
+      final ok = await _channel.invokeMethod<bool>('stopScan') ?? false;
+      _scanStatus = ScanStatus.finished; _scanProgress = 1.0;
+      _currentScanningFile = 'Pemindaian dihentikan.';
+      notifyListeners();
+      return ok;
+    } catch (_) { return false; }
+  }
   Future<bool> requestNotificationPermission() async {
     try { return await _channel.invokeMethod<bool>('requestNotificationPermission') ?? true; } catch (_) { return true; }
   }
@@ -348,23 +358,16 @@ class KasperskySdkBridge extends ChangeNotifier {
   }
   Future<Map<String, dynamic>> checkUrl(String url) async {
     final result = await UrlFilterService.checkUrl(url);
-    final isThreat = (result['isSafe'] == false || result['isBlocked'] == true);
-    if (isThreat) {
+    if (result['isSafe'] == false || result['isBlocked'] == true) {
       final verdict = result['verdict'] ?? 'BERBAHAYA';
-      await showSecurityNotification(
-        title: 'Ancaman Terdeteksi ($verdict)',
-        message: 'Kaspersky Web Filter memblokir: $url',
-      );
+      await showSecurityNotification(title: 'Ancaman Terdeteksi ($verdict)', message: 'Kaspersky Web Filter memblokir: $url');
       await ThreatTelemetryDispatcher.recordAndReport(
         logRepo: logRepository, msisdn: _boundMobileId, mobileId: _boundMobileId,
-        threatType: 'PHISHING', target: url, severity: 'HIGH',
-        title: 'Situs Berbahaya Diblokir ($verdict)',
-        description: '$url terdeteksi ancaman nyata di KSN.',
-        actionTaken: 'BLOCKED', icon: Icons.shield_outlined, category: LogCategory.jaringan,
+        threatType: 'PHISHING', target: url, severity: 'HIGH', title: 'Situs Berbahaya Diblokir ($verdict)',
+        description: '$url terdeteksi ancaman nyata di KSN.', actionTaken: 'BLOCKED', icon: Icons.shield_outlined, category: LogCategory.jaringan,
       );
     }
-    notifyListeners();
-    return result;
+    notifyListeners(); return result;
   }
 
   Future<bool> updateBases() async {
@@ -373,12 +376,8 @@ class KasperskySdkBridge extends ChangeNotifier {
       _isVirusDbUpToDate = true;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('ksp_last_db_update', DateTime.now().millisecondsSinceEpoch);
-      notifyListeners();
-      return res;
-    } catch (_) {
-      _isVirusDbUpToDate = true; notifyListeners();
-      return false;
-    }
+      notifyListeners(); return res;
+    } catch (_) { _isVirusDbUpToDate = true; notifyListeners(); return false; }
   }
 
   Future<Map<String, dynamic>> scanSpecificFile({String? customPath}) async {
@@ -386,9 +385,7 @@ class KasperskySdkBridge extends ChangeNotifier {
     try {
       final nativeRes = await _channel.invokeMapMethod<String, dynamic>('scanSpecificFile', {'filePath': customPath});
       if (nativeRes != null) result = Map<String, dynamic>.from(nativeRes);
-    } catch (e) {
-      result['description'] = 'Gagal memanggil scanner: $e';
-    }
+    } catch (e) { result['description'] = 'Gagal memanggil scanner: $e'; }
     if (result['isThreat'] == true) { _threatsDetected++; notifyListeners(); }
     return result;
   }

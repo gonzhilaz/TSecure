@@ -16,12 +16,12 @@ import java.io.File
  */
 object StorageThreatScanner {
     private const val TAG = "StorageThreatScanner"
-    private const val EICAR_SIG = "X5O!P%@AP[4\\PZX54(P^)7CC)7}\$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!\$H+H*"
 
     fun scanStorageFolders(
         context: Context,
         onFileScanned: (path: String) -> Unit,
-        onThreatFound: (threatName: String, path: String, isMalware: Boolean) -> Unit
+        onThreatFound: (threatName: String, path: String, isMalware: Boolean) -> Unit,
+        isCancelled: () -> Boolean = { false }
     ): Int {
         var threatCount = 0
         val targetDirs = mutableListOf<File>()
@@ -62,11 +62,16 @@ object StorageThreatScanner {
         }
 
         for (file in filesToScan) {
+            if (isCancelled()) {
+                Log.i(TAG, ">>> [STORAGE SCAN] Scan cancelled by user.")
+                break
+            }
+
             onFileScanned(file.name)
             var fileThreatDetected = false
             var detectedThreatName = ""
 
-            // 1. Genuine Kaspersky scanFile inspection
+            // Genuine Kaspersky scanFile inspection
             if (scanner != null) {
                 try {
                     val mode = ScannerConstants.SCAN_MODE_ALLOW_UDS or ScannerConstants.SCAN_MODE_DETECT_RISKWARE_ADWARE
@@ -85,21 +90,9 @@ object StorageThreatScanner {
                 }
             }
 
-            // 2. Standard EICAR Test Signature Verification
-            if (!fileThreatDetected && file.length() < 2048) {
-                try {
-                    val content = file.readText().trim()
-                    if (content.contains(EICAR_SIG) || content.startsWith("X5O!P%@AP[4\\PZX54(P^)7CC)7}")) {
-                        fileThreatDetected = true
-                        detectedThreatName = "EICAR-Standard-AV-Test"
-                        Log.w(TAG, ">>> [STORAGE SCAN] EICAR signature matched in: ${file.absolutePath}")
-                    }
-                } catch (_: Throwable) {}
-            }
-
             if (fileThreatDetected) {
                 threatCount++
-                val finalName = if (detectedThreatName.isNotBlank()) detectedThreatName else "EICAR-Test-File"
+                val finalName = if (detectedThreatName.isNotBlank()) detectedThreatName else "Ancaman-Penyimpanan"
                 Log.w(TAG, ">>> [STORAGE SCAN] THREAT REGISTERED: $finalName at ${file.absolutePath}")
                 onThreatFound(finalName, file.absolutePath, true)
             }

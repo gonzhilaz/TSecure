@@ -40,6 +40,12 @@ func NewStorage(persistPath string) *Storage {
 	if err := s.loadFromFile(); err != nil {
 		s.seedInitialData()
 	}
+	if len(s.subscribers) == 0 {
+		s.subscribers = generateInitialSeed(time.Now())
+	}
+	if len(s.threats) == 0 {
+		s.threats = generateSampleThreats(time.Now())
+	}
 	if len(s.phishingRecords) == 0 {
 		s.seedInitialPhishing()
 	}
@@ -53,8 +59,9 @@ func NewStorage(persistPath string) *Storage {
 }
 
 func (s *Storage) seedInitialData() {
-	s.subscribers = make(map[string]*model.Subscriber)
-	s.threats = make([]model.ThreatEvent, 0)
+	now := time.Now()
+	s.subscribers = generateInitialSeed(now)
+	s.threats = generateSampleThreats(now)
 	s.phishingRecords = make(map[string]*model.PhishingRecord)
 	s.operators = make(map[string]*model.Operator)
 	s.auditLogs = make([]model.AuditLog, 0)

@@ -54,9 +54,20 @@ class QuarantineNativeVault(private val context: Context) {
     ): Map<String, Any> {
         val srcFile = File(originalFilePath)
         if (!srcFile.exists()) {
+            val registry = loadRegistry()
+            for (i in 0 until registry.length()) {
+                val obj = registry.getJSONObject(i)
+                if (obj.optString("originalPath") == originalFilePath) {
+                    return mapOf(
+                        "success" to true,
+                        "id" to obj.optString("id"),
+                        "message" to "Berkas sudah berada di dalam Brankas Karantina."
+                    )
+                }
+            }
             return mapOf(
-                "success" to false,
-                "message" to "Berkas ancaman tidak ditemukan di path: $originalFilePath"
+                "success" to true,
+                "message" to "Berkas sudah tidak ada di sistem penyimpanan."
             )
         }
 
@@ -175,7 +186,7 @@ class QuarantineNativeVault(private val context: Context) {
     }
 
     /**
-     * Multi-stage robust deletion: Java File API -> Shell rm -f -> MediaStore Resolver
+     * Multi-stage robust deletion: Java File API -> MediaStore Resolver -> Shell rm -f -> Truncate
      */
     private fun forceDeleteFile(file: File): Boolean {
         if (!file.exists()) return true
@@ -187,7 +198,29 @@ class QuarantineNativeVault(private val context: Context) {
             Log.w(TAG, "Direct delete error: ${e.message}")
         }
 
-        // 2. Fallback: Shell rm -f
+        // 2. MediaStore query & delete by Content URI
+        try {
+            val uri = MediaStore.Files.getContentUri("external")
+            val cursor = context.contentResolver.query(
+                uri,
+                arrayOf(MediaStore.MediaColumns._ID),
+                "${MediaStore.MediaColumns.DATA} = ?",
+                arrayOf(file.absolutePath),
+                null
+            )
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val id = it.getLong(it.getColumnIndexOrThrow(MediaStore.MediaColumns._ID))
+                    val deleteUri = android.content.ContentUris.withAppendedId(uri, id)
+                    context.contentResolver.delete(deleteUri, null, null)
+                }
+            }
+            if (!file.exists()) return true
+        } catch (e: Throwable) {
+            Log.w(TAG, "MediaStore delete error: ${e.message}")
+        }
+
+        // 3. Fallback: Shell rm -f
         try {
             val proc = Runtime.getRuntime().exec(arrayOf("rm", "-f", file.absolutePath))
             proc.waitFor()
@@ -196,20 +229,13 @@ class QuarantineNativeVault(private val context: Context) {
             Log.w(TAG, "Shell rm error: ${e.message}")
         }
 
-        // 3. Fallback: MediaStore ContentResolver delete
+        // 4. Truncate file if delete blocked
         try {
-            val contentUri = MediaStore.Files.getContentUri("external")
-            val rows = context.contentResolver.delete(
-                contentUri,
-                "${MediaStore.MediaColumns.DATA} = ?",
-                arrayOf(file.absolutePath)
-            )
-            if (rows > 0 || !file.exists()) return true
-        } catch (e: Throwable) {
-            Log.w(TAG, "MediaStore delete error: ${e.message}")
-        }
+            FileOutputStream(file).use { it.write(ByteArray(0)) }
+            if (file.delete()) return true
+        } catch (_: Throwable) {}
 
-        // 4. Notify MediaScanner
+        // 5. Notify MediaScanner
         try {
             MediaScannerConnection.scanFile(context, arrayOf(file.absolutePath), null, null)
         } catch (_: Throwable) {}

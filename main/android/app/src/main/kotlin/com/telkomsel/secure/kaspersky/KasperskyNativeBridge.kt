@@ -40,6 +40,7 @@ class KasperskyNativeBridge(private val context: Context) {
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var activeScanner: EasyScanner? = null
+    @Volatile private var isScanCancelled = false
 
     fun ensureSdkInitialized(): Boolean {
         if (KavSdk.isInitialized()) return true
@@ -59,14 +60,10 @@ class KasperskyNativeBridge(private val context: Context) {
         val av = AntivirusInstance.getInstance()
         if (av.isInitialized) return true
         return try {
-            val scanTmp = File(context.cacheDir, "scan_tmp").apply { mkdirs() }
-            val monTmp = File(context.cacheDir, "mon_tmp").apply { mkdirs() }
-            av.initAntivirus(context, scanTmp.absolutePath, monTmp.absolutePath)
-            Log.i(TAG, ">>> [KASPERSKY NATIVE] Antivirus Engine INITIALIZED SUCCESS.")
-            true
+            av.initAntivirus(context, File(context.cacheDir, "scan_tmp").apply { mkdirs() }.absolutePath, File(context.cacheDir, "mon_tmp").apply { mkdirs() }.absolutePath)
+            Log.i(TAG, ">>> [KASPERSKY NATIVE] Antivirus Engine INITIALIZED SUCCESS."); true
         } catch (e: Throwable) {
-            Log.e(TAG, ">>> [KASPERSKY NATIVE] Antivirus Engine INIT FAILED: ${e.message}", e)
-            false
+            Log.e(TAG, ">>> [KASPERSKY NATIVE] Antivirus Engine INIT FAILED: ${e.message}", e); false
         }
     }
 
@@ -103,15 +100,10 @@ class KasperskyNativeBridge(private val context: Context) {
     fun checkAndUpdateBases(onStatus: (String) -> Unit): Boolean {
         if (!ensureAntivirusInitialized()) return false
         val updater = Updater.getInstance()
-        if (updater.isUpdateInProgress) {
-            onStatus("Pembaruan basis virus sedang berlangsung...")
-            return true
-        }
-        val latch = CountDownLatch(1)
-        var updateSuccess = false
+        if (updater.isUpdateInProgress) { onStatus("Pembaruan basis virus sedang berlangsung..."); return true }
+        val latch = CountDownLatch(1); var updateSuccess = false
         try {
             onStatus("Memeriksa pembaruan database virus Kaspersky...")
-            Log.i(TAG, ">>> [KASPERSKY NATIVE] Checking & updating antivirus bases...")
             updater.updateAntivirusBases(object : UpdateEventListener {
                 override fun onUpdateEvent(eventType: Int, eventResult: Int): Boolean {
                     when (eventType) {
@@ -119,9 +111,7 @@ class KasperskyNativeBridge(private val context: Context) {
                         UpdaterConstants.UPDATE_EVENT_BASES_DOWNLOADED -> mainHandler.post { onStatus("Mengunduh basis data virus terbaru...") }
                         UpdaterConstants.UPDATE_EVENT_BASES_APPLIED -> mainHandler.post { onStatus("Menerapkan basis data virus terbaru...") }
                         UpdaterConstants.UPDATE_EVENT_TASK_FINISHED -> {
-                            updateSuccess = (eventResult == UpdaterConstants.UPDATE_RESULT_DBUPDATE_SUCCESS ||
-                                           eventResult == UpdaterConstants.UPDATE_RESULT_DBUPDATE_NO_NEW_BASES)
-                            Log.i(TAG, ">>> [KASPERSKY NATIVE] Update finished. Code=$eventResult, success=$updateSuccess")
+                            updateSuccess = (eventResult == UpdaterConstants.UPDATE_RESULT_DBUPDATE_SUCCESS || eventResult == UpdaterConstants.UPDATE_RESULT_DBUPDATE_NO_NEW_BASES)
                             latch.countDown()
                         }
                     }
@@ -129,10 +119,7 @@ class KasperskyNativeBridge(private val context: Context) {
                 }
             })
             latch.await(20, TimeUnit.SECONDS)
-        } catch (e: Throwable) {
-            Log.w(TAG, ">>> [KASPERSKY NATIVE] Update error/offline: ${e.message}")
-            latch.countDown()
-        }
+        } catch (e: Throwable) { latch.countDown() }
         return updateSuccess
     }
 
@@ -140,8 +127,7 @@ class KasperskyNativeBridge(private val context: Context) {
         val inited = ensureSdkInitialized()
         val license: SdkLicense? = if (inited) KavSdk.getLicense() else null
         return mapOf(
-            "isInitialized" to inited,
-            "isActivated" to (license?.isValid ?: false),
+            "isInitialized" to inited, "isActivated" to (license?.isValid ?: false),
             "expireDate" to (license?.licenseKeyExpireDate ?: 0L),
             "hardwareIdHash" to (if (inited) KavSdk.getHashOfHardwareId() else ""),
             "installationId" to (if (inited) KavSdk.getInstallationId() else ""),
@@ -153,19 +139,13 @@ class KasperskyNativeBridge(private val context: Context) {
 
     fun checkRoot(): Map<String, Any> {
         ensureSdkInitialized()
-        var isRooted = false
-        var rootCause = ""
-        var sdkVerified = false
-        var sdkError = ""
+        var isRooted = false; var rootCause = ""; var sdkVerified = false; var sdkError = ""
         try {
             val detector = RootDetector.getInstance()
             isRooted = detector.checkRoot()
             sdkVerified = true
             detector.rootCause?.rootCausePath?.let { if (it.isNotBlank()) rootCause = it }
-            Log.i(TAG, ">>> [KASPERSKY NATIVE] RootDetector: isRooted=$isRooted, cause=$rootCause")
-        } catch (e: Throwable) {
-            sdkError = e.message ?: "RootDetector error"
-        }
+        } catch (e: Throwable) { sdkError = e.message ?: "RootDetector error" }
         if (!isRooted) {
             val suPaths = arrayOf("/system/bin/su", "/system/xbin/su", "/sbin/su", "/data/local/su", "/su/bin/su")
             for (p in suPaths) {
@@ -178,9 +158,7 @@ class KasperskyNativeBridge(private val context: Context) {
         return mapOf(
             "isRooted" to isRooted,
             "rootCause" to (if (isRooted) rootCause.ifEmpty { "Root Binary Ditemukan" } else "Bersih (Tidak Ada Root)"),
-            "sdkVerified" to sdkVerified,
-            "sdkError" to sdkError,
-            "engine" to "Kaspersky RootDetector v5.21"
+            "sdkVerified" to sdkVerified, "sdkError" to sdkError, "engine" to "Kaspersky RootDetector v5.21"
         )
     }
 
@@ -196,7 +174,7 @@ class KasperskyNativeBridge(private val context: Context) {
                 return@Thread
             }
 
-            // Poin 1: Selalu periksa dan perbarui basis database virus sebelum pemindaian dimulai
+            isScanCancelled = false
             checkAndUpdateBases { statusText -> mainHandler.post { onProgress(0, 0, statusText) } }
 
             try {
@@ -212,7 +190,7 @@ class KasperskyNativeBridge(private val context: Context) {
                     "FOLDER" -> EasyMode.Basic
                     else -> EasyMode.Full
                 }
-                Log.i(TAG, ">>> [KASPERSKY NATIVE] EasyScanner.scan($mode) [Mode: $scanMode] STARTING...")
+                Log.i(TAG, ">>> [KASPERSKY NATIVE] EasyScanner.scan($mode) STARTING...")
                 scanner.scan(mode, object : EasyListener {
                     override fun onFilesCountCalculated(total: Int) {
                         totalFiles = total
@@ -227,14 +205,14 @@ class KasperskyNativeBridge(private val context: Context) {
                         threatCount++
                         val name = info.virusName ?: "Malware"
                         val path = obj.fileFullPath ?: info.fileFullPath ?: obj.objectName ?: (if (info.packageName != null) "package:${info.packageName}" else "")
-                        Log.w(TAG, ">>> [KASPERSKY NATIVE] REAL MALWARE DETECTED: $name at $path")
+                        Log.w(TAG, ">>> [KASPERSKY NATIVE] REAL MALWARE: $name at $path")
                         mainHandler.post { onThreat(name, path, true) }
                     }
                     override fun onRiskwareDetected(obj: EasyObject, info: ThreatInfo) {
                         threatCount++
                         val name = info.virusName ?: "Riskware"
                         val path = obj.fileFullPath ?: info.fileFullPath ?: obj.objectName ?: (if (info.packageName != null) "package:${info.packageName}" else "")
-                        Log.w(TAG, ">>> [KASPERSKY NATIVE] REAL RISKWARE DETECTED: $name at $path")
+                        Log.w(TAG, ">>> [KASPERSKY NATIVE] REAL RISKWARE: $name at $path")
                         mainHandler.post { onThreat(name, path, false) }
                     }
                     override fun onRooted() {
@@ -244,19 +222,22 @@ class KasperskyNativeBridge(private val context: Context) {
                     override fun onObjectEnd(obj: EasyObject, status: EasyStatus) { obj.release() }
                 })
                 Log.i(TAG, ">>> [KASPERSKY NATIVE] EasyScanner COMPLETED: $scannedFiles scanned, $threatCount threats.")
-                StorageThreatScanner.scanStorageFolders(context, { n -> mainHandler.post { onProgress(++scannedFiles, totalFiles + 10, n) } }, { th, p, m -> threatCount++; mainHandler.post { onThreat(th, p, m) } })
+                if (!isScanCancelled) {
+                    StorageThreatScanner.scanStorageFolders(
+                        context,
+                        { n -> mainHandler.post { onProgress(++scannedFiles, totalFiles + 10, n) } },
+                        { th, p, m -> threatCount++; mainHandler.post { onThreat(th, p, m) } },
+                        isCancelled = { isScanCancelled }
+                    )
+                }
                 mainHandler.post { onComplete(scannedFiles, threatCount, null) }
             } catch (e: Throwable) {
                 Log.e(TAG, ">>> [KASPERSKY NATIVE] EasyScanner error: ${e.message}", e)
-                // Fallback KSN Cloud scan jika basis lokal offline belum siap
                 if (e.message?.contains("bases", ignoreCase = true) == true) {
                     try {
-                        Log.w(TAG, ">>> [KASPERSKY NATIVE] Falling back to EasyMode.Light (KSN Cloud scan)...")
                         val fbScanner = AntivirusInstance.getInstance().createEasyScanner()
                         activeScanner = fbScanner
-                        var fbTotal = 0
-                        var fbScanned = 0
-                        var fbThreats = 0
+                        var fbTotal = 0; var fbScanned = 0; var fbThreats = 0
                         fbScanner.scan(EasyMode.Light, object : EasyListener {
                             override fun onFilesCountCalculated(total: Int) { fbTotal = total; mainHandler.post { onProgress(fbScanned, fbTotal, "Memeriksa aplikasi via KSN Cloud...") } }
                             override fun onObjectBegin(obj: EasyObject) { fbScanned++; mainHandler.post { onProgress(fbScanned, fbTotal, obj.objectName ?: "Aplikasi") } }
@@ -265,7 +246,14 @@ class KasperskyNativeBridge(private val context: Context) {
                             override fun onRooted() { fbThreats++; mainHandler.post { onThreat("Root Terdeteksi", "Sistem", true) } }
                             override fun onObjectEnd(obj: EasyObject, status: EasyStatus) { obj.release() }
                         })
-                        StorageThreatScanner.scanStorageFolders(context, { n -> mainHandler.post { onProgress(++fbScanned, fbTotal + 10, n) } }, { th, p, m -> fbThreats++; mainHandler.post { onThreat(th, p, m) } })
+                        if (!isScanCancelled) {
+                            StorageThreatScanner.scanStorageFolders(
+                                context,
+                                { n -> mainHandler.post { onProgress(++fbScanned, fbTotal + 10, n) } },
+                                { th, p, m -> fbThreats++; mainHandler.post { onThreat(th, p, m) } },
+                                isCancelled = { isScanCancelled }
+                            )
+                        }
                         mainHandler.post { onComplete(fbScanned, fbThreats, null) }
                         return@Thread
                     } catch (fbErr: Throwable) {
@@ -277,6 +265,49 @@ class KasperskyNativeBridge(private val context: Context) {
                 activeScanner = null
             }
         }.start()
+    }
+
+    fun pauseScan(): Boolean {
+        return try {
+            val sc = activeScanner
+            if (sc != null && sc.isScanInProgress && !sc.isPaused) {
+                sc.pauseScan()
+                Log.i(TAG, ">>> [KASPERSKY NATIVE] EasyScanner PAUSED.")
+                true
+            } else false
+        } catch (e: Throwable) {
+            Log.e(TAG, "pauseScan error: ${e.message}")
+            false
+        }
+    }
+
+    fun resumeScan(): Boolean {
+        return try {
+            val sc = activeScanner
+            if (sc != null && sc.isPaused) {
+                sc.resumeScan()
+                Log.i(TAG, ">>> [KASPERSKY NATIVE] EasyScanner RESUMED.")
+                true
+            } else false
+        } catch (e: Throwable) {
+            Log.e(TAG, "resumeScan error: ${e.message}")
+            false
+        }
+    }
+
+    fun stopScan(): Boolean {
+        isScanCancelled = true
+        return try {
+            val sc = activeScanner
+            if (sc != null && sc.isScanInProgress) {
+                sc.stopScan()
+                Log.i(TAG, ">>> [KASPERSKY NATIVE] EasyScanner STOPPED.")
+                true
+            } else false
+        } catch (e: Throwable) {
+            Log.e(TAG, "stopScan error: ${e.message}")
+            false
+        }
     }
 
     fun setRealtimeProtection(enabled: Boolean, onThreatIntercepted: (name: String, type: String) -> Unit): Boolean {
@@ -325,10 +356,7 @@ class KasperskyNativeBridge(private val context: Context) {
         }
         val isSafe = sdkChecked && !isPhishing && !isMalware
         return mapOf(
-            "url" to url,
-            "isPhishing" to isPhishing,
-            "isMalware" to isMalware,
-            "isSafe" to isSafe,
+            "url" to url, "isPhishing" to isPhishing, "isMalware" to isMalware, "isSafe" to isSafe,
             "verdict" to (if (isSafe) "AMAN" else if (isPhishing) "PHISHING" else if (isMalware) "MALWARE" else "TIDAK DIKETAHUI"),
             "score" to (if (isSafe) 98 else 10),
             "description" to (if (isSafe) "Situs diverifikasi aman oleh Kaspersky KSN." else "Kaspersky mendeteksi potensi ancaman siber."),
@@ -337,50 +365,32 @@ class KasperskyNativeBridge(private val context: Context) {
     }
 
     fun scanSpecificFile(targetInput: String?): Map<String, Any> {
-        if (!ensureAntivirusInitialized()) {
-            return mapOf("isThreat" to false, "error" to "Engine Belum Siap", "threatName" to "Engine Belum Siap", "severity" to "NONE", "sdkVerified" to false)
-        }
+        if (!ensureAntivirusInitialized()) return mapOf("isThreat" to false, "error" to "Engine Belum Siap", "threatName" to "Engine Belum Siap", "severity" to "NONE", "sdkVerified" to false)
         val targetFile = if (targetInput.isNullOrBlank()) File(context.cacheDir, "sample_test.txt").apply { if (!exists()) writeText("File uji normal") } else File(targetInput.trim())
-        if (!targetFile.exists()) {
-            return mapOf("isThreat" to false, "threatName" to "Berkas Tidak Ditemukan", "severity" to "NONE", "description" to "Berkas tidak ditemukan: ${targetFile.absolutePath}", "filePath" to targetFile.absolutePath, "sdkVerified" to false)
-        }
+        if (!targetFile.exists()) return mapOf("isThreat" to false, "threatName" to "Berkas Tidak Ditemukan", "severity" to "NONE", "description" to "Berkas tidak ditemukan: ${targetFile.absolutePath}", "filePath" to targetFile.absolutePath, "sdkVerified" to false)
 
-        var detectedName: String? = null
-        var threatTypeName: String? = null
-        var scanError: String? = null
+        var detectedName: String? = null; var threatTypeName: String? = null; var scanError: String? = null
         val startTime = System.currentTimeMillis()
-
         try {
             val scanner = AntivirusInstance.getInstance().createScanner()
             val mode = ScannerConstants.SCAN_MODE_ALLOW_UDS or ScannerConstants.SCAN_MODE_DETECT_RISKWARE_ADWARE
             scanner.scanFile(targetFile.absolutePath, mode, ScannerConstants.CLEAN_MODE_DONOTCLEAN, object : ScannerEventListener {
                 override fun onScanEvent(eventType: Int, percent: Int, threatInfo: ThreatInfo?, threatType: ThreatType?): Int {
-                    if (threatInfo != null) {
-                        detectedName = threatInfo.virusName
-                        threatTypeName = threatType?.name
-                        Log.w(TAG, ">>> [KASPERSKY NATIVE] REAL THREAT: $detectedName in ${targetFile.name}")
-                    }
+                    if (threatInfo != null) { detectedName = threatInfo.virusName; threatTypeName = threatType?.name }
                     return ScannerConstants.EVENT_RESULT_OK
                 }
             }, true)
-        } catch (e: Throwable) {
-            scanError = e.message
-            Log.e(TAG, ">>> [KASPERSKY NATIVE] scanFile exception: ${e.message}", e)
-        }
+        } catch (e: Throwable) { scanError = e.message }
 
         val scanDuration = System.currentTimeMillis() - startTime
         val isRealThreat = !detectedName.isNullOrBlank()
-
         return mapOf(
             "isThreat" to isRealThreat,
             "threatName" to (detectedName ?: if (scanError != null) "Error: $scanError" else "Bersih (Tidak Ada Ancaman)"),
-            "threatType" to (threatTypeName ?: "None"),
-            "severity" to (if (isRealThreat) "HIGH" else "NONE"),
+            "threatType" to (threatTypeName ?: "None"), "severity" to (if (isRealThreat) "HIGH" else "NONE"),
             "description" to if (isRealThreat) "Mesin Antivirus Kaspersky mendeteksi: $detectedName" else if (scanError != null) "Gagal: $scanError" else "Berkas bersih dari malware.",
-            "filePath" to targetFile.absolutePath,
-            "fileName" to targetFile.name,
-            "fileSize" to targetFile.length(),
-            "scanDurationMs" to scanDuration,
+            "filePath" to targetFile.absolutePath, "fileName" to targetFile.name,
+            "fileSize" to targetFile.length(), "scanDurationMs" to scanDuration,
             "sdkVerified" to (isRealThreat || scanError == null)
         )
     }

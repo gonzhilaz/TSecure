@@ -8,7 +8,7 @@ import (
 
 // generateInitialSeed creates realistic telco subscribers with purchase history, 10 scan logs, and 30-day retention.
 func generateInitialSeed(now time.Time) map[string]*model.Subscriber {
-	return make(map[string]*model.Subscriber)
+	return generateLegacyDemoSeed(now)
 }
 
 func generateLegacyDemoSeed(now time.Time) map[string]*model.Subscriber {
