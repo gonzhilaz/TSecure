@@ -117,14 +117,38 @@ func (s *Storage) SimulateNdpExpire(msisdn string) (*model.Subscriber, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	cleaned := cleanMsisdn(msisdn)
+	now := time.Now()
 	sub, exists := s.subscribers[cleaned]
 	if !exists {
-		return nil, false
+		sub = &model.Subscriber{
+			ID:                  fmt.Sprintf("SUB-%s", cleaned),
+			MSISDN:              cleaned,
+			MobileID:            "MOBILE ID-AUTO-" + cleaned[len(cleaned)-4:],
+			DeviceModel:         "Smartphone (Auto-Provisioned)",
+			OSVersion:           "Android 15",
+			ActivationCode:      fmt.Sprintf("TK-%d", 100000+now.Unix()%900000),
+			PlanName:            "Telkomsel Secure Guard 30 Hari",
+			RootStatus:          "CLEAN",
+			HookStatus:          "CLEAN",
+			BoundIccid:          "89620188" + cleaned[len(cleaned)-8:],
+			CurrentIccid:        "89620188" + cleaned[len(cleaned)-8:],
+			SimSlot:             "Slot 1 (Telkomsel)",
+			PurchaseTimestamp:   now.Add(-31 * 24 * time.Hour),
+			ActivePeriodStart:   now.Add(-31 * 24 * time.Hour),
+			ActivePeriodEnd:     now.Add(-1 * time.Hour),
+			KasperskyExpiryDate: now.Add(-1 * time.Hour),
+			IsActive:            false,
+			ActivationStatus:    "EXPIRED",
+			KasperskyLicenseKey: "6KYKJ-65T6T-WMVBD-NNPEG",
+			CreatedAt:           now.Add(-31 * 24 * time.Hour),
+		}
+	} else {
+		sub.IsActive = false
+		sub.ActivationStatus = "EXPIRED"
+		sub.ActivePeriodEnd = now.Add(-1 * time.Hour)
+		sub.KasperskyExpiryDate = sub.ActivePeriodEnd
 	}
-	sub.IsActive = false
-	sub.ActivationStatus = "EXPIRED"
-	sub.ActivePeriodEnd = time.Now().Add(-1 * time.Hour)
-	sub.KasperskyExpiryDate = sub.ActivePeriodEnd
+	s.subscribers[cleaned] = sub
 	_ = s.saveToFile()
 	copied := *sub
 	return &copied, true
@@ -134,12 +158,40 @@ func (s *Storage) SimulateNdpUnactivated(msisdn string) (*model.Subscriber, bool
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	cleaned := cleanMsisdn(msisdn)
+	now := time.Now()
 	sub, exists := s.subscribers[cleaned]
 	if !exists {
-		return nil, false
+		sub = &model.Subscriber{
+			ID:                  fmt.Sprintf("SUB-%s", cleaned),
+			MSISDN:              cleaned,
+			MobileID:            "",
+			DeviceModel:         "Smartphone (Auto-Provisioned)",
+			OSVersion:           "Android 15",
+			ActivationCode:      fmt.Sprintf("TK-%d", 100000+now.Unix()%900000),
+			PlanName:            "Telkomsel Secure Guard (Belum Aktivasi)",
+			RootStatus:          "CLEAN",
+			HookStatus:          "CLEAN",
+			BoundIccid:          "89620188" + cleaned[len(cleaned)-8:],
+			CurrentIccid:        "89620188" + cleaned[len(cleaned)-8:],
+			SimSlot:             "Slot 1 (Telkomsel)",
+			PurchaseTimestamp:   now,
+			ActivePeriodStart:   time.Time{},
+			ActivePeriodEnd:     time.Time{},
+			KasperskyExpiryDate: time.Time{},
+			IsActive:            false,
+			ActivationStatus:    "PENDING_ACTIVATION",
+			KasperskyLicenseKey: "",
+			CreatedAt:           now,
+		}
+	} else {
+		sub.IsActive = false
+		sub.ActivationStatus = "PENDING_ACTIVATION"
+		sub.ActivePeriodStart = time.Time{}
+		sub.ActivePeriodEnd = time.Time{}
+		sub.KasperskyExpiryDate = time.Time{}
+		sub.KasperskyLicenseKey = ""
 	}
-	sub.IsActive = false
-	sub.ActivationStatus = "SMS_FAILED"
+	s.subscribers[cleaned] = sub
 	_ = s.saveToFile()
 	copied := *sub
 	return &copied, true

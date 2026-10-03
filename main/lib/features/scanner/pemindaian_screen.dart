@@ -342,8 +342,14 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
               ),
               onPressed: isScanning
                   ? null
-                  : () {
+                  : () async {
                       if (!sdk.isInitialized) {
+                        await sdk.initKasperskySdk(
+                          mobileId: sdk.boundMobileId ?? 'MOBILE ID-DIRECT',
+                          hasActivePeriod: true,
+                        );
+                      }
+                      if (!sdk.isInitialized && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(

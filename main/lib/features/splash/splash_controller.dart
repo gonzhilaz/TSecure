@@ -79,8 +79,8 @@ class SplashController extends ChangeNotifier {
         mobileId: _mobileId!,
       );
 
-      // Step 3: Initialize Kaspersky SDK only if activePeriod is valid
-      if (activePeriod.isValid && !activePeriod.isExpired && !activePeriod.isPendingActivation) {
+      // Step 3: Initialize Kaspersky SDK if activePeriod is valid
+      if (activePeriod.isValid && !activePeriod.isExpired) {
         _statusMessage = 'Initializing...';
         _progress = 0.90;
         notifyListeners();

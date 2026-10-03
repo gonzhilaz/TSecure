@@ -157,8 +157,12 @@ func (s *SubscriptionService) VerifyOtp(msisdn, mobileID, code string) (model.Ve
 
 	sub, _ := s.store.GetSubscriber(msisdn)
 	needsActivation := true
-	if sub != nil && sub.ActivationStatus == "ACTIVATED" && sub.MobileID == mobileID {
+	if sub != nil && sub.ActivationStatus == "ACTIVATED" {
 		needsActivation = false
+		if mobileID != "" && sub.MobileID != mobileID {
+			sub.MobileID = mobileID
+			s.store.SaveSubscriber(sub)
+		}
 	}
 
 	return model.VerifyOtpResponse{

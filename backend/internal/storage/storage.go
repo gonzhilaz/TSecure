@@ -225,6 +225,7 @@ func cleanMsisdn(msisdn string) string {
 	}
 	str := b.String()
 	if strings.HasPrefix(str, "62") && len(str) > 2 { return "0" + str[2:] }
+	if strings.HasPrefix(str, "8") && len(str) >= 9 { return "0" + str }
 	return str
 }
 

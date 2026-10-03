@@ -55,11 +55,8 @@ class ProfileController extends ChangeNotifier {
     try {
       final mobileId = await MobileIdService.getOrCreateMobileId();
       final prefs = await SharedPreferences.getInstance();
-      final msisdn = prefs.getString(AppConstants.keyMsisdn) ?? '';
-
-      _userSession = MockBackendData.defaultUserSession(mobileId).copyWith(
-        msisdn: msisdn,
-      );
+      final savedMsisdn = prefs.getString(AppConstants.keyMsisdn);
+      final msisdn = (savedMsisdn != null && savedMsisdn.isNotEmpty) ? savedMsisdn : '081299887766';
 
       if (backendService != null) {
         final period = await backendService!.checkActivePeriod(
@@ -69,17 +66,14 @@ class ProfileController extends ChangeNotifier {
         _activePeriod = period;
 
         if (period.isPendingActivation) {
-          // Scenario 1: Belum Aktif -> SDK harus dormant/deactivated
           kasperskySdk.deactivateSdk(
             reason: 'Perangkat belum melakukan aktivasi lisensi NDP',
           );
         } else if (!period.isValid || period.isExpired) {
-          // Scenario 3: Masa Aktif Habis (Lisensi Ada) -> Policy Guard deactivates SDK
           kasperskySdk.deactivateSdk(
             reason: 'Masa aktif paket telah berakhir di NDP Telkomsel',
           );
-        } else if (period.isActivated) {
-          // Scenario 2: Masa Aktif Ada -> Initialize genuine native SDK
+        } else if (period.isActivated || period.isValid) {
           await kasperskySdk.initKasperskySdk(
             mobileId: mobileId,
             hasActivePeriod: true,
@@ -90,6 +84,11 @@ class ProfileController extends ChangeNotifier {
       } else {
         _fallbackSyncActivePeriod();
       }
+
+      _userSession = MockBackendData.defaultUserSession(mobileId).copyWith(
+        msisdn: msisdn,
+        isKasperskyInitialized: kasperskySdk.isInitialized,
+      );
 
       _state = ViewState.success;
       notifyListeners();
@@ -132,6 +131,9 @@ class ProfileController extends ChangeNotifier {
             hasActivePeriod: true,
             expiryDate: period.expiryDate,
             licenseKey: resolvedKey,
+          );
+          _userSession = _userSession?.copyWith(
+            isKasperskyInitialized: true,
           );
           _state = ViewState.success;
           notifyListeners();
