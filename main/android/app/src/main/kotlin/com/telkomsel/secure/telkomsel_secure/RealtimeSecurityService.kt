@@ -12,6 +12,7 @@ import android.os.Environment
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.kavsdk.antivirus.Antivirus
 import com.kavsdk.antivirus.AntivirusInstance
 import com.kavsdk.antivirus.MonitorConstants
 import com.kavsdk.antivirus.MonitorEventListener
@@ -190,7 +191,7 @@ class RealtimeSecurityService : Service() {
         }
     }
 
-    private fun addExtraMonitoredDirs(av: AntivirusInstance) {
+    private fun addExtraMonitoredDirs(av: Antivirus) {
         val monitorFlags = MonitorNotifyConstants.NOTIFY_CREATE or
                 MonitorNotifyConstants.NOTIFY_MODIFY or
                 MonitorNotifyConstants.NOTIFY_CLOSE_WRITE or
