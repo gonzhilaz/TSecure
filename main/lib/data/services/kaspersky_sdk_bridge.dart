@@ -24,7 +24,7 @@ class KasperskySdkBridge extends ChangeNotifier {
   DateTime _licenseExpiryDate = DateTime(2026, 12, 24, 23, 59, 59);
   String _hardwareIdHash = '', _installationId = '', _emergencyContact = '+62 812-9988-7766';
   Map<String, dynamic>? _rawSdkStatus;
-  bool _realtimeProtection = true, _webFilter = true, _puaScanner = true, _wifiSafety = true;
+  bool _realtimeProtection = false, _webFilter = false, _puaScanner = true, _wifiSafety = true;
   bool _fakeAppsProtection = true, _deviceReputation = true, _dataBreachProtection = true, _simWatchEnabled = true, _secureStorageEnabled = true;
   final String _boundSimSlot = 'Slot 1 (Telkomsel Halo)', _boundIccidMasked = '8962 0188 **** 9012', _virusDbVersion = '2026.09.24-KSP';
   final int _quarantineItemCount = 0;
@@ -155,13 +155,15 @@ class KasperskySdkBridge extends ChangeNotifier {
 
       case 'onRealtimeThreat':
         final name = call.arguments['name'] as String? ?? 'Malware';
+        final path = call.arguments['path'] as String? ?? '';
+        final target = path.isNotEmpty ? path : name;
         _threatsDetected++; notifyListeners();
         await ThreatTelemetryDispatcher.recordAndReport(
           logRepo: logRepository,
           msisdn: _boundMobileId,
           mobileId: _boundMobileId,
           threatType: 'MALWARE',
-          target: name,
+          target: target,
           severity: 'CRITICAL',
           title: 'Perlindungan Real-Time: $name',
           description: 'Ancaman $name berhasil diisolasi oleh Kaspersky.',
@@ -251,13 +253,11 @@ class KasperskySdkBridge extends ChangeNotifier {
     try { _channel.invokeMethod('setRealtimeProtection', {'enabled': false}); } catch (_) {}
     notifyListeners();
   }
-
   void toggleRealtimeProtection(bool enabled) {
     _realtimeProtection = enabled;
     try { _channel.invokeMethod('setRealtimeProtection', {'enabled': enabled}); } catch (_) {}
     notifyListeners();
   }
-
   void toggleWebFilter(bool enabled) {
     _webFilter = enabled;
     try { _channel.invokeMethod('setWebFilter', {'enabled': enabled}); } catch (_) {}
@@ -340,14 +340,12 @@ class KasperskySdkBridge extends ChangeNotifier {
       _scanStatus = ScanStatus.error; _scanErrorMessage = e.toString(); notifyListeners();
     }
   }
-
   Future<bool> requestNotificationPermission() async {
     try { return await _channel.invokeMethod<bool>('requestNotificationPermission') ?? true; } catch (_) { return true; }
   }
   Future<void> showSecurityNotification({required String title, required String message, bool isThreat = true}) async {
     try { await _channel.invokeMethod('showNotification', {'title': title, 'message': message, 'isThreat': isThreat}); } catch (_) {}
   }
-
   Future<Map<String, dynamic>> checkUrl(String url) async {
     final result = await UrlFilterService.checkUrl(url);
     final isThreat = (result['isSafe'] == false || result['isBlocked'] == true);

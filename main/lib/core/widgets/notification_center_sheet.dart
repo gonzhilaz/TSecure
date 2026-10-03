@@ -25,10 +25,10 @@ class NotificationCenterSheet extends StatelessWidget {
         isRead: false,
       ),
       _NotifItem(
-        title: 'Wi-Fi Terverifikasi Aman',
-        desc: 'Koneksi ke Telkomsel_Orbit_5G dienkripsi protokol WPA3.',
+        title: 'Audit Keamanan Sistem',
+        desc: 'Audit keamanan enkripsi perangkat dan jaringan telah diperbarui.',
         time: '3 jam yang lalu',
-        icon: Icons.wifi_protected_setup_rounded,
+        icon: Icons.shield_outlined,
         isRead: false,
       ),
       _NotifItem(

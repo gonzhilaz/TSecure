@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/services/permission_gate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/scan_options_sheet.dart';
@@ -98,17 +99,14 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
             onPressed: () {
               ScanOptionsSheet.show(
                 context,
-                onSelect: (title, code) {
+                onSelect: (title, code) async {
+                  final ok = await PermissionGate.ensure(context, GateFeature.scan);
+                  if (!ok || !context.mounted) return;
                   setState(() {
                     _scanModeTitle = title;
                     _scanModeCode = code;
                     _hasScannedInSession = true;
                   });
-                  if (code == 'FULL' || code == 'FOLDER') {
-                    if (!kasperskySdk.hasFullStorageAccess) {
-                      kasperskySdk.requestFullStoragePermission();
-                    }
-                  }
                   kasperskySdk.runFullScan(scanMode: code);
                 },
               );
@@ -349,17 +347,18 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
                           hasActivePeriod: true,
                         );
                       }
-                      if (!sdk.isInitialized && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Mesin Kaspersky Tidak Aktif: Masa aktif lisensi telah berakhir.',
-                            ),
+                      if (!sdk.isInitialized) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text('Mesin Kaspersky Tidak Aktif: Masa aktif lisensi telah berakhir.'),
                             backgroundColor: AppColors.statusDanger,
-                          ),
-                        );
+                          ));
+                        }
                         return;
                       }
+                      if (!context.mounted) return;
+                      final ok = await PermissionGate.ensure(context, GateFeature.scan);
+                      if (!ok || !context.mounted) return;
                       setState(() => _hasScannedInSession = true);
                       sdk.runFullScan(scanMode: _scanModeCode);
                     },
@@ -378,13 +377,9 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    isScanning
-                        ? 'Memindai...'
-                        : (_hasScannedInSession ? 'Pindai Ulang' : 'Pindai Sekarang'),
+                    isScanning ? 'Memindai...' : 'Pindai',
                     style: AppTypography.labelLg.copyWith(
-                      color: isScanning
-                          ? AppColors.slateMuted
-                          : ((sdk.threatsDetected > 0) ? Colors.white : AppColors.primary),
+                      color: isScanning ? AppColors.slateMuted : ((sdk.threatsDetected > 0) ? Colors.white : AppColors.primary),
                       fontWeight: FontWeight.w700,
                     ),
                   ),

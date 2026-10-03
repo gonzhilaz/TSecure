@@ -55,6 +55,17 @@ class MainActivity : FlutterActivity() {
                 ))
             }
         }
+
+        fun notifyRealtimeThreat(name: String, type: String, path: String) {
+            val activity = activeInstance ?: return
+            activity.runOnUiThread {
+                activity.kasperskyChannel?.invokeMethod("onRealtimeThreat", mapOf(
+                    "name" to name,
+                    "type" to type,
+                    "path" to path
+                ))
+            }
+        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -181,13 +192,17 @@ class MainActivity : FlutterActivity() {
                     // Persist preference for BootReceiver auto-restart
                     getSharedPreferences(BootReceiver.PREFS_NAME, Context.MODE_PRIVATE)
                         .edit().putBoolean(BootReceiver.KEY_RTP_ENABLED, enabled).apply()
-                    val success = kasperskyBridge.setRealtimeProtection(enabled) { name, type ->
-                        showSecurityAlertNotification("🚨 Kaspersky Threat Blocked", "Ancaman dicegat: $name ($type)", true)
-                        runOnUiThread { kspChannel.invokeMethod("onRealtimeThreat", mapOf("name" to name, "type" to type)) }
-                    }
-                    result.success(success)
+                    result.success(true)
                 }
                 "isRtpActive" -> result.success(RealtimeSecurityService.isRunning(applicationContext))
+                "getProtectionStatus" -> result.success(
+                    com.telkomsel.secure.platform.ProtectionLog.snapshot(
+                        applicationContext,
+                        RealtimeSecurityService.isRunning(applicationContext),
+                        com.telkomsel.secure.accessibility.TelkomWebFilterAccessibilityService.isServiceRunning
+                    )
+                )
+                "openLocationSettings" -> result.success(PermissionHelper.openLocationSettings(this))
 
                 // --- URL FILTER (WebFilterControl from Kaspersky SDK) ---
                 "urlFilterInit" -> Thread {

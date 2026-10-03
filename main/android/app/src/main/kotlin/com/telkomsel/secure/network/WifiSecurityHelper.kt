@@ -4,191 +4,171 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import androidx.core.content.ContextCompat
-import java.net.InetAddress
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
+import java.net.Inet4Address
 
 /**
- * Native Wi-Fi Security & Encryption Inspector for TelkomSecure.
- * Evaluates real Wi-Fi connection, SSID, signal, security encryption, and rogue AP risks.
+ * Native Wi-Fi inspector. Reports ONLY values read from the device.
+ * Anything the OS does not expose is returned as empty / "unknown" — never invented.
  */
 object WifiSecurityHelper {
 
-    fun getWifiSecurityStatus(context: Context): Map<String, Any> {
+    private const val UNREADABLE_SSID = "<unknown ssid>"
+
+    fun getWifiSecurityStatus(context: Context): Map<String, Any?> {
         val hasLocationPerm = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            context, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
+        val gpsOn = isLocationEnabled(context)
+
         return try {
-            val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val wm = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            val vpnActive = cm.allNetworks.any {
+                cm.getNetworkCapabilities(it)?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
+            }
+            val wifiNet = findWifiNetwork(cm)
 
-            val activeNetwork = cm?.activeNetwork
-            val capabilities = activeNetwork?.let { cm.getNetworkCapabilities(it) }
-
-            val isWifi = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
-            val isCellular = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true
-            val isConnected = capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
-
-            if (!isWifi) {
-                val connType = if (isCellular) "Data Seluler (Telkomsel 4G/5G)" else "Tidak Terhubung"
-                return mapOf(
-                    "isConnected" to isConnected,
-                    "isWifi" to false,
-                    "networkType" to connType,
-                    "ssid" to if (isCellular) "Telkomsel Cellular" else "Offline",
-                    "securityProtocol" to if (isCellular) "LTE/5G Encrypted Core" else "Tidak Aktif",
-                    "isEncrypted" to true,
-                    "isSafe" to true,
-                    "signalLevel" to "Normal",
-                    "linkSpeed" to "N/A",
-                    "gateway" to "N/A",
-                    "summary" to if (isCellular) "Jaringan data seluler Telkomsel terenkripsi standar operator." else "Perangkat tidak terhubung ke jaringan."
-                )
+            if (wifiNet == null) {
+                val active = cm.getNetworkCapabilities(cm.activeNetwork)
+                val cellular = active?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true
+                return notOnWifi(cellular, vpnActive, hasLocationPerm, gpsOn)
             }
 
-            var cleanSsid = ""
-            var bssid = "00:00:00:00:00:00"
-            var kavVerdict = "Safe"
-            var isKavSafe = true
-
-            // 1. Try Kaspersky SDK WifiReputation first
-            try {
-                val wifiReputation = com.kavsdk.wifi.WifiReputation(context.applicationContext)
-                val checkResult = wifiReputation.checkCurrentNetwork()
-                val kSsid = checkResult.ssid?.trim()?.trim('"') ?: ""
-                if (kSsid.isNotEmpty() && kSsid != "<unknown ssid>") {
-                    cleanSsid = kSsid
-                }
-                if (!checkResult.bssid.isNullOrEmpty()) {
-                    bssid = checkResult.bssid
-                }
-                kavVerdict = checkResult.verdict.name
-                isKavSafe = (checkResult.verdict == com.kavsdk.wifi.Verdict.Safe)
-            } catch (_: Throwable) {}
-
-            // 2. Fallback to Android NetworkCapabilities (transportInfo) / WifiManager
+            val caps = cm.getNetworkCapabilities(wifiNet)
             @Suppress("DEPRECATION")
-            val wifiInfo: WifiInfo? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                capabilities.transportInfo as? WifiInfo ?: wm?.connectionInfo
-            } else {
-                wm?.connectionInfo
+            val info: WifiInfo? = wm?.connectionInfo ?: (caps?.transportInfo as? WifiInfo)
+
+            val ssid = readSsid(context, info)
+            val bssid = info?.bssid?.takeIf { it.isNotEmpty() && it != "02:00:00:00:00:00" } ?: ""
+
+            val secType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) info?.currentSecurityType ?: -1 else -1
+            val sec = describeSecurity(secType)
+
+            val lp = cm.getLinkProperties(wifiNet)
+            val ip = lp?.linkAddresses?.firstOrNull { it.address is Inet4Address }?.address?.hostAddress ?: ""
+            val gateway = lp?.routes?.firstOrNull { it.isDefaultRoute && it.gateway is Inet4Address }?.gateway?.hostAddress ?: ""
+            val dns = lp?.dnsServers?.mapNotNull { it.hostAddress }?.joinToString(", ") ?: ""
+
+            val captive = caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL) == true
+            val rssi = info?.rssi ?: Int.MIN_VALUE
+            val signal = when {
+                rssi == Int.MIN_VALUE || rssi <= -127 -> "Tidak terbaca"
+                rssi >= -60 -> "Sangat Baik ($rssi dBm)"
+                rssi >= -70 -> "Baik ($rssi dBm)"
+                rssi >= -80 -> "Cukup ($rssi dBm)"
+                else -> "Lemah ($rssi dBm)"
             }
 
-            if (cleanSsid.isEmpty() || cleanSsid == "<unknown ssid>") {
-                val raw = wifiInfo?.ssid?.trim()?.trim('"') ?: ""
-                if (raw.isNotEmpty() && raw != "<unknown ssid>") {
-                    cleanSsid = raw
-                }
+            val verdict = kasperskyVerdict(context)
+            val risky = captive || sec.isOpen || sec.isWeak || verdict.safe == false
+            val summary = when {
+                !hasLocationPerm -> "Izin Lokasi belum diberikan, nama Wi-Fi tidak dapat dibaca."
+                !gpsOn -> "Layanan Lokasi (GPS) mati, nama Wi-Fi tidak dapat dibaca."
+                sec.isOpen -> "Peringatan: Wi-Fi terbuka tanpa enkripsi."
+                sec.isWeak -> "Peringatan: Wi-Fi memakai enkripsi usang (WEP)."
+                captive -> "Peringatan: Wi-Fi memerlukan login portal (captive portal)."
+                verdict.safe == false -> "Peringatan: Kaspersky menandai jaringan ini berisiko."
+                !sec.known -> "Jenis enkripsi tidak dapat dibaca oleh sistem Android ini."
+                else -> "Wi-Fi terenkripsi (${sec.label})."
             }
-            if ((bssid.isEmpty() || bssid == "00:00:00:00:00:00") && wifiInfo?.bssid != null) {
-                bssid = wifiInfo.bssid
-            }
-
-            // 3. Location / GPS status check
-            val lm = context.getSystemService(Context.LOCATION_SERVICE) as? android.location.LocationManager
-            val isGpsEnabled = try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    lm?.isLocationEnabled == true
-                } else {
-                    lm?.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) == true ||
-                    lm?.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER) == true
-                }
-            } catch (_: Throwable) { true }
-
-            if (cleanSsid.isEmpty() || cleanSsid == "<unknown ssid>") {
-                cleanSsid = if (!hasLocationPerm) {
-                    "Wi-Fi (Izin Lokasi Belum Aktif)"
-                } else if (!isGpsEnabled) {
-                    "Wi-Fi (Nyalakan GPS untuk Membaca SSID)"
-                } else {
-                    "Jaringan Wi-Fi Aktif"
-                }
-            }
-
-            val linkSpeed = wifiInfo?.linkSpeed ?: 0
-            val rssi = wifiInfo?.rssi ?: -100
-            val signalLevel = when {
-                rssi >= -60 -> "Sangat Baik (100%)"
-                rssi >= -70 -> "Baik (80%)"
-                rssi >= -80 -> "Cukup (60%)"
-                else -> "Lemah (< 40%)"
-            }
-
-            val ipInt = wifiInfo?.ipAddress ?: 0
-            val ipAddress = if (ipInt != 0) {
-                try {
-                    InetAddress.getByAddress(
-                        ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(ipInt).array()
-                    ).hostAddress ?: "192.168.1.1"
-                } catch (_: Throwable) {
-                    "192.168.1.1"
-                }
-            } else {
-                "192.168.1.1"
-            }
-
-            val isCaptive = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL)
-            val isOpenNetwork = cleanSsid.contains("free", ignoreCase = true) || cleanSsid.contains("open", ignoreCase = true)
-            val protocol = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                "WPA3 / WPA2 Enterprise (AES-256)"
-            } else {
-                "WPA2-PSK (AES)"
-            }
-
-            val isSafe = !isCaptive && !isOpenNetwork && isKavSafe
 
             mapOf(
                 "isConnected" to true,
                 "isWifi" to true,
-                "networkType" to "Wi-Fi ($cleanSsid)",
-                "ssid" to cleanSsid,
+                "vpnActive" to vpnActive,
+                "ssid" to ssid,
+                "ssidAvailable" to ssid.isNotEmpty(),
+                "networkType" to "Wi-Fi",
                 "bssid" to bssid,
-                "securityProtocol" to protocol,
-                "isEncrypted" to true,
-                "isCaptivePortal" to isCaptive,
-                "isOpenNetwork" to isOpenNetwork,
-                "isSafe" to isSafe,
-                "kasperskyVerdict" to kavVerdict,
-                "isGpsEnabled" to isGpsEnabled,
-                "signalLevel" to signalLevel,
-                "linkSpeed" to "$linkSpeed Mbps",
-                "ipAddress" to ipAddress,
-                "gateway" to "192.168.1.1",
-                "dnsResolver" to "Telkomsel Secure DoH (1.1.1.1 / 8.8.8.8)",
+                "securityProtocol" to sec.label,
+                "securityKnown" to sec.known,
+                "isEncrypted" to (sec.known && !sec.isOpen),
+                "isCaptivePortal" to captive,
+                "isOpenNetwork" to sec.isOpen,
+                "isSafe" to !risky,
+                "kasperskyVerdict" to verdict.name,
+                "isGpsEnabled" to gpsOn,
                 "hasLocationPermission" to hasLocationPerm,
-                "permissionHint" to if (hasLocationPerm && isGpsEnabled) "Izin Lokasi & GPS aktif" else "Izin Lokasi dan GPS diperlukan untuk mendeteksi nama Wi-Fi (SSID) secara presisi.",
-                "summary" to if (!hasLocationPerm) {
-                    "Perhatian: Berikan izin Lokasi agar nama jaringan Wi-Fi dapat diaudit secara presisi oleh sistem."
-                } else if (!isGpsEnabled) {
-                    "Perhatian: Aktifkan GPS / Lokasi pada pengaturan HP agar sistem dapat membaca nama hotspot Wi-Fi."
-                } else if (isSafe) {
-                    "Wi-Fi aman dengan proteksi enkripsi $protocol. Bebas sniffing & rogue AP."
-                } else {
-                    "Peringatan: Jaringan Wi-Fi terbuka atau berisiko!"
-                }
+                "signalLevel" to signal,
+                "linkSpeed" to if ((info?.linkSpeed ?: -1) > 0) "${info?.linkSpeed} Mbps" else "",
+                "ipAddress" to ip,
+                "gateway" to gateway,
+                "dnsResolver" to dns,
+                "summary" to summary
             )
         } catch (e: Throwable) {
             mapOf(
-                "isConnected" to true,
-                "isWifi" to true,
-                "networkType" to "Wi-Fi",
-                "ssid" to "Wi-Fi Terkoneksi",
-                "securityProtocol" to "WPA2/WPA3",
-                "isEncrypted" to true,
-                "isSafe" to true,
-                "signalLevel" to "Baik (80%)",
-                "linkSpeed" to "150 Mbps",
-                "ipAddress" to "192.168.1.100",
-                "gateway" to "192.168.1.1",
-                "dnsResolver" to "Telkomsel DNS Resolver",
-                "summary" to "Audit jaringan Wi-Fi aktif. Enkripsi terverifikasi aman."
+                "isConnected" to false,
+                "isWifi" to false,
+                "ssid" to "",
+                "ssidAvailable" to false,
+                "error" to (e.message ?: e.javaClass.simpleName),
+                "summary" to "Audit Wi-Fi gagal dibaca dari sistem."
             )
         }
     }
+
+    private fun notOnWifi(cellular: Boolean, vpn: Boolean, loc: Boolean, gps: Boolean): Map<String, Any?> = mapOf(
+        "isConnected" to cellular,
+        "isWifi" to false,
+        "vpnActive" to vpn,
+        "ssid" to "",
+        "ssidAvailable" to false,
+        "networkType" to if (cellular) "Data Seluler" else "Tidak Terhubung",
+        "hasLocationPermission" to loc,
+        "isGpsEnabled" to gps,
+        "summary" to if (cellular) "HP tidak terhubung ke Wi-Fi (memakai data seluler)." else "HP tidak terhubung ke jaringan apa pun."
+    )
+
+    /** Picks a real Wi-Fi network even when a VPN is the default network. */
+    private fun findWifiNetwork(cm: ConnectivityManager): Network? = cm.allNetworks.firstOrNull { n ->
+        val c = cm.getNetworkCapabilities(n)
+        c != null && c.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) && !c.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+    }
+
+    private fun readSsid(context: Context, info: WifiInfo?): String {
+        val raw = info?.ssid?.trim()?.trim('"') ?: ""
+        if (raw.isNotEmpty() && raw != UNREADABLE_SSID) return raw
+        return try {
+            val k = com.kavsdk.wifi.WifiReputation(context.applicationContext).checkCurrentNetwork().ssid
+                ?.trim()?.trim('"') ?: ""
+            if (k == UNREADABLE_SSID) "" else k
+        } catch (_: Throwable) { "" }
+    }
+
+    private class KavVerdict(val name: String, val safe: Boolean?)
+
+    private fun kasperskyVerdict(context: Context): KavVerdict = try {
+        val r = com.kavsdk.wifi.WifiReputation(context.applicationContext).checkCurrentNetwork()
+        KavVerdict(r.verdict.name, r.verdict == com.kavsdk.wifi.Verdict.Safe)
+    } catch (_: Throwable) { KavVerdict("Unavailable", null) }
+
+    private class Security(val label: String, val known: Boolean, val isOpen: Boolean, val isWeak: Boolean)
+
+    private fun describeSecurity(type: Int): Security {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return Security("Tidak dapat dibaca (Android < 12)", false, false, false)
+        return when (type) {
+            WifiInfo.SECURITY_TYPE_OPEN -> Security("Terbuka (tanpa enkripsi)", true, true, false)
+            WifiInfo.SECURITY_TYPE_WEP -> Security("WEP (usang)", true, false, true)
+            WifiInfo.SECURITY_TYPE_PSK -> Security("WPA/WPA2-Personal", true, false, false)
+            WifiInfo.SECURITY_TYPE_SAE -> Security("WPA3-Personal", true, false, false)
+            WifiInfo.SECURITY_TYPE_OWE -> Security("OWE (Enhanced Open)", true, false, false)
+            WifiInfo.SECURITY_TYPE_EAP -> Security("WPA/WPA2-Enterprise", true, false, false)
+            WifiInfo.SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT -> Security("WPA3-Enterprise 192-bit", true, false, false)
+            else -> Security("Tidak diketahui", false, false, false)
+        }
+    }
+
+    private fun isLocationEnabled(context: Context): Boolean = try {
+        val lm = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) lm.isLocationEnabled
+        else lm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
+            lm.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
+    } catch (_: Throwable) { false }
 }

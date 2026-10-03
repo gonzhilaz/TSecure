@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/services/permission_gate.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/advanced_security_hub_sheet.dart';
@@ -145,7 +146,13 @@ class _BerandaScreenState extends State<BerandaScreen> with WidgetsBindingObserv
                       controller.kasperskySdk.realtimeProtection,
                   lastScanText: _formatLastScan(controller.kasperskySdk.lastScanDate),
                   onScanPressed: widget.onNavigateToScanner,
-                  onRealtimeToggled: controller.toggleRealtimeProtection,
+                  onRealtimeToggled: (enabled) async {
+                    if (enabled) {
+                      final ok = await PermissionGate.ensure(context, GateFeature.realtime);
+                      if (!ok || !context.mounted) return;
+                    }
+                    controller.toggleRealtimeProtection(enabled);
+                  },
                 ),
                 const SizedBox(height: 24),
                 SecurityFeaturesGrid(

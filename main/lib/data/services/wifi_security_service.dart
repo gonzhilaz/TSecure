@@ -8,25 +8,20 @@ class WifiSecurityService {
   static const MethodChannel _deviceChannel =
       MethodChannel('com.telkomsel.secure/device');
 
+  static Map<String, dynamic> _unavailable(String why) => {
+        'isConnected': false,
+        'isWifi': false,
+        'ssid': '',
+        'ssidAvailable': false,
+        'securityKnown': false,
+        'isSafe': true,
+        'error': why,
+        'summary': why,
+      };
+
   static Future<Map<String, dynamic>> auditWifi() async {
     if (kIsWeb || !Platform.isAndroid) {
-      return {
-        'isConnected': true,
-        'isWifi': true,
-        'ssid': 'Telkomsel_Orbit_Wi-Fi',
-        'bssid': 'E4:8D:8C:1A:2B:3C',
-        'securityProtocol': 'WPA3 Personal (AES-256)',
-        'isEncrypted': true,
-        'isCaptivePortal': false,
-        'isOpenNetwork': false,
-        'isSafe': true,
-        'signalLevel': 'Sangat Baik (100%)',
-        'linkSpeed': '866 Mbps',
-        'ipAddress': '192.168.1.105',
-        'gateway': '192.168.1.1',
-        'dnsResolver': 'Telkomsel Secure DoH (1.1.1.1)',
-        'summary': 'Wi-Fi aman dengan proteksi enkripsi WPA3. Bebas sniffing & rogue AP.',
-      };
+      return _unavailable('Audit Wi-Fi hanya tersedia di Android.');
     }
 
     try {
@@ -45,17 +40,7 @@ class WifiSecurityService {
       }
     }
 
-    return {
-      'isConnected': true,
-      'isWifi': true,
-      'ssid': 'Wi-Fi Terkoneksi',
-      'securityProtocol': 'WPA2/WPA3 AES',
-      'isEncrypted': true,
-      'isSafe': true,
-      'signalLevel': 'Baik (80%)',
-      'linkSpeed': '150 Mbps',
-      'summary': 'Jaringan Wi-Fi terenkripsi aman.',
-    };
+    return _unavailable('Gagal membaca status Wi-Fi dari sistem.');
   }
 
   /// Verifies SSL certificate authenticity, chain of trust, and expiration via Kaspersky SDK

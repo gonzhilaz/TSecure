@@ -116,6 +116,7 @@ object PermissionHelper {
 
     fun openAccessibilitySettings(context: Context): Boolean {
         return try {
+            ProtectionLog.expectAccessibility(context)
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
@@ -174,11 +175,30 @@ object PermissionHelper {
         }
     }
 
+    fun isLocationEnabled(context: Context): Boolean = try {
+        val lm = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) lm.isLocationEnabled
+        else lm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
+            lm.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
+    } catch (_: Throwable) { false }
+
+    fun openLocationSettings(context: Context): Boolean {
+        return try {
+            context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            })
+            true
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
     fun getAllPermissionsStatus(context: Context): Map<String, Any> {
         return mapOf(
             "storage" to checkStoragePermission(context)["hasFullAccess"] as Boolean,
             "notifications" to checkNotificationPermission(context),
             "location" to checkLocationPermission(context),
+            "locationEnabled" to isLocationEnabled(context),
             "accessibility" to checkAccessibilityPermission(context),
             "installPackages" to checkInstallPermission(context)
         )

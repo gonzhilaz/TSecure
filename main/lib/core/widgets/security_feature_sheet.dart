@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../../data/services/kaspersky_sdk_bridge.dart';
+import '../../data/services/protection_status_service.dart';
+import '../services/permission_gate.dart';
 import 'dns_cert_check_dialog.dart';
+import 'security_feature_live_configs.dart';
 import 'security_feature_models.dart';
 import 'web_filter_test_dialog.dart';
 
@@ -47,42 +50,63 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
   Map<String, dynamic>? _rootAuditResult;
   bool _isCheckingRoot = false;
   bool _isAuditingWifi = false;
+  ProtectionStatus? _protection;
+  bool _loadingProtection = false;
 
   @override
   void initState() {
     super.initState();
     _isEnabled = _getInitialStatus();
+    if (widget.featureTitle.toLowerCase().contains('realtime')) _loadProtection();
   }
 
-  bool _getInitialStatus() {
-    final t = widget.featureTitle.toLowerCase();
-    if (t.contains('web')) return widget.sdk.webFilter;
-    if (t.contains('realtime')) return widget.sdk.realtimeProtection;
-    if (t.contains('pua')) return widget.sdk.puaScanner;
-    if (t.contains('wifi')) return widget.sdk.wifiSafety;
-    if (t.contains('fake')) return widget.sdk.fakeAppsProtection;
-    if (t.contains('device')) return widget.sdk.deviceReputation;
-    return widget.sdk.dataBreachProtection;
+  Future<void> _loadProtection() async {
+    setState(() => _loadingProtection = true);
+    final st = await ProtectionStatusService.fetch();
+    if (!mounted) return;
+    setState(() { _protection = st; _loadingProtection = false; });
   }
 
-  void _toggleStatus(bool value) {
-    setState(() => _isEnabled = value);
+  Future<void> _auditWifi() async {
+    final ok = await PermissionGate.ensure(context, GateFeature.wifi);
+    if (!mounted) return;
+    setState(() => _isAuditingWifi = true);
+    final res = await widget.sdk.auditWifi();
+    if (!mounted) return;
+    setState(() => _isAuditingWifi = false);
+    final ssid = (res['ssid'] as String?) ?? '';
+    final msg = !ok
+        ? 'Izin lokasi diperlukan untuk membaca nama Wi-Fi.'
+        : (res['isWifi'] == true
+            ? 'Wi-Fi: ${ssid.isEmpty ? 'nama tidak terbaca' : ssid}'
+            : (res['summary'] as String? ?? 'Tidak terhubung Wi-Fi'));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg),
+      backgroundColor: res['isSafe'] == false ? AppColors.statusWarning : AppColors.navyDeep,
+      duration: const Duration(seconds: 2),
+    ));
+  }
+
+  bool _getInitialStatus() => LiveFeatureConfigs.initialStatus(widget.featureTitle, widget.sdk);
+
+  Future<void> _toggleStatus(bool value) async {
     final t = widget.featureTitle.toLowerCase();
-    if (t.contains('web')) {
-      widget.sdk.toggleWebFilter(value);
-    } else if (t.contains('realtime')) {
-      widget.sdk.toggleRealtimeProtection(value);
-    } else if (t.contains('pua')) {
-      widget.sdk.togglePuaScanner(value);
-    } else if (t.contains('wifi')) {
-      widget.sdk.toggleWifiSafety(value);
-    } else if (t.contains('fake')) {
-      widget.sdk.toggleFakeApps(value);
-    } else if (t.contains('device')) {
-      widget.sdk.toggleDeviceRep(value);
-    } else if (t.contains('data')) {
-      widget.sdk.toggleDataBreach(value);
+    if (value) {
+      GateFeature? gate;
+      if (t.contains('web')) {
+        gate = GateFeature.webFilter;
+      } else if (t.contains('realtime') || t.contains('pua') || t.contains('fake')) {
+        gate = GateFeature.scan;
+      } else if (t.contains('wifi')) {
+        gate = GateFeature.wifi;
+      }
+      if (gate != null) {
+        final ok = await PermissionGate.ensure(context, gate);
+        if (!ok || !mounted) return;
+      }
     }
+    setState(() => _isEnabled = value);
+    LiveFeatureConfigs.applyToggle(widget.featureTitle, widget.sdk, value);
   }
 
   SecurityFeatureConfig _getConfig() {
@@ -104,19 +128,12 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
       );
     }
     if (title.contains('realtime')) {
-      return SecurityFeatureConfig(
-        title: 'Realtime Scanner',
-        icon: Icons.shield,
-        engine: 'Kaspersky Anti-Malware Core',
-        description: 'Pemantauan I/O file system secara terus menerus untuk mencegah trojan dan ransomware.',
-        actionLabel: 'Mulai Pemindaian Sekarang',
+      return LiveFeatureConfigs.realtime(
+        status: _protection,
+        loading: _loadingProtection,
+        dbVersion: widget.sdk.virusDbVersion,
         onAction: () { Navigator.pop(context); widget.onNavigateToScanner(); },
-        telemetry: [
-          SecurityFeatureTelemetryRow('Status Pemantauan', _isEnabled ? 'Aktif 24/7' : 'Nonaktif'),
-          SecurityFeatureTelemetryRow('Kecepatan Analisis', '< 50 ms per file'),
-          SecurityFeatureTelemetryRow('Database Virus', widget.sdk.virusDbVersion),
-          SecurityFeatureTelemetryRow('Heuristik Malware', 'Deep AI Behavior Analysis'),
-        ],
+        onRefresh: _loadProtection,
       );
     }
     if (title.contains('pua')) {
@@ -128,44 +145,17 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
         actionLabel: 'Pindai Aplikasi Terpasang',
         onAction: () { Navigator.pop(context); widget.onNavigateToScanner(); },
         telemetry: [
-          SecurityFeatureTelemetryRow('Status Deteksi', _isEnabled ? 'Aktif Melindungi' : 'Nonaktif'),
+          SecurityFeatureTelemetryRow('Status Deteksi', _isEnabled ? 'Aktif' : 'Nonaktif'),
           SecurityFeatureTelemetryRow('Klasifikasi Deteksi', 'Adware, Riskware, Remote Admin'),
-          SecurityFeatureTelemetryRow('Aplikasi Dianalisis', '84 Aplikasi Sistem & Pengguna'),
-          SecurityFeatureTelemetryRow('Tingkat Kebersihan', '100% Bebas PUA'),
         ],
       );
     }
     if (title.contains('wifi')) {
-      final wifi = widget.sdk.wifiAuditData;
-      final ssid = wifi?['ssid'] as String? ?? 'Telkomsel_Orbit_5G';
-      final proto = wifi?['securityProtocol'] as String? ?? 'WPA3 Personal (AES-256)';
-      final signal = wifi?['signalLevel'] as String? ?? 'Baik (80%)';
-      final isSafe = wifi?['isSafe'] != false;
-      return SecurityFeatureConfig(
-        title: 'Wifi Safety',
-        icon: Icons.wifi_rounded,
-        engine: 'TelkomSecure Network Guard & Wi-Fi Inspector',
-        description: 'Audit enkripsi hotspot, integritas DNS resolver, dan perlindungan dari serangan rogue AP/ARP spoofing.',
-        actionLabel: _isAuditingWifi ? 'Memeriksa Wi-Fi...' : 'Audit Jaringan Wi-Fi Sekarang',
-        onAction: () async {
-          setState(() => _isAuditingWifi = true);
-          final res = await widget.sdk.auditWifi();
-          if (!mounted) return;
-          setState(() => _isAuditingWifi = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Audit Wi-Fi: $ssid (${res['securityProtocol'] ?? 'Aman'})'),
-              backgroundColor: isSafe ? AppColors.statusSafe : AppColors.statusWarning,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        },
-        telemetry: [
-          SecurityFeatureTelemetryRow('Jaringan Terhubung', ssid),
-          SecurityFeatureTelemetryRow('Protokol Keamanan', proto),
-          SecurityFeatureTelemetryRow('Kekuatan Sinyal', signal),
-          SecurityFeatureTelemetryRow('Status Enkripsi', _isEnabled ? (isSafe ? 'Terkunci & Aman' : 'Peringatan Terbuka') : 'Nonaktif'),
-        ],
+      return LiveFeatureConfigs.wifi(
+        audit: widget.sdk.wifiAuditData,
+        loading: _isAuditingWifi,
+        enabled: _isEnabled,
+        onAction: _auditWifi,
       );
     }
     if (title.contains('fake')) {
@@ -177,10 +167,8 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
         actionLabel: 'Pindai Integritas APK',
         onAction: () { Navigator.pop(context); widget.onNavigateToScanner(); },
         telemetry: [
-          SecurityFeatureTelemetryRow('Integritas Paket', _isEnabled ? 'Terverifikasi Utuh' : 'Nonaktif'),
-          SecurityFeatureTelemetryRow('Injeksi DEX / Hook', '0 Modifikasi Terdeteksi'),
-          SecurityFeatureTelemetryRow('Anti-Tampering', 'Hardening Aktif'),
-          SecurityFeatureTelemetryRow('Validasi Tanda Tangan', 'v1/v2/v3 Scheme Resmi'),
+          SecurityFeatureTelemetryRow('Status Deteksi', _isEnabled ? 'Aktif' : 'Nonaktif'),
+          SecurityFeatureTelemetryRow('Validasi Tanda Tangan', 'v1/v2/v3'),
         ],
       );
     }
@@ -203,7 +191,7 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
           });
           final rooted = res['isRooted'] == true;
           final cause = res['rootCause'] as String? ?? 'Terdeteksi Root';
-          final msg = rooted ? '🚨 Peringatan Root Terdeteksi ($cause)' : '✅ Integritas Aman: Tanpa Root';
+          final msg = rooted ? 'Peringatan: Root terdeteksi ($cause)' : 'Integritas aman: tanpa root';
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(msg),
             backgroundColor: rooted ? AppColors.statusDanger : AppColors.statusSafe,
@@ -214,7 +202,6 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
           SecurityFeatureTelemetryRow('Status Root / Magisk', _rootAuditResult == null ? 'Siap Diaudit' : (isRooted ? 'Terdeteksi Root!' : 'Bersih (Murni)')),
           SecurityFeatureTelemetryRow('Detail Audit Root', _rootAuditResult == null ? 'Tekan Tombol Cek' : rootCause),
           SecurityFeatureTelemetryRow('Mesin Audit', 'Kaspersky RootDetector'),
-          SecurityFeatureTelemetryRow('Status SELinux', 'Enforcing (Aktif)'),
         ],
       );
     }
@@ -366,9 +353,8 @@ class _SecurityFeatureSheetState extends State<SecurityFeatureSheet> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 onPressed: () {
-                  if (cfg.onAction != null) {
-                    cfg.onAction!();
-                  } else if (cfg.actionMessage != null) {
+                  if (cfg.onAction != null) return cfg.onAction!();
+                  if (cfg.actionMessage != null) {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(cfg.actionMessage!), backgroundColor: AppColors.navyDeep, behavior: SnackBarBehavior.floating));
                   }

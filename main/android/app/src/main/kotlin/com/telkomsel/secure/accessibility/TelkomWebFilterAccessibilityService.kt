@@ -13,6 +13,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.app.NotificationCompat
 import com.telkomsel.secure.kaspersky.KasperskyNativeBridge
+import com.telkomsel.secure.platform.ProtectionLog
 import com.telkomsel.secure.telkomsel_secure.MainActivity
 import com.telkomsel.secure.telkomsel_secure.R
 
@@ -39,7 +40,15 @@ class TelkomWebFilterAccessibilityService : AccessibilityService() {
         isServiceRunning = true
         kasperskyBridge = KasperskyNativeBridge(applicationContext)
         createNotificationChannel()
+        ProtectionLog.event(applicationContext, "WEB", "STARTED", "Layanan aksesibilitas Web Filter aktif")
         Log.i(TAG, ">>> TelkomSecure Web Filter Accessibility Service CONNECTED & ACTIVE")
+        if (ProtectionLog.consumeAccessibilityExpectation(applicationContext)) {
+            try {
+                startActivity(Intent(this, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                })
+            } catch (_: Throwable) {}
+        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -94,6 +103,7 @@ class TelkomWebFilterAccessibilityService : AccessibilityService() {
 
                 // Check against Kaspersky URL service
                 val result = kasperskyBridge.checkUrl(formattedUrl)
+                ProtectionLog.countUrl(applicationContext)
                 val isPhishing = result["isPhishing"] as? Boolean ?: false
                 val isMalware = result["isMalware"] as? Boolean ?: false
                 val isSafe = result["isSafe"] as? Boolean ?: true
@@ -101,6 +111,7 @@ class TelkomWebFilterAccessibilityService : AccessibilityService() {
                 if (!isSafe || isPhishing || isMalware) {
                     val verdict = if (isPhishing) "Situs Phishing / Penipuan" else "Situs Penyebar Malware"
                     Log.w(TAG, "[WEB FILTER BLOCKED] Threat detected: $formattedUrl ($verdict)")
+                    ProtectionLog.event(applicationContext, "WEB", "BLOCKED", "$verdict | $formattedUrl")
                     showThreatAlertNotification(formattedUrl, verdict)
                     MainActivity.notifyUrlThreat(formattedUrl, verdict, "BLOCKED")
                 }
@@ -159,5 +170,6 @@ class TelkomWebFilterAccessibilityService : AccessibilityService() {
     override fun onDestroy() {
         super.onDestroy()
         isServiceRunning = false
+        ProtectionLog.event(applicationContext, "WEB", "STOPPED", "Layanan aksesibilitas Web Filter dimatikan")
     }
 }

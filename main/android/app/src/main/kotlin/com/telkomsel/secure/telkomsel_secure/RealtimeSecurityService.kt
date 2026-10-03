@@ -20,6 +20,7 @@ import com.kavsdk.antivirus.MonitoringListener
 import com.kavsdk.antivirus.MonitorNotifyConstants
 import com.kavsdk.antivirus.ThreatInfo
 import com.kavsdk.antivirus.ThreatType
+import com.telkomsel.secure.platform.ProtectionLog
 import com.telkomsel.secure.telkomsel_secure.receivers.BootReceiver
 import java.io.File
 import kotlin.concurrent.thread
@@ -76,11 +77,15 @@ class RealtimeSecurityService : Service() {
 
     // --- Kaspersky SDK File Monitor Callbacks ---
 
+    @Volatile private var heartbeatRunning = false
+
     private val monitorEventListener = object : MonitorEventListener {
         override fun onMonitorEvent(threatInfo: ThreatInfo, threatType: ThreatType) {
             val name = threatInfo.virusName ?: "Malware"
             val path = threatInfo.fileFullPath ?: "Unknown"
-            Log.w(TAG, "🚨 THREAT DETECTED: $name at $path (Type: $threatType)")
+            Log.w(TAG, "THREAT DETECTED: $name at $path (Type: $threatType)")
+            ProtectionLog.event(applicationContext, "RTP", "THREAT", "$name | $path | $currentThreatAction")
+            MainActivity.notifyRealtimeThreat(name, threatType.toString(), path)
 
             showThreatNotification(threatInfo, threatType)
             handleThreatAction(threatInfo)
@@ -89,11 +94,11 @@ class RealtimeSecurityService : Service() {
 
     private val monitoringListener = object : MonitoringListener {
         override fun onMonitorStart(monitorId: Int) {
-            Log.i(TAG, "Monitor task started: $monitorId")
+            ProtectionLog.countFile(applicationContext)
         }
 
         override fun onMonitorStop(monitorId: Int) {
-            Log.i(TAG, "Monitor task finished: $monitorId")
+            Log.d(TAG, "Monitor task finished: $monitorId")
         }
     }
 
@@ -124,6 +129,9 @@ class RealtimeSecurityService : Service() {
 
     override fun onDestroy() {
         Log.d(TAG, "RealtimeSecurityService destroying")
+        heartbeatRunning = false
+        ProtectionLog.event(applicationContext, "RTP", "STOPPED", "Layanan proteksi real-time dihentikan")
+        ProtectionLog.flush(applicationContext)
 
         // Persist preference
         getSharedPreferences(BootReceiver.PREFS_NAME, Context.MODE_PRIVATE)
@@ -151,43 +159,68 @@ class RealtimeSecurityService : Service() {
     // --- SDK Monitor Initialization ---
 
     private fun initializeMonitor() {
-        try {
-            val av = AntivirusInstance.getInstance()
-            if (!av.isInitialized) {
-                Log.w(TAG, "Antivirus not initialized — RTP delayed until license activation")
+        val ctx = applicationContext
+        var lastError = "Mesin antivirus belum siap"
+        for (attempt in 1..5) {
+            try {
+                val bridge = com.telkomsel.secure.kaspersky.KasperskyNativeBridge(ctx)
+                val ready = bridge.ensureAntivirusInitialized()
+                val av = AntivirusInstance.getInstance()
+                if (!ready || !av.isInitialized) {
+                    lastError = "Mesin antivirus belum siap (percobaan $attempt/5)"
+                    ProtectionLog.event(ctx, "RTP", "WAITING", lastError)
+                    Thread.sleep(4000)
+                    continue
+                }
+
+                av.setMonitorListener(monitorEventListener)
+                av.setMonitoringListener(monitoringListener)
+                av.setMonitorScanMode(MonitorConstants.ALL_FILES or MonitorConstants.ALLOW_UDS)
+                av.setMonitorCleanMode(
+                    if (currentThreatAction.lowercase() == "delete") MonitorConstants.DELETE_AND_LOG
+                    else MonitorConstants.LOG_ONLY
+                )
+                av.addDefaultDirectories()
+                addExtraMonitoredDirs(av)
+                av.setMonitorState(true)
+
+                val dirs = av.monitoredDirectories?.map { it.path } ?: emptyList()
+                val active = av.isMonitorActive
+                dirs.forEach { Log.i(TAG, "Watching: $it") }
+                if (active) {
+                    ProtectionLog.event(ctx, "RTP", "STARTED", "Memantau ${dirs.size} folder: ${dirs.take(4).joinToString(", ")}")
+                    startHeartbeat()
+                } else {
+                    ProtectionLog.event(ctx, "RTP", "ERROR", "Monitor tidak aktif setelah diaktifkan (cek izin Penyimpanan Penuh)")
+                }
                 return
+            } catch (e: Throwable) {
+                lastError = e.message ?: e.javaClass.simpleName
+                Log.e(TAG, "Failed to initialize SDK monitor", e)
             }
+        }
+        ProtectionLog.event(ctx, "RTP", "ERROR", "Gagal memulai: $lastError")
+    }
 
-            // Attach listeners
-            av.setMonitorListener(monitorEventListener)
-            av.setMonitoringListener(monitoringListener)
-
-            // Scan mode: all file types including UDS (heuristic)
-            av.setMonitorScanMode(MonitorConstants.ALL_FILES or MonitorConstants.ALLOW_UDS)
-
-            // Clean mode based on user preference
-            val cleanMode = if (currentThreatAction.lowercase() == "delete") {
-                MonitorConstants.DELETE_AND_LOG
-            } else {
-                MonitorConstants.LOG_ONLY
+    /** Every 60s record proof the monitor is still alive; one HEARTBEAT event is stored every 10 minutes. */
+    private fun startHeartbeat() {
+        if (heartbeatRunning) return
+        heartbeatRunning = true
+        thread(start = true, isDaemon = true, name = "RTP-Heartbeat") {
+            var ticks = 0
+            while (heartbeatRunning) {
+                try { Thread.sleep(60_000) } catch (_: InterruptedException) { return@thread }
+                if (!heartbeatRunning) return@thread
+                ticks++
+                val active = try { AntivirusInstance.getInstance().isMonitorActive } catch (_: Throwable) { false }
+                ProtectionLog.flush(applicationContext)
+                if (!active) {
+                    ProtectionLog.event(applicationContext, "RTP", "ERROR", "Monitor berhenti tanpa diminta, mencoba menyalakan ulang")
+                    try { AntivirusInstance.getInstance().setMonitorState(true) } catch (_: Throwable) {}
+                } else if (ticks % 10 == 0) {
+                    ProtectionLog.event(applicationContext, "RTP", "HEARTBEAT", "Monitor aktif")
+                }
             }
-            av.setMonitorCleanMode(cleanMode)
-
-            // Add default system directories
-            av.addDefaultDirectories()
-
-            // Explicitly add common download locations (critical for catching threats)
-            addExtraMonitoredDirs(av)
-
-            // Log monitored directories
-            av.monitoredDirectories?.forEach { Log.i(TAG, "Watching: ${it.path}") }
-
-            // Activate the monitor
-            av.setMonitorState(true)
-            Log.i(TAG, "✅ Kaspersky SDK File Monitor ACTIVATED — Real-Time Protection is ON")
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize SDK monitor", e)
         }
     }
 
