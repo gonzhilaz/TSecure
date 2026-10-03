@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -38,9 +39,25 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// Root status check
+	// Root status check & path dispatcher fallback
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
+		// If request was rewritten to /api/index.go, /api/index, or /api
+		if r.URL.Path == "/api/index.go" || r.URL.Path == "/api/index" || r.URL.Path == "/api" {
+			target := r.URL.Query().Get("path")
+			if target == "" {
+				if fwd := r.Header.Get("x-forwarded-uri"); fwd != "" {
+					parts := strings.SplitN(fwd, "?", 2)
+					target = parts[0]
+				}
+			}
+			if target != "" && target != "/api/index.go" && target != "/api/index" && target != "/api" && target != "/" {
+				r.URL.Path = target
+				mux.ServeHTTP(w, r)
+				return
+			}
+		}
+
+		if r.URL.Path != "/" && r.URL.Path != "/api" && r.URL.Path != "/api/index.go" && r.URL.Path != "/api/index" {
 			http.NotFound(w, r)
 			return
 		}
