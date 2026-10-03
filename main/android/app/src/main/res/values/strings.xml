@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TelkomSecure</string>
+    <string name="web_filter_accessibility_label">TelkomSecure - Proteksi Web Filter</string>
     <string name="web_filter_accessibility_description">Layanan TelkomSecure Web Filter memeriksa tautan dan alamat situs web (URL) di peramban secara langsung untuk melindungi Anda dari penipuan daring, phishing perbankan, dan unduhan berbahaya.</string>
 </resources>

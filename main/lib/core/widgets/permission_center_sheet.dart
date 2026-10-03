@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../../data/services/wifi_security_service.dart';
 import 'permission_card_tile.dart';
+import 'web_filter_guide_dialog.dart';
 
 class PermissionCenterSheet extends StatefulWidget {
   const PermissionCenterSheet({super.key});
@@ -163,7 +164,18 @@ class _PermissionCenterSheetState extends State<PermissionCenterSheet> with Widg
                           description: 'Memeriksa URL di Chrome, Edge & browser lain untuk memblokir tautan scam/phishing.',
                           isGranted: _accessibilityGranted,
                           onActivate: () async {
-                            await _kspChannel.invokeMethod('requestAccessibilityPermission');
+                            await WebFilterGuideDialog.show(
+                              context,
+                              onOpenAccessibility: () async {
+                                await _kspChannel.invokeMethod('requestAccessibilityPermission');
+                                await _refreshPermissions();
+                              },
+                              onOpenAppSettings: () async {
+                                await _kspChannel.invokeMethod('openAppSettings');
+                                await _refreshPermissions();
+                              },
+                            );
+                            await _refreshPermissions();
                           },
                         ),
                         const SizedBox(height: 12),

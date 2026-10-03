@@ -359,12 +359,13 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
                     },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     isScanning
                         ? Icons.hourglass_top_rounded
                         : (_hasScannedInSession ? Icons.refresh : Icons.shield_rounded),
-                    size: 22,
+                    size: 20,
                     color: isScanning
                         ? AppColors.slateMuted
                         : ((sdk.threatsDetected > 0) ? Colors.white : AppColors.primary),
@@ -372,12 +373,8 @@ class _PemindaianScreenState extends State<PemindaianScreen> {
                   const SizedBox(width: 8),
                   Text(
                     isScanning
-                        ? 'Sedang Memindai...'
-                        : (_hasScannedInSession
-                            ? 'Pindai Ulang ($_scanModeTitle)'
-                            : 'Mulai Pemindaian'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                        ? 'Memindai...'
+                        : (_hasScannedInSession ? 'Pindai Ulang' : 'Pindai Sekarang'),
                     style: AppTypography.labelLg.copyWith(
                       color: isScanning
                           ? AppColors.slateMuted

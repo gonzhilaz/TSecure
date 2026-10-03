@@ -283,6 +283,7 @@ class MainActivity : FlutterActivity() {
                 "requestLocationPermission" -> result.success(PermissionHelper.requestLocationPermission(this))
                 "checkAccessibilityPermission" -> result.success(PermissionHelper.checkAccessibilityPermission(this))
                 "requestAccessibilityPermission" -> result.success(PermissionHelper.openAccessibilitySettings(this))
+                "openAppSettings" -> result.success(PermissionHelper.openAppSettings(this))
                 "checkInstallPermission" -> result.success(PermissionHelper.checkInstallPermission(this))
                 "requestInstallPermission" -> result.success(PermissionHelper.openInstallPermissionSettings(this))
                 "openAutostartSettings" -> result.success(PermissionHelper.openAutostartSettings(this))
