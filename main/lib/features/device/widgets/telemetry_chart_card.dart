@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../data/services/kaspersky_sdk_bridge.dart';
 
 class TelemetryChartCard extends StatelessWidget {
   final VoidCallback onScanPressed;
@@ -11,8 +13,25 @@ class TelemetryChartCard extends StatelessWidget {
     required this.onScanPressed,
   });
 
+  String _formatRelativeTime(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (diff.inMinutes < 2) {
+      return 'Baru saja';
+    } else if (diff.inMinutes < 60) {
+      return '${diff.inMinutes} menit lalu';
+    } else if (diff.inHours < 24) {
+      return '${diff.inHours} jam lalu';
+    } else {
+      return '${diff.inDays} hari lalu';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ksp = context.watch<KasperskySdkBridge>();
+    final lastScanText = _formatRelativeTime(ksp.lastScanDate);
+
     return Row(
       children: [
         // Left Card: Waktu Terakhir Scan
@@ -42,7 +61,7 @@ class TelemetryChartCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '3 jam yang lalu',
+                      lastScanText,
                       style: AppTypography.bodySm.copyWith(
                         color: AppColors.slateMuted,
                       ),
@@ -51,7 +70,7 @@ class TelemetryChartCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 AppButton(
-                  label: 'Pindai Perangkat',
+                  label: 'Pindai',
                   height: 36,
                   onPressed: onScanPressed,
                 ),

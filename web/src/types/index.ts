@@ -102,3 +102,109 @@ export interface AdminActionResponse {
   message: string;
   subscriber?: Subscriber;
 }
+
+export interface PhishingRecord {
+  id: string;
+  url: string;
+  domain: string;
+  category: 'PHISHING' | 'MALWARE_URL' | 'FAKE_LOGIN' | 'SMISHING' | string;
+  target_brand: string;
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | string;
+  status: 'ACTIVE_THREAT' | 'REPORTED_KOMINFO' | 'TAKEN_DOWN' | 'WHITELISTED' | string;
+  hit_count: number;
+  first_detected_at: string;
+  last_detected_at: string;
+  targeted_msisdns: string[];
+  action_taken: string;
+  ksn_verdict: string;
+  notes: string;
+}
+
+export interface PhishingStats {
+  total_unique_domains: number;
+  total_hits_blocked: number;
+  active_threats_count: number;
+  taken_down_count: number;
+  top_targeted_brands: Record<string, number>;
+}
+
+export interface PhishingStatusUpdateRequest {
+  id: string;
+  status: 'ACTIVE_THREAT' | 'REPORTED_KOMINFO' | 'TAKEN_DOWN' | 'WHITELISTED' | string;
+  notes?: string;
+}
+
+export interface Operator {
+  id: string;
+  name: string;
+  email: string;
+  role: 'SUPERADMIN' | 'SOC_ANALYST' | 'CUSTOMER_CARE' | 'AUDITOR' | string;
+  badge_number: string;
+  is_active: boolean;
+  last_login_at?: string;
+  created_at: string;
+}
+
+export interface OperatorLoginResponse {
+  token: string;
+  operator: Operator;
+  expires_at: string;
+}
+
+export interface AuditLog {
+  id: string;
+  operator_email: string;
+  operator_name: string;
+  action: string;
+  target_resource: string;
+  details: string;
+  ip_address: string;
+  timestamp: string;
+}
+
+export interface IngestionApiKey {
+  id: string;
+  name: string;
+  key: string;
+  source: 'NDP_BILLING' | 'TELCO_PROXY' | 'WAF_GATEWAY' | 'EXTERNAL_SOC' | string;
+  is_active: boolean;
+  created_at: string;
+  last_used_at?: string;
+  request_count: number;
+}
+
+export interface DeadLetterRecord {
+  id: string;
+  source: 'NDP_BILLING' | 'TELCO_PROXY' | string;
+  payload_raw: string;
+  error_message: string;
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | string;
+  status: 'PENDING' | 'REPLAYED' | 'DISCARDED' | string;
+  timestamp: string;
+  resolved_at?: string;
+  notes?: string;
+}
+
+export interface DatabaseMaintenanceStats {
+  data_file_path: string;
+  file_size_bytes: number;
+  total_subscribers: number;
+  total_threats: number;
+  total_phishing_domains: number;
+  total_audit_logs: number;
+  total_dlq_records: number;
+  total_operators: number;
+  last_backup_at?: string;
+  last_retention_run_at?: string;
+  storage_engine: string;
+  health_status: 'HEALTHY' | 'WARNING' | 'DEGRADED' | string;
+}
+
+export interface RetentionRunResult {
+  threats_pruned: number;
+  audit_pruned: number;
+  dlq_pruned: number;
+  executed_at: string;
+}
+
+

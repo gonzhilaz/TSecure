@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Shield, Radio, Activity, RefreshCw, LogOut, User, Volume2, VolumeX } from 'lucide-react';
+import { Shield, Radio, Activity, RefreshCw, LogOut, User, Volume2, VolumeX, Trash2 } from 'lucide-react';
 import { SOCOperator } from '@/lib/auth';
 import { isSoundEnabled, setSoundEnabled } from '@/lib/soundAlert';
 
@@ -9,6 +9,7 @@ interface HeaderProps {
   isConnected: boolean;
   onRefresh: () => void;
   isRefreshing: boolean;
+  onClearData?: () => void;
   operator?: SOCOperator | null;
   onLogout?: () => void;
 }
@@ -17,15 +18,17 @@ export const Header: React.FC<HeaderProps> = ({
   isConnected,
   onRefresh,
   isRefreshing,
+  onClearData,
   operator,
   onLogout,
 }) => {
   const [timeStr, setTimeStr] = useState<string>('');
-  const [soundActive, setSoundActive] = useState<boolean>(true);
-
-  useEffect(() => {
-    setSoundActive(isSoundEnabled());
-  }, []);
+  const [soundActive, setSoundActive] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return isSoundEnabled();
+    }
+    return true;
+  });
 
   const handleToggleSound = () => {
     const next = !soundActive;
@@ -121,6 +124,18 @@ export const Header: React.FC<HeaderProps> = ({
             <RefreshCw className={`w-3.5 h-3.5 text-[#5e3f3c] ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>Sync</span>
           </button>
+
+          {/* Clear / Reset Action */}
+          {onClearData && (
+            <button
+              onClick={onClearData}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-red-50 border border-slate-200 hover:border-red-200 text-xs font-semibold text-slate-700 hover:text-red-600 transition-all active:scale-95 shadow-xs"
+              title="Bersihkan riwayat ancaman dan log aktivitas untuk pengujian bersih"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Clear Data</span>
+            </button>
+          )}
 
           {/* Operator Profile & Logout */}
           {operator && (

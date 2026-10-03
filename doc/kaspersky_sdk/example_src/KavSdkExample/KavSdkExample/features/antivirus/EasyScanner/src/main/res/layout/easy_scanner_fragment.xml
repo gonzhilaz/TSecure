@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@android:id/tabcontent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/default_side_padding">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/str_antivirus_easy_scanner_mode"/>
+
+        <RadioGroup
+            android:id="@+id/RadioGroupActionEasyScannerMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/easyScannerBasic"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_antivirus_easy_scanner_basic">
+            </RadioButton>
+
+            <RadioButton
+                android:id="@+id/easyScannerLight"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_antivirus_easy_scanner_light">
+            </RadioButton>
+
+            <RadioButton
+                android:id="@+id/easyScannerLightPlus"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_antivirus_easy_scanner_light_plus">
+            </RadioButton>
+
+            <RadioButton
+                android:id="@+id/easyScannerRecommended"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_antivirus_easy_scanner_recommended">
+            </RadioButton>
+
+            <RadioButton
+                android:id="@+id/easyScannerFull"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_antivirus_easy_scanner_full">
+            </RadioButton>
+
+        </RadioGroup>
+
+
+        <TextView
+            android:id="@+id/textViewActionIfNotCured"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/str_antivirus_easy_scanner_action"
+            />
+
+        <RadioGroup
+            android:id="@+id/RadioGroupActionIfNotCured"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/deleteIfNotCured"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_antivirus_delete_threat">
+            </RadioButton>
+
+            <RadioButton
+                android:id="@+id/quarantineIfNotCured"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_antivirus_quarantine_threat">
+            </RadioButton>
+
+            <RadioButton
+                android:id="@+id/skipIfNotCured"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_antivirus_skip_threat">
+            </RadioButton>
+        </RadioGroup>
+
+        <include
+            android:id="@+id/StartScan"
+            layout="@layout/command_item"/>
+
+        <include
+            android:id="@+id/PauseScan"
+            layout="@layout/command_item"/>
+
+    </LinearLayout>
+</ScrollView>

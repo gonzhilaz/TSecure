@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/stitch_icons.dart';
 
 /// Fixed Bottom Navigation Bar matching Stitch design specification:
-/// - Exact 64px row height (h-[64px]) wrapped in SafeArea so it's never squished
-/// - Top active indicator bar (h-[3px] bg-primary rounded-b-sm)
-/// - Center elevated scan button (-translate-y-2.5, 48x48 rounded-2xl)
-/// - Exact Stitch icons: grid_view, smartphone, document_scanner, history, person
+/// - Exact 64px row height wrapped in SafeArea
+/// - Top active indicator bar (w-8 h-0.5 bg-primary rounded-full)
+/// - Center elevated scan button (-translate-y-2.5, rounded-2xl with red glow)
+/// - Pixel-perfect Stitch SVG icons: 2x2 grid, smartphone, scanner target, clock arrow, user outline
 class CustomBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTabSelected;
@@ -22,12 +23,12 @@ class CustomBottomNav extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: const Border(
-          top: BorderSide(color: AppColors.slateBorder, width: 1),
+          top: BorderSide(color: Color(0xFFF1F5F9), width: 1),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 20,
+            color: const Color(0xFF0B132B).withValues(alpha: 0.05),
+            blurRadius: 16,
             offset: const Offset(0, -4),
           ),
         ],
@@ -35,34 +36,34 @@ class CustomBottomNav extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: 64, // Exact Stitch design: h-[64px]
+          height: 60,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. Beranda (Active indicator on top)
+              // 1. Beranda (Grid 2x2 outline)
               _buildNavItem(
                 index: 0,
-                icon: Icons.grid_view_rounded,
+                svgIcon: StitchIcons.navDashboard,
                 isSelected: currentIndex == 0,
               ),
-              // 2. Perangkat
+              // 2. Perangkat (Smartphone outline with dot)
               _buildNavItem(
                 index: 1,
-                icon: Icons.phone_android_rounded,
+                svgIcon: StitchIcons.navDevices,
                 isSelected: currentIndex == 1,
               ),
-              // 3. Center elevated Scan button (-translate-y-2.5)
+              // 3. Center elevated Scan button
               _buildCenterScanButton(),
-              // 4. Riwayat Aktivitas
+              // 4. Riwayat Aktivitas (Clock counter-clockwise)
               _buildNavItem(
                 index: 3,
-                icon: Icons.history_rounded,
+                svgIcon: StitchIcons.navHistory,
                 isSelected: currentIndex == 3,
               ),
-              // 5. Profil
+              // 5. Profil (User outline)
               _buildNavItem(
                 index: 4,
-                icon: Icons.person_rounded,
+                svgIcon: StitchIcons.navProfile,
                 isSelected: currentIndex == 4,
               ),
             ],
@@ -74,9 +75,11 @@ class CustomBottomNav extends StatelessWidget {
 
   Widget _buildNavItem({
     required int index,
-    required IconData icon,
+    required String svgIcon,
     required bool isSelected,
   }) {
+    final color = isSelected ? AppColors.primary : AppColors.slateMuted;
+
     return Expanded(
       child: Material(
         color: Colors.transparent,
@@ -87,26 +90,25 @@ class CustomBottomNav extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Top active indicator (Stitch: h-[3px] bg-primary rounded-b-sm left-4 right-4)
+              // Top active indicator (Stitch: w-8 h-0.5 bg-brand-red rounded-full)
               Positioned(
                 top: 0,
-                left: 12,
-                right: 12,
                 child: Container(
-                  height: 3,
+                  width: 32,
+                  height: 2.5,
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.primary : Colors.transparent,
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(2),
-                    ),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
-              // Tab Icon (Stitch: text-[24px])
-              Icon(
-                icon,
-                size: 24,
-                color: isSelected ? AppColors.primary : AppColors.slateMuted,
+              // Tab Icon using exact Stitch SVG
+              Center(
+                child: StitchSvg(
+                  svgString: svgIcon,
+                  size: 24,
+                  color: color,
+                ),
               ),
             ],
           ),
@@ -120,18 +122,18 @@ class CustomBottomNav extends StatelessWidget {
     return Expanded(
       child: Center(
         child: Transform.translate(
-          offset: const Offset(0, -10), // Stitch: -translate-y-2.5 (~10px elevated)
+          offset: const Offset(0, -10),
           child: GestureDetector(
             onTap: () => onTabSelected(2),
             child: Container(
-              width: 48, // Stitch: w-12 (48px)
-              height: 48, // Stitch: h-12 (48px)
+              width: 52,
+              height: 52,
               decoration: BoxDecoration(
                 color: AppColors.primary,
-                borderRadius: BorderRadius.circular(16), // Stitch: rounded-2xl
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.38),
+                    color: AppColors.primary.withValues(alpha: 0.40),
                     blurRadius: 16,
                     offset: const Offset(0, 6),
                   ),
@@ -141,9 +143,9 @@ class CustomBottomNav extends StatelessWidget {
                     : null,
               ),
               child: const Center(
-                child: Icon(
-                  Icons.document_scanner_rounded, // Stitch: document_scanner text-[26px]
-                  size: 26,
+                child: StitchSvg(
+                  svgString: StitchIcons.navScan,
+                  size: 24,
                   color: Colors.white,
                 ),
               ),

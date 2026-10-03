@@ -1,0 +1,22 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.kavsdkexample.antiphishing">
+
+    <application>
+        <activity
+            android:name=".view.impl.WebFilterActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleInstance"
+            android:windowSoftInputMode="stateHidden"/>
+
+        <activity
+            android:name=".view.impl.AddExclusionActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.INSERT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

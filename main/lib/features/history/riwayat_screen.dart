@@ -4,7 +4,10 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/activity_detail_sheet.dart';
 import '../../core/widgets/notification_center_sheet.dart';
+import '../../core/widgets/scan_threat_detail_sheet.dart';
 import '../../core/widgets/tri_state_view.dart';
+import '../../data/services/kaspersky_sdk_bridge.dart';
+import '../../data/services/threat_manager_service.dart';
 import 'history_controller.dart';
 import 'widgets/history_log_item.dart';
 import 'widgets/monthly_summary_card.dart';
@@ -103,7 +106,18 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                         const SizedBox(height: 12),
                         ...logList.map((log) => HistoryLogItem(
                               log: log,
-                              onTap: () => ActivityDetailSheet.show(context, log),
+                              onTap: () {
+                                if (!log.isSafe || log.threats.isNotEmpty) {
+                                  ScanThreatDetailSheet.show(
+                                    context,
+                                    log: log,
+                                    threatManager: context.read<ThreatManagerService>(),
+                                    kasperskySdk: context.read<KasperskySdkBridge>(),
+                                  );
+                                } else {
+                                  ActivityDetailSheet.show(context, log);
+                                }
+                              },
                             )),
                         const SizedBox(height: 20),
                       ],

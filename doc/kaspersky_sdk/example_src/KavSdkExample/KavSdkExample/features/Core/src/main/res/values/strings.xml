@@ -1,0 +1,28 @@
+<resources>
+    <string name="str_notification_channel_name">KavSdkExample channel</string>
+    <string name="str_notification_channel_desc">KavSdkExample channel description</string>
+
+    <string name="str_core_loading_application">Loading&#8230;</string>
+    <string name="str_core_check_button">Check</string>
+    <string name="str_core_cancel_button">Cancel</string>
+    <string name="str_loading">Please wait</string>
+
+    <string name="str_kav_error_ok">KAV_OK</string>
+    <string name="str_kav_error_license_expired">KAV_LICENSE_VIOLATION</string>
+
+    <string name="ok_button_text">OK</string>
+
+    <!-- select directory fragment-->
+    <string name="str_directory_chooser_selected_folder">Selected folder</string>
+    <string name="str_directory_chooser_hint_empty_subfolder">[No subfolders]</string>
+    <string name="str_directory_chooser_go_up_content_desc">Go up</string>
+
+    <!-- select application fragment-->
+    <string name="str_application_chooser_title">Select an application</string>
+    <string name="str_application_chooser_loading_hint">Loading applications &#8230;</string>
+    <string name="str_accessibility_desc">Enable this service to make your antivirus unconquerable</string>
+
+    <string name="str_directorydocumentchooserfragment_failed_to_choose_text">Failed to choose external storage</string>
+    <string name="str_directorydocumentchooserfragment_chosen_root_point">"Chosen root point '%1$s' isn't SdCard.\nDo you want change a root point?"</string>
+    <string name="str_directorydocumentchooserfragment_chosen_wrong_volume">"Chosen root point '%1$s' has not '%2$s' volume.\nDo you want change a root point?"</string>
+</resources>

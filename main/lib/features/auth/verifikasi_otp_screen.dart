@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -128,7 +129,7 @@ class _VerifikasiOtpScreenState extends State<VerifikasiOtpScreen> {
   @override
   Widget build(BuildContext context) {
     final authController = context.watch<AuthController>();
-    final mockOtp = authController.lastMockOtp ?? '123456';
+    final mockOtp = authController.lastMockOtp;
     final countdown = authController.resendCountdown;
 
     return Scaffold(
@@ -153,8 +154,10 @@ class _VerifikasiOtpScreenState extends State<VerifikasiOtpScreen> {
               _buildHeaderInfo(),
               const SizedBox(height: 28),
               _buildOtpInputs(),
-              const SizedBox(height: 20),
-              _buildDemoAssistantChip(mockOtp),
+              if (kDebugMode && mockOtp != null && mockOtp.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                _buildQuickFillSection(mockOtp),
+              ],
               const SizedBox(height: 36),
               AppButton(
                 label: 'Verifikasi & Lanjutkan',
@@ -242,53 +245,71 @@ class _VerifikasiOtpScreenState extends State<VerifikasiOtpScreen> {
     );
   }
 
-  Widget _buildDemoAssistantChip(String mockOtp) {
+  Widget _buildQuickFillSection(String mockOtp) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          const Icon(Icons.mark_email_unread_outlined, size: 20, color: AppColors.primary),
-          const SizedBox(width: 10),
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.sms_outlined, size: 20, color: AppColors.primary),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Simulasi SMS Gateway Telkomsel',
-                  style: TextStyle(
-                    fontSize: 11,
+                  'SMS OTP Diterima',
+                  style: AppTypography.labelMd.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
+                    color: AppColors.navyDeep,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
-                  'Gunakan kode POC: $mockOtp',
-                  style: const TextStyle(fontSize: 12, color: AppColors.navyDeep),
+                  'Isi otomatis dari verifikasi Telkomsel',
+                  style: AppTypography.bodySm.copyWith(
+                    fontSize: 11,
+                    color: AppColors.slateMuted,
+                  ),
                 ),
               ],
             ),
           ),
-          InkWell(
-            onTap: () => _fillMockOtp(mockOtp),
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(8),
+          ElevatedButton(
+            onPressed: () => _fillMockOtp(mockOtp),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: const Text(
-                'Isi Cepat',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
+            ),
+            child: const Text(
+              'Isi Cepat',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),

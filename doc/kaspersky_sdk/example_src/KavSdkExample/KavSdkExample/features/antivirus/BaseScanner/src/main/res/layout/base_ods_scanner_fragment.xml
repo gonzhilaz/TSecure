@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/tabcontent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/default_side_padding" >
+
+        <LinearLayout
+            android:id="@+id/scanner_controls_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+        <TextView
+            style="@style/Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/str_antivirus_on_demand_scanner_settings"
+            />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/CloudScanOnly"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:saveEnabled="false"
+            android:text="@string/str_antivirus_scan_cloud_only" >
+        </androidx.appcompat.widget.SwitchCompat>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/ScanUds"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:saveEnabled="false"
+            android:text="@string/str_antivirus_scan_check_in_cloud" >
+        </androidx.appcompat.widget.SwitchCompat>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/ScanSuspicious"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:saveEnabled="false"
+            android:text="@string/str_antivirus_scan_suspicious" >
+        </androidx.appcompat.widget.SwitchCompat>
+        
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/ScanDetectRiskwareAdware"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:saveEnabled="false"
+            android:text="@string/str_antivirus_scan_detect_riskware_adware" >
+        </androidx.appcompat.widget.SwitchCompat>
+       
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/ScanTryCure"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:saveEnabled="false"
+            android:text="@string/str_antivirus_scan_try_cure" >
+        </androidx.appcompat.widget.SwitchCompat>
+
+        <TextView
+            android:id="@+id/textViewActionIfNotCured"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/str_antivirus_scan_action_in_not_cured"
+            />
+
+        <RadioGroup
+            android:id="@+id/RadioGroupActionIfNotCured"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <RadioButton
+                style="@style/TextSmall"
+                android:id="@+id/deleteIfNotCured"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_antivirus_delete_threat" >
+            </RadioButton>
+
+            <RadioButton
+                style="@style/TextSmall"
+                android:id="@+id/quarantineIfNotCured"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_antivirus_quarantine_threat" >
+            </RadioButton>
+
+            <RadioButton
+                style="@style/TextSmall"
+                android:id="@+id/skipIfNotCured"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_antivirus_skip_threat" >
+            </RadioButton>
+        </RadioGroup>
+
+        <TextView
+			style="@style/TextMedium"
+            android:id="@+id/textViewScan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/str_antivirus_scan_radiobutton"
+            />
+
+        <RadioGroup
+            android:id="@+id/ObjectsToScan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <RadioButton
+               	style="@style/TextSmall"
+                android:id="@+id/ScanInstalledAppsRadio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/str_antivirus_scan_installed_applications"
+                android:saveEnabled="false" >
+            </RadioButton>
+
+            <RadioButton
+               	style="@style/TextSmall"
+                android:id="@+id/ScanInstalledAppRadio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/str_antivirus_scan_installed_application"
+                android:saveEnabled="false" >
+            </RadioButton>
+
+            <RadioButton
+                style="@style/TextSmall"
+                android:id="@+id/ScanAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/str_antivirus_scan_all_files"
+                android:saveEnabled="false" >
+            </RadioButton>
+            
+            <RadioButton
+                style="@style/TextSmall"
+                android:id="@+id/ScanMemory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/str_antivirus_scan_phone_memory"
+                android:saveEnabled="false" >
+            </RadioButton>
+            
+            <RadioButton
+                style="@style/TextSmall"
+                android:id="@+id/ScanSelectedFolder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/str_antivirus_scan_selected_folder"
+                android:saveEnabled="false" >
+            </RadioButton>
+
+            <RadioButton
+                style="@style/TextSmall"
+                android:id="@+id/ScanFile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/str_antivirus_scan_file"
+                android:saveEnabled="false" >
+            </RadioButton>
+
+            <RadioButton
+                style="@style/TextSmall"
+                android:id="@+id/ScanSelectedDirectoryDocument"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/str_antivirus_scan_selected_directory_document"
+                android:saveEnabled="false" >
+            </RadioButton>
+
+            <RadioButton
+                style="@style/TextSmall"
+                android:id="@+id/ScanSelectedDocument"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/str_antivirus_scan_selected_document"
+                android:saveEnabled="false" >
+            </RadioButton>
+            
+       </RadioGroup>
+
+       <include
+           layout="@layout/command_item"
+           android:id="@+id/StartScan" />
+
+       <include
+           layout="@layout/command_item"
+           android:id="@+id/PauseScan" />
+
+	</LinearLayout>
+</ScrollView>

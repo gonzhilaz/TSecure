@@ -3,11 +3,14 @@ import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 
 class ScanOptionsSheet extends StatelessWidget {
-  final ValueChanged<String> onSelectOption;
+  final void Function(String title, String code) onSelectOption;
 
   const ScanOptionsSheet({super.key, required this.onSelectOption});
 
-  static void show(BuildContext context, {required ValueChanged<String> onSelect}) {
+  static void show(
+    BuildContext context, {
+    required void Function(String title, String code) onSelect,
+  }) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -18,10 +21,30 @@ class ScanOptionsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final options = [
-      _ScanMode('Pindai Cepat', 'Inspeksi memori aktif dan aplikasi terinstal', Icons.flash_on_rounded),
-      _ScanMode('Pindai Penuh (Rekomendasi)', 'Inspeksi menyeluruh OS, berkas sistem, & partisi internal', Icons.radar_rounded),
-      _ScanMode('Pindai Folder Unduhan', 'Inspeksi berkas APK eksternal dan folder Download', Icons.folder_open_rounded),
-      _ScanMode('Uji Validasi EICAR (Test Lab)', 'Verifikasi deteksi mesin dengan sampel standar EICAR', Icons.science_rounded),
+      _ScanMode(
+        'Pindai Cepat (Quick Scan)',
+        'Inspeksi cepat aplikasi terpasang & memori kerja sistem',
+        Icons.flash_on_rounded,
+        'QUICK',
+      ),
+      _ScanMode(
+        'Pindai Penuh (Full Scan)',
+        'Inspeksi menyeluruh semua berkas penyimpanan internal, kartu SD, & aplikasi',
+        Icons.phone_android_rounded,
+        'FULL',
+      ),
+      _ScanMode(
+        'Pindai Rekomendasi (Recommended)',
+        'Inspeksi berkas sistem & partisi rentan rekomendasi Kaspersky',
+        Icons.radar_rounded,
+        'RECOMMENDED',
+      ),
+      _ScanMode(
+        'Pindai Folder Unduhan (Folder Scan)',
+        'Inspeksi berkas APK eksternal & dokumen di folder Download',
+        Icons.folder_open_rounded,
+        'FOLDER',
+      ),
     ];
 
     return Container(
@@ -48,11 +71,16 @@ class ScanOptionsSheet extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Pilihan Mode Pemindaian',
+              '4 Mode Pemindaian Kaspersky SDK',
               style: AppTypography.headlineSm.copyWith(
                 fontWeight: FontWeight.w700,
                 color: AppColors.navyDeep,
               ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Pilih cakupan pemindaian sesuai kebutuhan keamanan perangkat Anda',
+              style: AppTypography.bodySm.copyWith(color: AppColors.slateMuted),
             ),
             const SizedBox(height: 14),
             ...options.map((opt) {
@@ -79,7 +107,7 @@ class ScanOptionsSheet extends StatelessWidget {
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  onSelectOption(opt.title);
+                  onSelectOption(opt.title, opt.code);
                 },
               );
             }),
@@ -95,5 +123,6 @@ class _ScanMode {
   final String title;
   final String desc;
   final IconData icon;
-  _ScanMode(this.title, this.desc, this.icon);
+  final String code;
+  _ScanMode(this.title, this.desc, this.icon, this.code);
 }

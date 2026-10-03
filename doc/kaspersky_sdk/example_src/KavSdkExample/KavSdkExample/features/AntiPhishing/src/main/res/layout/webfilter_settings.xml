@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical" >
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/WfEnable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_webfilter_enable_webfilter"/>
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/WfExtCategories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_webfilter_use_extended_categories"/>
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/WfIgnorePowerSaveMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_webfilter_ignore_power_save_mode"/>
+    <TextView
+        android:id="@+id/WfIgnorePowerSaveModeInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/str_webfilter_ignore_power_save_mode_info"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/webfilter_proxy_port_caption"/>
+    <EditText
+        android:id="@+id/webFilterProxyPort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_webfilter_proxy_port"
+        android:inputType="number"/>
+    <TextView
+        android:id="@+id/textViewProxyInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/str_webfilter_proxy_info"/>
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switchWifiProxyState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_webfilter_enable_wifi_proxy_button"/>
+    <Button
+        android:filterTouchesWhenObscured="true"
+        android:id="@+id/selCategoryButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_webfilter_view_or_select_categories" />
+    <Button
+        android:filterTouchesWhenObscured="true"
+        android:id="@+id/accessibilyEnableButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_antivirus_accessibility_enable" />
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/str_webfilter_exclusions"/>
+    <ListView
+        android:id="@+id/wfItemsList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:cacheColorHint="@android:color/transparent"/>
+</LinearLayout>

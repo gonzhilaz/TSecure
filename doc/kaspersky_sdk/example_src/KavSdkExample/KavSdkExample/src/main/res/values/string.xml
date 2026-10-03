@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KavSdkExample</string>
+
+    <string name="str_sdk_loading_time">SDK initialization took %s ms</string>
+    <string name="str_sdk_init_error_tab_name">Init error</string>
+    <string name="str_sdk_license_network_error">Cannot init SDK: network problems.\nDetails: %s</string>
+    <string name="str_sdk_license_date_error">Cannot init SDK: date on the device is incorrect.\nDetails: %s</string>
+    <string name="str_sdk_license_invalid_error">License is not valid\nDetails: %s</string>
+    <string name="str_sdk_initialization_error">"There was an exception with message '%s' during SDK initialization, see details in logcat"</string>
+
+    <string name="str_license_expired">Expiration date: </string>
+    <string name="str_license_hashOfHardwaredId">Hash of Hardware ID:</string>
+    <string name="str_license_installationId">Installation ID:</string>
+    <string name="str_license_successful_activation">License activation successful</string>
+    <string name="str_license_retry">Retry</string>
+    <string name="str_license_not_available">N/A</string>
+
+    <string name="str_insufficient_permissions_fragment_title">SDK is not fully functional without following permissions:</string>
+    <string name="str_insufficient_permissions_fragment_try_again_button">Try again</string>
+    <string name="str_insufficient_permissions_fragment_proceed">Ignore</string>
+
+    <string name="str_notification_ticker_text">Monitoring</string>
+    <string name="str_notification_title">KavSdkExample</string>
+    <string name="str_notification_message">Open KavSdkExample</string>
+
+    <string name="str_tab_insufficient_permissions_title">Insufficient permissions</string>
+    <string name="str_tab_anti_phishing_title">Anti-Phishing and Fake Apps Protection</string>
+    <string name="str_tab_av_protection_tab">Anti-Virus Protection</string>
+    <string name="str_tab_device_reputation_title">Device Reputation</string>
+    <string name="str_tab_data_protection_title">Data Protection</string>
+    <string name="str_tab_secure_connectivity_title">Secure Connectivity</string>
+    <string name="str_tab_license_info_title">License information</string>
+    <string name="str_tab_other_features_title">Other Features</string>
+    <string name="str_tab_privacy_title">Privacy</string>
+
+    <string name="str_enter_code_activation_code_label">Activation code</string>
+    <string name="str_enter_code_activation_code_hint">Enter activation code</string>
+    <string name="str_enter_code_activate">Activate</string>
+    <string name="str_enter_code_user_id_label">User ID</string>
+    <string name="str_enter_code_user_id_hint">Enter user ID</string>
+    <string name="str_enter_code_send">Send user ID</string>
+
+    <string name="str_av_protection_pua_protection">Potentially Unwanted Apps Protection</string>
+    <string name="str_av_protection_oas">On-Access Scanner</string>
+    <string name="str_av_protection_info_message">\"This app writes all events into logcat. Check logcat output for com.kavsdkexample application\"</string>
+
+    <string name="str_proxy_login_caption_text">Login:</string>
+    <string name="str_proxy_password_caption_text">Password:</string>
+</resources>

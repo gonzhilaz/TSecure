@@ -6,6 +6,7 @@ import '../../core/widgets/advanced_security_hub_sheet.dart';
 import '../../core/widgets/notification_center_sheet.dart';
 import '../../core/widgets/security_feature_sheet.dart';
 import '../../core/widgets/tri_state_view.dart';
+import '../../data/services/kaspersky_sdk_bridge.dart';
 import 'dashboard_controller.dart';
 import 'widgets/protection_status_card.dart';
 import 'widgets/recent_activity_preview.dart';
@@ -28,13 +29,47 @@ class BerandaScreen extends StatefulWidget {
   State<BerandaScreen> createState() => _BerandaScreenState();
 }
 
-class _BerandaScreenState extends State<BerandaScreen> {
+class _BerandaScreenState extends State<BerandaScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DashboardController>().loadDashboardData();
+      context.read<KasperskySdkBridge>().checkFullStoragePermission();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      context.read<KasperskySdkBridge>().checkFullStoragePermission();
+      context.read<DashboardController>().loadDashboardData();
+    }
+  }
+
+  String _formatLastScan(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (diff.inMinutes < 2) {
+      return 'Baru saja';
+    } else if (diff.inMinutes < 60) {
+      return '${diff.inMinutes} menit yang lalu';
+    } else if (diff.inHours < 24 && date.day == now.day) {
+      final hour = date.hour.toString().padLeft(2, '0');
+      final minute = date.minute.toString().padLeft(2, '0');
+      return 'Hari ini, $hour:$minute WIB';
+    } else {
+      final hour = date.hour.toString().padLeft(2, '0');
+      final minute = date.minute.toString().padLeft(2, '0');
+      return '${date.day}/${date.month}/${date.year}, $hour:$minute WIB';
+    }
   }
 
   @override
@@ -48,7 +83,25 @@ class _BerandaScreenState extends State<BerandaScreen> {
         leading: Padding(
           padding: const EdgeInsets.only(left: 16.0),
           child: IconButton(
-            icon: const Icon(Icons.notifications_none_rounded),
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.notifications_none_rounded, size: 22),
+                Positioned(
+                  top: 1,
+                  right: 1,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                  ),
+                ),
+              ],
+            ),
             onPressed: () => NotificationCenterSheet.show(context),
             style: IconButton.styleFrom(
               backgroundColor: AppColors.slateDivider,
@@ -85,12 +138,12 @@ class _BerandaScreenState extends State<BerandaScreen> {
                 SecurityGaugeCard(
                   securityScore: controller.securityScore,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 ProtectionStatusCard(
                   securityScore: controller.securityScore,
                   isRealtimeActive:
                       controller.kasperskySdk.realtimeProtection,
-                  lastScanText: 'Hari ini, 09:42 WIB',
+                  lastScanText: _formatLastScan(controller.kasperskySdk.lastScanDate),
                   onScanPressed: widget.onNavigateToScanner,
                   onRealtimeToggled: controller.toggleRealtimeProtection,
                 ),

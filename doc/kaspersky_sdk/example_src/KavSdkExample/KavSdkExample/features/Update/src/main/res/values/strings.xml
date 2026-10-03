@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="str_updates_select_component">Components to update</string>
+    <string name="str_updates_select_update_server">Update server</string>
+    <string name="str_updates_random_server">Random server</string>
+    <string name="str_updates_start_update">Update</string>
+    <string name="str_updates_cancel_update">Cancel update</string>
+    <string name="str_updates_details">Update result details</string>
+    <string name="str_updates_specified_server">Specific server</string>
+    <string name="str_updates_feature_tab">Updates</string>
+    <string name="str_update_component_all">All components</string>
+    <string name="str_update_component_antivirus_protection">Anti-Virus Protection</string>
+    <string name="str_error_license_expired">License expired</string>
+    <string name="str_updates_update_started">Update started</string>
+    <string name="str_updates_server_changed">Update server changed: %s</string>
+    <string name="str_updates_server_selected">Update server selected: %s</string>
+    <string name="str_updates_bases_downloaded">Bases downloaded</string>
+    <string name="str_updates_bases_applied">Bases applied</string>
+    <string name="str_updates_update_finished_succesfully">Update finished: successful</string>
+    <string name="str_updates_update_finished_no_new_bases">Update finished: no new bases found</string>
+    <string name="str_updates_update_finished_failed_no_connection">Update finished: unable to connect to the update server</string>
+    <string name="str_updates_update_finished_failed_no_disk_space">Update finished: not enough disk space to download updates</string>
+    <string name="str_updates_update_finished_failed">Update finished: update failed</string>
+    <string name="str_updates_update_finished_canceled">Update finished: update canceled</string>
+    <string name="str_updates_update_finished_canceled_date_incorrect">Update finished: date incorrect</string>
+    <string name="str_updates_update_finished_bases_corrupted">Update finished: bases corrupted</string>
+    <string name="str_updates_update_finished_with_result_code">Update finished: result code %d</string>
+    <string name="str_updates_waiting_for_another_update_finished">Waiting for another update finished (%s)</string>
+    <string name="str_wrong_component">Wrong component</string>
+    <string name="str_failed_to_create_updater">Failed to create updater instance</string>
+    <string name="str_updates_selected_update_component">Selected component: %1$s (%2$d)</string>
+    <string name="str_malformed_url_exception">MalformedURLException: %1$s</string>
+    
+</resources>

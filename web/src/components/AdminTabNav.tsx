@@ -1,9 +1,18 @@
 'use client';
 
 import React from 'react';
-import { Shield, Headphones, Smartphone, Cpu, FileText } from 'lucide-react';
+import { Shield, Headphones, Smartphone, Cpu, FileText, Globe, Users, Server, Database } from 'lucide-react';
 
-export type DashboardTab = 'overview' | 'helpdesk' | 'device_integrity' | 'ndp_simulator' | 'reports';
+export type DashboardTab =
+  | 'overview'
+  | 'phishing_intel'
+  | 'helpdesk'
+  | 'device_integrity'
+  | 'ingestion_dlq'
+  | 'users_rbac'
+  | 'db_maintenance'
+  | 'reports'
+  | 'ndp_simulator';
 
 interface AdminTabNavProps {
   activeTab: DashboardTab;
@@ -12,6 +21,8 @@ interface AdminTabNavProps {
   desyncCount?: number;
   rootedCount?: number;
   simSwapCount?: number;
+  activePhishingCount?: number;
+  pendingDlqCount?: number;
 }
 
 export const AdminTabNav: React.FC<AdminTabNavProps> = ({
@@ -21,6 +32,8 @@ export const AdminTabNav: React.FC<AdminTabNavProps> = ({
   desyncCount = 0,
   rootedCount = 0,
   simSwapCount = 0,
+  activePhishingCount = 0,
+  pendingDlqCount = 0,
 }) => {
   const helpdeskIssues = smsFailedCount + desyncCount;
   const integrityIssues = rootedCount + simSwapCount;
@@ -36,13 +49,41 @@ export const AdminTabNav: React.FC<AdminTabNavProps> = ({
     {
       id: 'overview',
       label: 'SOC & Telemetri',
-      description: 'Live telemetry & threat intelligence',
+      description: 'Live telemetry & threat stream',
       icon: Shield,
+    },
+    {
+      id: 'phishing_intel',
+      label: 'Phishing Threat Intel',
+      description: 'URL jahat & takedown CSIRT',
+      icon: Globe,
+      badgeCount: activePhishingCount,
+      badgeColor: 'bg-[#ed0226] text-white',
+    },
+    {
+      id: 'ingestion_dlq',
+      label: 'Ingestion Gateway & DLQ',
+      description: 'NDP, Proxy, & error mitigation',
+      icon: Server,
+      badgeCount: pendingDlqCount,
+      badgeColor: 'bg-[#dc2626] text-white',
+    },
+    {
+      id: 'users_rbac',
+      label: 'User Management & RBAC',
+      description: 'Operator, peran, & audit trail',
+      icon: Users,
+    },
+    {
+      id: 'db_maintenance',
+      label: 'Database Lifecycle',
+      description: 'Backup, snapshot, & retensi',
+      icon: Database,
     },
     {
       id: 'helpdesk',
       label: 'Customer Care & Lisensi',
-      description: 'Pencarian unik, masa aktif, & lisensi',
+      description: 'Pencarian & masa aktif B2B',
       icon: Headphones,
       badgeCount: helpdeskIssues,
       badgeColor: 'bg-[#ed0226] text-white',
@@ -50,7 +91,7 @@ export const AdminTabNav: React.FC<AdminTabNavProps> = ({
     {
       id: 'device_integrity',
       label: 'Device Integrity & SIM',
-      description: 'Root, tamper, & SIM swap audit',
+      description: 'Root, tamper, & SIM watch',
       icon: Smartphone,
       badgeCount: integrityIssues,
       badgeColor: 'bg-[#f59e0b] text-white',
@@ -58,20 +99,20 @@ export const AdminTabNav: React.FC<AdminTabNavProps> = ({
     {
       id: 'reports',
       label: 'Laporan & Ekspor Audit',
-      description: 'Download CSV, Excel, & PDF resmi',
+      description: 'Download CSV, Excel, & PDF',
       icon: FileText,
     },
     {
       id: 'ndp_simulator',
-      label: 'NDP & Billing Simulator',
-      description: 'Simulasi pembelian & expired paket',
+      label: 'NDP Simulator',
+      description: 'Simulasi pembelian & billing',
       icon: Cpu,
     },
   ];
 
   return (
     <div className="bg-white border border-[#e9bcb8]/80 rounded-2xl p-2 shadow-sm mb-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-9 gap-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

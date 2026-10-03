@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="appcontrol_lists">
+        <item>block list</item>
+        <item>allow list</item>
+    </string-array>
+</resources>

@@ -1,0 +1,319 @@
+package com.telkomsel.secure.telkomsel_secure
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.os.Environment
+import android.os.IBinder
+import android.util.Log
+import androidx.core.app.NotificationCompat
+import com.kavsdk.antivirus.AntivirusInstance
+import com.kavsdk.antivirus.MonitorConstants
+import com.kavsdk.antivirus.MonitorEventListener
+import com.kavsdk.antivirus.MonitoringListener
+import com.kavsdk.antivirus.MonitorNotifyConstants
+import com.kavsdk.antivirus.ThreatInfo
+import com.kavsdk.antivirus.ThreatType
+import com.telkomsel.secure.telkomsel_secure.receivers.BootReceiver
+import java.io.File
+import kotlin.concurrent.thread
+
+/**
+ * Enterprise Real-Time Protection (RTP) Service for TelkomSecure.
+ *
+ * Integrates with the genuine Kaspersky Mobile SDK file monitor to detect
+ * threats as files are created, modified, or moved on the device storage.
+ * Runs as a foreground service with START_STICKY for persistence.
+ */
+class RealtimeSecurityService : Service() {
+
+    companion object {
+        private const val TAG = "TelkomRTP"
+        private const val STATUS_CHANNEL_ID = "telkom_realtime_protection"
+        private const val STATUS_NOTIFICATION_ID = 2026
+        private const val THREAT_CHANNEL_ID = "telkom_threat_alerts"
+        private const val THREAT_NOTIFICATION_ID_BASE = 3000
+        private const val EXTRA_THREAT_ACTION = "extra_threat_action"
+
+        fun start(context: Context, threatAction: String = "delete") {
+            val intent = Intent(context, RealtimeSecurityService::class.java).apply {
+                putExtra(EXTRA_THREAT_ACTION, threatAction)
+            }
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(intent)
+                } else {
+                    context.startService(intent)
+                }
+            } catch (e: Throwable) {
+                Log.e(TAG, "Failed to start RTP service: ${e.message}")
+            }
+        }
+
+        fun stop(context: Context) {
+            try {
+                context.stopService(Intent(context, RealtimeSecurityService::class.java))
+            } catch (_: Throwable) {}
+        }
+
+        fun isRunning(context: Context): Boolean {
+            return try {
+                val av = AntivirusInstance.getInstance()
+                av.isInitialized && av.isMonitorActive
+            } catch (_: Exception) {
+                false
+            }
+        }
+    }
+
+    private var currentThreatAction: String = "delete"
+
+    // --- Kaspersky SDK File Monitor Callbacks ---
+
+    private val monitorEventListener = object : MonitorEventListener {
+        override fun onMonitorEvent(threatInfo: ThreatInfo, threatType: ThreatType) {
+            val name = threatInfo.virusName ?: "Malware"
+            val path = threatInfo.fileFullPath ?: "Unknown"
+            Log.w(TAG, "🚨 THREAT DETECTED: $name at $path (Type: $threatType)")
+
+            showThreatNotification(threatInfo, threatType)
+            handleThreatAction(threatInfo)
+        }
+    }
+
+    private val monitoringListener = object : MonitoringListener {
+        override fun onMonitorStart(monitorId: Int) {
+            Log.i(TAG, "Monitor task started: $monitorId")
+        }
+
+        override fun onMonitorStop(monitorId: Int) {
+            Log.i(TAG, "Monitor task finished: $monitorId")
+        }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        createNotificationChannels()
+        Log.d(TAG, "RealtimeSecurityService created")
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        currentThreatAction = intent?.getStringExtra(EXTRA_THREAT_ACTION) ?: "delete"
+        Log.d(TAG, "RTP start command — action: $currentThreatAction")
+
+        // Must call startForeground immediately to avoid ANR
+        startForeground(STATUS_NOTIFICATION_ID, buildStatusNotification())
+
+        // Persist the user's RTP preference so BootReceiver can read it
+        getSharedPreferences(BootReceiver.PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putBoolean(BootReceiver.KEY_RTP_ENABLED, true).apply()
+
+        // Initialize SDK monitor on a background thread to avoid main-thread freeze
+        thread(start = true, name = "RTP-Init") {
+            initializeMonitor()
+        }
+
+        return START_STICKY
+    }
+
+    override fun onDestroy() {
+        Log.d(TAG, "RealtimeSecurityService destroying")
+
+        // Persist preference
+        getSharedPreferences(BootReceiver.PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putBoolean(BootReceiver.KEY_RTP_ENABLED, false).apply()
+
+        // Stop monitor on background thread
+        thread(start = true, name = "RTP-Shutdown") {
+            try {
+                val av = AntivirusInstance.getInstance()
+                if (av.isInitialized) {
+                    av.setMonitorState(false)
+                    av.setMonitorListener(null)
+                    av.setMonitoringListener(null)
+                    Log.d(TAG, "SDK Monitor stopped successfully")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error stopping monitor", e)
+            }
+        }
+        super.onDestroy()
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    // --- SDK Monitor Initialization ---
+
+    private fun initializeMonitor() {
+        try {
+            val av = AntivirusInstance.getInstance()
+            if (!av.isInitialized) {
+                Log.w(TAG, "Antivirus not initialized — RTP delayed until license activation")
+                return
+            }
+
+            // Attach listeners
+            av.setMonitorListener(monitorEventListener)
+            av.setMonitoringListener(monitoringListener)
+
+            // Scan mode: all file types including UDS (heuristic)
+            av.setMonitorScanMode(MonitorConstants.ALL_FILES or MonitorConstants.ALLOW_UDS)
+
+            // Clean mode based on user preference
+            val cleanMode = if (currentThreatAction.lowercase() == "delete") {
+                MonitorConstants.DELETE_AND_LOG
+            } else {
+                MonitorConstants.LOG_ONLY
+            }
+            av.setMonitorCleanMode(cleanMode)
+
+            // Add default system directories
+            av.addDefaultDirectories()
+
+            // Explicitly add common download locations (critical for catching threats)
+            addExtraMonitoredDirs(av)
+
+            // Log monitored directories
+            av.monitoredDirectories?.forEach { Log.i(TAG, "Watching: ${it.path}") }
+
+            // Activate the monitor
+            av.setMonitorState(true)
+            Log.i(TAG, "✅ Kaspersky SDK File Monitor ACTIVATED — Real-Time Protection is ON")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize SDK monitor", e)
+        }
+    }
+
+    private fun addExtraMonitoredDirs(av: AntivirusInstance) {
+        val monitorFlags = MonitorNotifyConstants.NOTIFY_CREATE or
+                MonitorNotifyConstants.NOTIFY_MODIFY or
+                MonitorNotifyConstants.NOTIFY_CLOSE_WRITE or
+                MonitorNotifyConstants.NOTIFY_MOVED_TO or
+                MonitorNotifyConstants.NOTIFY_OPEN
+
+        val extraDirs = listOf(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+            File(Environment.getExternalStorageDirectory(), "WhatsApp/Media"),
+            File(Environment.getExternalStorageDirectory(), "Telegram"),
+        )
+        for (dir in extraDirs) {
+            if (dir.exists() && dir.isDirectory) {
+                try {
+                    av.addDirectoryToMonitor(dir.absolutePath, monitorFlags)
+                    Log.i(TAG, "Added monitor dir: ${dir.absolutePath}")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Could not add ${dir.absolutePath}: ${e.message}")
+                }
+            }
+        }
+    }
+
+    // --- Threat Action Handling ---
+
+    private fun handleThreatAction(threatInfo: ThreatInfo) {
+        try {
+            val av = AntivirusInstance.getInstance()
+            when (currentThreatAction.lowercase()) {
+                "quarantine" -> {
+                    Log.i(TAG, "Quarantining: ${threatInfo.fileFullPath}")
+                    av.addToQuarantine(threatInfo)
+                }
+                "delete" -> {
+                    Log.i(TAG, "Deleting threat: ${threatInfo.fileFullPath}")
+                    val removed = av.removeThreat(threatInfo)
+                    Log.i(TAG, "Removal result: $removed")
+                }
+                else -> {
+                    Log.i(TAG, "No action taken (mode: $currentThreatAction)")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Threat action '$currentThreatAction' failed", e)
+        }
+    }
+
+    // --- Notification Channels & Builders ---
+
+    private fun createNotificationChannels() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val nm = getSystemService(NotificationManager::class.java)
+
+            nm.createNotificationChannel(
+                NotificationChannel(STATUS_CHANNEL_ID, "Real-Time Protection",
+                    NotificationManager.IMPORTANCE_LOW).apply {
+                    description = "Status perlindungan aktif Kaspersky Engine"
+                    setShowBadge(false)
+                }
+            )
+
+            nm.createNotificationChannel(
+                NotificationChannel(THREAT_CHANNEL_ID, "Threat Alerts",
+                    NotificationManager.IMPORTANCE_HIGH).apply {
+                    description = "Peringatan saat ancaman terdeteksi secara real-time"
+                    enableLights(true)
+                    lightColor = android.graphics.Color.RED
+                    enableVibration(true)
+                }
+            )
+        }
+    }
+
+    private fun buildStatusNotification(): Notification {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pi = PendingIntent.getActivity(
+            this, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        return NotificationCompat.Builder(this, STATUS_CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle("Real-Time Protection Active")
+            .setContentText("Kaspersky Engine actively protecting your device")
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .setContentIntent(pi)
+            .setCategory(Notification.CATEGORY_SERVICE)
+            .build()
+    }
+
+    private fun showThreatNotification(threatInfo: ThreatInfo, threatType: ThreatType) {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pi = PendingIntent.getActivity(
+            this, System.currentTimeMillis().toInt(), intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val actionLabel = if (currentThreatAction.lowercase() == "delete") "Dihapus" else "Dikarantina"
+        val name = threatInfo.virusName ?: "Malware"
+        val path = threatInfo.fileFullPath ?: "unknown"
+
+        val notification = NotificationCompat.Builder(this, THREAT_CHANNEL_ID)
+            .setContentTitle("🚨 Ancaman Terdeteksi!")
+            .setContentText("$name ditemukan dan $actionLabel.")
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText("File: $path\nAncaman: $name ($threatType)\nTindakan: $actionLabel"))
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setContentIntent(pi)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setDefaults(Notification.DEFAULT_ALL)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setCategory(Notification.CATEGORY_ERROR)
+            .build()
+
+        val nm = getSystemService(NotificationManager::class.java)
+        nm.notify(THREAT_NOTIFICATION_ID_BASE + (System.currentTimeMillis() % 1000).toInt(), notification)
+    }
+}

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_antivirus_accessibility_enable">Enable accessibility</string>
+    <string name="str_webfilter_app_name">KavSdkExample</string>
+
+    <string name="str_anti_phishing_init_failed_error">AntiPhishing init failed with exception:\n\n %s</string>
+    <string name="web_filter_not_working">Web filter not working</string>
+    <string name="task_reputation_not_working">Task reputation is not working now</string>
+
+    <string name="str_anti_phishing_anti_phishing">Anti-Phishing</string>
+    <string name="str_anti_phishing_open_url_monitor_settings">Open URL Monitor settings</string>
+
+    <string name="str_webfilter_enable_webfilter">Enable URL Monitor</string>
+    <string name="str_webfilter_use_extended_categories">Use extended URL categories</string>
+    <string name="str_webfilter_proxy_info">Button for a Wi–Fi proxy is available if the proxy is enabled and Android OS version is 4.0 – 5.1. </string>
+    <string name="str_webfilter_view_or_select_categories">Select URL categories to monitor</string>
+    <string name="str_webfilter_exclusions">Exclusions:</string>
+    <string name="str_webfilter_restore_wifi_proxy_button">Restore the previous Wi-Fi proxy settings</string>
+    <string name="str_webfilter_enable_wifi_proxy_button">Enable Wi-Fi proxy</string>
+    <string name="str_webfilter_ignore_power_save_mode">Ignore power save mode</string>
+    <string name="str_webfilter_ignore_power_save_mode_info">In power save mode only foreground application has network access. If this option is not selected, webfilter will be paused automatically in power save mode. Some devices, like Samsung S7 Edge Android - 6.0.1, may do not work properly - they can disable network</string>
+
+    <string name="hint_webfilter_proxy_port">Default value: 3128</string>
+    <string name="webfilter_proxy_port_caption">Enter start proxy port</string>
+    <string name="webfilter_new_proxy_port_dialog_title">Enter new proxy port</string>
+
+    <string name="str_web_filter_category_dialog_title">Web filter categories</string>
+    <string name="str_web_filter_category_dialog_positive">Close</string>
+
+    <string name="str_remove_web_filter_dialog_title">Delete item</string>
+    <string name="str_remove_web_filter_dialog_message">Are you sure?</string>
+    <string name="str_remove_web_filter_dialog_positive">Yes</string>
+    <string name="str_remove_web_filter_dialog_negative">No</string>
+
+    <string name="power_save_mode_service_notification_title">Power Save Mode Service</string>
+    <string name="notification_ticker_text">Monitoring</string>
+    <string name="notification_message">Open KavSdkExample</string>
+    <string name="str_sms_anti_phishing_enabled">SMS anti-phishing</string>
+</resources>

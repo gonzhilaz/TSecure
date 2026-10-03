@@ -21,7 +21,9 @@ export function playCriticalThreatAlert(): void {
   if (typeof window === 'undefined' || !isSoundEnabled()) return;
 
   try {
-    const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioCtxClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!AudioCtxClass) return;
 
     if (!audioCtx || audioCtx.state === 'suspended') {

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_root_detector_title">Root Detector</string>
+    <string name="str_root_detector_check_root">Check if the device is rooted</string>
+    <string name="str_root_detector_dialog_title">Check device root state</string>
+    <string name="str_root_detector_dialog_rooted">This device is rooted (result is cached for 30 seconds).</string>
+    <string name="str_root_detector_dialog_not_rooted">This device is NOT rooted (result is cached for 30 seconds).</string>
+    <string name="str_root_detector_dialog_progress_msg">Checking…</string>
+    <string name="str_root_detector_dialog_positive_button">Check</string>
+    <string name="str_root_detector_dialog_negative_button">Cancel</string>
+    <string name="str_root_detector_dialog_root_cause_path">Root cause path: </string>
+    <string name="str_root_detector_dialog_root_cause_self_check_failed">Self check FAILED</string>
+</resources>

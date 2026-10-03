@@ -1,0 +1,140 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dp"
+        android:paddingLeft="5dp"
+        android:paddingTop="5dp"
+        android:paddingRight="5dp"
+        android:paddingBottom="5dp">
+
+        <TextView
+            android:id="@+id/textViewDatabaseName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/str_secure_storage_test_database_name_label"/>
+
+        <EditText
+            android:id="@+id/editTextFileName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/str_secure_storage_test_database_hint"
+            android:inputType="text"
+            android:text="@string/str_secure_storage_test_database_name">
+
+            <requestFocus/>
+        </EditText>
+
+        <TextView
+            android:id="@+id/textViewDatabasePassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/str_secure_storage_test_database_password_label"/>
+
+        <EditText
+            android:id="@+id/editTextPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/str_secure_storage_test_database_password_hint"
+            android:inputType="textVisiblePassword">
+        </EditText>
+
+        <TextView
+            android:id="@+id/textViewDatabaseStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/str_secure_storage_test_database_status"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="10dp"
+            android:weightSum="3">
+
+            <Button
+                android:id="@+id/buttonOpenDatabase"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:filterTouchesWhenObscured="true"
+                android:text="@string/str_secure_storage_test_database_open"/>
+
+            <Button
+                android:id="@+id/buttonCloseDatabase"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:filterTouchesWhenObscured="true"
+                android:text="@string/str_secure_storage_test_database_close"/>
+
+            <Button
+                android:id="@+id/buttonDeleteDatabase"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:filterTouchesWhenObscured="true"
+                android:text="@string/str_secure_storage_test_database_delete"/>
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/editTextSql"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="top|left"
+            android:hint="@string/str_secure_storage_test_database_enter_sql_hint"
+            android:inputType="textMultiLine"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <Button
+                android:id="@+id/buttonSql"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:filterTouchesWhenObscured="true"
+                android:text="@string/str_secure_storage_test_database_execute_sql"/>
+
+            <Button
+                android:id="@+id/buttonTestData"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:filterTouchesWhenObscured="true"
+                android:text="@string/str_secure_storage_test_database_test_table_button"/>
+
+            <Button
+                android:id="@+id/buttonShowTables"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:filterTouchesWhenObscured="true"
+                android:text="@string/str_secure_storage_test_database_view_tables"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/sql_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"/>
+    </LinearLayout>
+</ScrollView>

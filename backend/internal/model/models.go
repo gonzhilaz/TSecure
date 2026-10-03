@@ -179,3 +179,15 @@ type LicenseActivationResponse struct {
 	LicenseKey       string `json:"license_key,omitempty"`
 }
 
+// AppUpdateResponse represents OTA In-App APK update metadata
+type AppUpdateResponse struct {
+	HasUpdate         bool     `json:"has_update"`
+	LatestVersion     string   `json:"latest_version"`
+	LatestBuildNumber int      `json:"latest_build_number"`
+	MinSupportedBuild int      `json:"min_supported_build"`
+	IsMandatory       bool     `json:"is_mandatory"`
+	ReleaseNotes      []string `json:"release_notes"`
+	DownloadURL       string   `json:"download_url"`
+	ApkSizeMB         float64  `json:"apk_size_mb"`
+	PublishedAt       string   `json:"published_at"`
+}

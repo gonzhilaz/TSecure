@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/stitch_icons.dart';
 import '../../../data/models/user_session.dart';
 
+/// Informasi Akun Card matching Stitch design:
+/// - Section title: INFORMASI AKUN
+/// - Phone row with 28x28 light container & Stitch phone SVG
+/// - Location row with 28x28 light container & Stitch location SVG
+/// - Divider & 24/7 transmission protection description
+/// - 3 Tags: Telkomsel Guard, Halo VIP, Prioritas
 class AccountInfoCard extends StatelessWidget {
   final UserSession session;
 
@@ -11,99 +16,141 @@ class AccountInfoCard extends StatelessWidget {
     required this.session,
   });
 
+  String _formatMsisdn(String raw) {
+    if (raw.isEmpty) return '-';
+    if (raw.contains('-')) return raw;
+    if (raw.startsWith('+62') && raw.length >= 12) {
+      final prefix = raw.substring(0, 3);
+      final mid = raw.substring(3, raw.length - 7);
+      final rest = raw.substring(raw.length - 7);
+      return '$prefix $mid-$rest';
+    }
+    return raw;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final displayPhone = _formatMsisdn(session.msisdn);
+    final displayLocation = session.location.isNotEmpty ? session.location : 'Indonesia';
+
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceCard,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.slateBorder),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0B132B).withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          // Header: INFORMASI AKUN
+          const Text(
             'INFORMASI AKUN',
-            style: AppTypography.labelSm.copyWith(
-              color: AppColors.slateMuted,
+            style: TextStyle(
+              fontSize: 12,
               fontWeight: FontWeight.w700,
+              color: Color(0xFF94A3B8),
               letterSpacing: 1.0,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+
+          // Row 1: Phone
           Row(
             children: [
               Container(
-                width: 38,
-                height: 38,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
-                  color: AppColors.slateDivider,
-                  borderRadius: BorderRadius.circular(10),
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
-                  Icons.phone_outlined,
-                  size: 20,
-                  color: AppColors.navyDeep,
+                child: const Center(
+                  child: StitchSvg(
+                    svgString: StitchIcons.phone,
+                    size: 14,
+                    color: Color(0xFF64748B),
+                  ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  session.msisdn,
-                  style: AppTypography.labelLg.copyWith(
-                    color: AppColors.navyDeep,
-                    fontWeight: FontWeight.w600,
+                  displayPhone,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF334155),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
+
+          // Row 2: Location
           Row(
             children: [
               Container(
-                width: 38,
-                height: 38,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
-                  color: AppColors.slateDivider,
-                  borderRadius: BorderRadius.circular(10),
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
-                  Icons.location_on_outlined,
-                  size: 20,
-                  color: AppColors.navyDeep,
+                child: const Center(
+                  child: StitchSvg(
+                    svgString: StitchIcons.location,
+                    size: 14,
+                    color: Color(0xFF64748B),
+                  ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  session.location,
-                  style: AppTypography.labelLg.copyWith(
-                    color: AppColors.navyDeep,
-                    fontWeight: FontWeight.w600,
+                  displayLocation,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF334155),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          const Divider(color: AppColors.slateDivider, height: 1),
-          const SizedBox(height: 14),
-          Text(
+          const SizedBox(height: 12),
+
+          // Divider
+          const Divider(color: Color(0xFFF1F5F9), height: 1),
+          const SizedBox(height: 10),
+
+          // Description
+          const Text(
             'Perlindungan identitas & enkripsi transmisi data cloud aktif 24/7 di seluruh jaringan Telkomsel.',
-            style: AppTypography.bodySm.copyWith(
-              color: AppColors.slateMuted,
+            style: TextStyle(
+              fontSize: 11,
+              height: 1.5,
+              color: Color(0xFF778CA2),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+
+          // 3 Pill Tags
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 6,
+            runSpacing: 6,
             children: const [
-              _BadgePill(label: 'Telkomsel Guard'),
-              _BadgePill(label: 'Halo VIP'),
-              _BadgePill(label: 'Prioritas'),
+              _StitchPill(label: 'Telkomsel Guard'),
+              _StitchPill(label: 'Halo VIP'),
+              _StitchPill(label: 'Prioritas'),
             ],
           ),
         ],
@@ -112,24 +159,25 @@ class AccountInfoCard extends StatelessWidget {
   }
 }
 
-class _BadgePill extends StatelessWidget {
+class _StitchPill extends StatelessWidget {
   final String label;
 
-  const _BadgePill({required this.label});
+  const _StitchPill({required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.slateDivider,
+        color: const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
-        style: AppTypography.labelSm.copyWith(
-          color: AppColors.navyDeep,
+        style: const TextStyle(
+          fontSize: 11,
           fontWeight: FontWeight.w600,
+          color: Color(0xFF475569),
         ),
       ),
     );

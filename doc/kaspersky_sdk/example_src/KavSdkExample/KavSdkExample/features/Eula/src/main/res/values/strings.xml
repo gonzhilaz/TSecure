@@ -1,0 +1,5 @@
+<resources>
+    <string name="str_strings_eula_fragment_accept">Accept</string>
+    <string name="str_strings_eula_fragment_decline">Decline</string>
+    <string name="str_strings_eula_fragment_tab">Eula</string>
+</resources>

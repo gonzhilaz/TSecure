@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_url_check_features"
+        style="@style/Title"/>
+
+    <View
+        style="?android:attr/listSeparatorTextViewStyle"
+        android:background="@color/drawer_list_item_color"
+        android:layout_gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:duplicateParentState="true"	/>
+
+    <include
+        android:id="@+id/check_url_reputation_button"
+        layout="@layout/command_item" />
+
+    <include
+        android:id="@+id/check_url_reputation_ext_button"
+        layout="@layout/command_item" />
+
+    <include
+        android:id="@+id/check_financial_category_button"
+        layout="@layout/command_item" />
+</LinearLayout>

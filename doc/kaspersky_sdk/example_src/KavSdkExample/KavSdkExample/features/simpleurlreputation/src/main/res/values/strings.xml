@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_simple_url_reputation_feature_tab">URL Reputation (Simple)</string>
+    <string name="simple_url_reputation_edit_text_hint">URL to check</string>
+    <string name="simple_url_reputation_button_text">Check URL</string>
+    <string name="simple_url_reputation_disclaimer">URL Reputation feature is available as part of the KAV SDK</string>
+</resources>

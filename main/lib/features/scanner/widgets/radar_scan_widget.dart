@@ -122,8 +122,10 @@ class _RadarScanWidgetState extends State<RadarScanWidget>
                       widget.isScanning
                           ? 'MEMINDAI...'
                           : widget.securityScore.statusText.toUpperCase(),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
                       style: AppTypography.labelSm.copyWith(
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: Colors.white.withValues(alpha: 0.95),
                         letterSpacing: 1.5,
                         fontWeight: FontWeight.w700,
                         fontSize: 11,

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <WebView
+        android:id="@+id/eulaText"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/buttonAcceptEula"
+    />
+
+    <Button
+        android:filterTouchesWhenObscured="true"
+        android:id="@+id/buttonAcceptEula"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_strings_eula_fragment_accept"
+        android:layout_above="@+id/buttonDeclineEula"
+    />
+
+    <Button
+        android:filterTouchesWhenObscured="true"
+        android:id="@+id/buttonDeclineEula"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_strings_eula_fragment_decline"
+        android:layout_alignParentBottom="true"
+    />
+
+</RelativeLayout>

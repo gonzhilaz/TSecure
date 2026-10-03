@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_constants.dart';
 import '../../data/models/active_period.dart';
@@ -53,9 +53,12 @@ class AuthController extends ChangeNotifier {
   }
 
   String formatMsisdn(String rawPhone) {
-    final clean = rawPhone.trim().replaceAll(RegExp(r'[\s\-]'), '');
-    if (clean.startsWith('+62')) return clean;
-    if (clean.startsWith('0')) return '+62${clean.substring(1)}';
+    var clean = rawPhone.trim().replaceAll(RegExp(r'[\s\-]'), '');
+    if (clean.startsWith('+62')) clean = clean.substring(3);
+    if (clean.startsWith('62')) clean = clean.substring(2);
+    while (clean.startsWith('0')) {
+      clean = clean.substring(1);
+    }
     return '+62$clean';
   }
 
@@ -95,7 +98,7 @@ class AuthController extends ChangeNotifier {
         return false;
       }
 
-      _lastMockOtp = res['mock_otp'] ?? '123456';
+      _lastMockOtp = kDebugMode ? (res['mock_otp'] ?? '123456') : null;
       _startResendTimer(res['resend_timeout_seconds'] ?? 60);
 
       _isLoading = false;

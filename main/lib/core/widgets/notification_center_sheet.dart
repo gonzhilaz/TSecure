@@ -81,70 +81,89 @@ class NotificationCenterSheet extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             ...notifications.map((item) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: item.isRead
-                      ? AppColors.surface
-                      : AppColors.primary.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: item.isRead
-                        ? AppColors.slateBorder
-                        : AppColors.primary.withValues(alpha: 0.2),
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${item.title}: ${item.desc}'),
+                          backgroundColor: AppColors.navyDeep,
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 3),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: item.isRead
-                            ? AppColors.slateDivider
-                            : AppColors.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
+                            ? AppColors.surface
+                            : AppColors.primary.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: item.isRead
+                              ? AppColors.slateBorder
+                              : AppColors.primary.withValues(alpha: 0.2),
+                        ),
                       ),
-                      child: Icon(
-                        item.icon,
-                        color: item.isRead
-                            ? AppColors.navyDeep
-                            : AppColors.primary,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            item.title,
-                            style: AppTypography.labelMd.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.navyDeep,
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: item.isRead
+                                  ? AppColors.slateDivider
+                                  : AppColors.primary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              item.icon,
+                              color: item.isRead
+                                  ? AppColors.navyDeep
+                                  : AppColors.primary,
+                              size: 20,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            item.desc,
-                            style: AppTypography.bodySm.copyWith(
-                              color: AppColors.slateMuted,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            item.time,
-                            style: AppTypography.labelSm.copyWith(
-                              fontSize: 10,
-                              color: AppColors.slateMuted,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.title,
+                                  style: AppTypography.labelMd.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.navyDeep,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  item.desc,
+                                  style: AppTypography.bodySm.copyWith(
+                                    color: AppColors.slateMuted,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  item.time,
+                                  style: AppTypography.labelSm.copyWith(
+                                    fontSize: 10,
+                                    color: AppColors.slateMuted,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               );
             }),

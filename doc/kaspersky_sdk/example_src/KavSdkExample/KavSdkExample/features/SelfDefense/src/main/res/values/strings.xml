@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_self_defense_tab">Self Defense</string>
+
+    <string name="str_self_defense_autorestart_enabled">Autorestart</string>
+    <string name="str_self_defense_foreground_service_enabled">Foreground service</string>
+    <string name="str_self_defense_section_general">General</string>
+    <string name="str_self_defense_section_other">Other</string>
+
+    <string name="str_self_defense_check_app_signature_button">Check app signature</string>
+    <string name="str_self_defense_notification_access_enabled">Notification access</string>
+
+    <string name="str_self_defense_error_protection_certificate_not_match">KAV_PROTECTION_CERTIFICATE_NOT_MATCH</string>
+    <string name="str_self_defense_error_kav_protection_integrity_check_failed">KAV_PROTECTION_INTEGRITY_CHECK_FAILED</string>
+    <string name="str_self_defense_error_reading_certificate">Error reading certificate from assets</string>
+    <string name="str_self_defense_error_wrong_certificate">Wrong certificate</string>
+    <string name="str_self_defense_check_signature_button">Compare with android debug key</string>
+</resources>

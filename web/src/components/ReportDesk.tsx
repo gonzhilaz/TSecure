@@ -13,6 +13,7 @@ interface ReportDeskProps {
   subscribers: Subscriber[];
   stats: DashboardStats | null;
   operator: SOCOperator | null;
+  loading?: boolean;
 }
 
 export const ReportDesk: React.FC<ReportDeskProps> = ({
@@ -20,6 +21,7 @@ export const ReportDesk: React.FC<ReportDeskProps> = ({
   subscribers,
   stats,
   operator,
+  loading,
 }) => {
   const [timeRange, setTimeRange] = useState<'all' | '24h' | '7d' | '30d'>('all');
   const [severityFilter, setSeverityFilter] = useState<string>('ALL');
@@ -65,7 +67,6 @@ export const ReportDesk: React.FC<ReportDeskProps> = ({
 
   // Calculations for KPI Cards
   const criticalCount = threats.filter((t) => t.severity === 'CRITICAL').length;
-  const highCount = threats.filter((t) => t.severity === 'HIGH').length;
   const malwareCount = threats.filter((t) => t.threat_type === 'MALWARE' || t.threat_type === 'EICAR').length;
   const phishingCount = threats.filter((t) => t.threat_type === 'PHISHING').length;
 
@@ -300,7 +301,15 @@ export const ReportDesk: React.FC<ReportDeskProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e2e8f0]">
-              {pagedThreats.length > 0 ? (
+              {loading ? (
+                [1, 2, 3, 4].map((i) => (
+                  <tr key={i}>
+                    <td colSpan={7} className="py-3.5 px-4">
+                      <div className="h-8 rounded-lg skeleton-shimmer-light"></div>
+                    </td>
+                  </tr>
+                ))
+              ) : pagedThreats.length > 0 ? (
                 pagedThreats.map((t) => (
                   <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-3 px-4 font-mono font-bold text-slate-700">{t.id}</td>

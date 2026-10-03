@@ -7,9 +7,10 @@ import { ThreatEvent } from '@/types';
 interface ThreatFeedProps {
   threats: ThreatEvent[];
   loading: boolean;
+  onClear?: () => void;
 }
 
-export const ThreatFeed: React.FC<ThreatFeedProps> = ({ threats, loading }) => {
+export const ThreatFeed: React.FC<ThreatFeedProps> = ({ threats, loading, onClear }) => {
   const getThreatIcon = (type: string) => {
     switch (type.toUpperCase()) {
       case 'PHISHING':
@@ -48,9 +49,20 @@ export const ThreatFeed: React.FC<ThreatFeedProps> = ({ threats, loading }) => {
             Live Threat Stream (Real-Time SOC Feed)
           </h2>
         </div>
-        <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#fff0ef] border border-[#e9bcb8] text-[#be001c] font-bold font-mono">
-          {threats.length} Events
-        </span>
+        <div className="flex items-center space-x-2">
+          {onClear && threats.length > 0 && (
+            <button
+              onClick={onClear}
+              className="text-[11px] px-2 py-0.5 rounded border border-slate-200 hover:border-red-200 bg-white hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors font-medium shadow-xs"
+              title="Bersihkan daftar ancaman"
+            >
+              Clear
+            </button>
+          )}
+          <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#fff0ef] border border-[#e9bcb8] text-[#be001c] font-bold font-mono">
+            {threats.length} Events
+          </span>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto max-h-[420px] space-y-2.5 pr-1">

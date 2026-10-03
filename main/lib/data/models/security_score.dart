@@ -38,7 +38,7 @@ class SecurityScore {
     } else {
       return SecurityScore(
         score: clamped,
-        statusText: 'Rentan Terhadap Ancaman',
+        statusText: 'Rentan',
         recommendationText: 'Tindakan Diperlukan Segera',
         themeColor: AppColors.statusDanger,
         backgroundColor: AppColors.statusDangerBg,

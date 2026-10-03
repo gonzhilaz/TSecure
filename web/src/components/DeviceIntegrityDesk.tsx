@@ -13,9 +13,10 @@ import { Subscriber } from '@/types';
 
 interface DeviceIntegrityDeskProps {
   subscribers: Subscriber[];
+  loading?: boolean;
 }
 
-export const DeviceIntegrityDesk: React.FC<DeviceIntegrityDeskProps> = ({ subscribers }) => {
+export const DeviceIntegrityDesk: React.FC<DeviceIntegrityDeskProps> = ({ subscribers, loading }) => {
   const rootedDevices = subscribers.filter(
     (s) => s.root_status === 'ROOT_DETECTED' || s.hook_status === 'HOOK_DETECTED'
   );
@@ -34,7 +35,11 @@ export const DeviceIntegrityDesk: React.FC<DeviceIntegrityDeskProps> = ({ subscr
               <ShieldAlert className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-[#0b132b] mt-1">{rootedDevices.length}</div>
+          {loading ? (
+            <div className="h-7 w-16 rounded skeleton-shimmer-light mt-1" />
+          ) : (
+            <div className="text-2xl font-bold text-[#0b132b] mt-1">{rootedDevices.length}</div>
+          )}
           <p className="text-xs text-[#778ca2] mt-0.5">Magisk, KernelSU, atau Frida hook terdeteksi</p>
         </div>
 
@@ -45,7 +50,11 @@ export const DeviceIntegrityDesk: React.FC<DeviceIntegrityDeskProps> = ({ subscr
               <Radio className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-[#0b132b] mt-1">{simSwapAlerts.length}</div>
+          {loading ? (
+            <div className="h-7 w-16 rounded skeleton-shimmer-light mt-1" />
+          ) : (
+            <div className="text-2xl font-bold text-[#0b132b] mt-1">{simSwapAlerts.length}</div>
+          )}
           <p className="text-xs text-[#778ca2] mt-0.5">Pergantian kartu SIM di luar ICCID resmi</p>
         </div>
 
@@ -56,9 +65,13 @@ export const DeviceIntegrityDesk: React.FC<DeviceIntegrityDeskProps> = ({ subscr
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-[#0b132b] mt-1">
-            {subscribers.length - rootedDevices.length}
-          </div>
+          {loading ? (
+            <div className="h-7 w-16 rounded skeleton-shimmer-light mt-1" />
+          ) : (
+            <div className="text-2xl font-bold text-[#0b132b] mt-1">
+              {subscribers.length - rootedDevices.length}
+            </div>
+          )}
           <p className="text-xs text-[#778ca2] mt-0.5">Integritas OS Android/iOS aman & terverifikasi</p>
         </div>
       </div>
@@ -88,7 +101,22 @@ export const DeviceIntegrityDesk: React.FC<DeviceIntegrityDeskProps> = ({ subscr
               </tr>
             </thead>
             <tbody className="divide-y divide-[#ffe9e7]">
-              {subscribers.map((sub) => {
+              {loading ? (
+                [1, 2, 3, 4].map((i) => (
+                  <tr key={i}>
+                    <td colSpan={6} className="py-3.5 px-4">
+                      <div className="h-8 rounded-lg skeleton-shimmer-light"></div>
+                    </td>
+                  </tr>
+                ))
+              ) : subscribers.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-[#778ca2]">
+                    Tidak ada data telemetri integritas perangkat.
+                  </td>
+                </tr>
+              ) : (
+                subscribers.map((sub) => {
                 const isRooted = sub.root_status === 'ROOT_DETECTED';
                 const isHooked = sub.hook_status === 'HOOK_DETECTED';
                 const isSimSwapped = sub.bound_iccid && sub.current_iccid && sub.bound_iccid !== sub.current_iccid;
@@ -157,7 +185,7 @@ export const DeviceIntegrityDesk: React.FC<DeviceIntegrityDeskProps> = ({ subscr
                     </td>
                   </tr>
                 );
-              })}
+              }))}
             </tbody>
           </table>
         </div>

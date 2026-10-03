@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class DeviceHardwareService {
-  static const MethodChannel _blackwallChannel =
-      MethodChannel('com.telkomsel.secure/blackwall');
+  static const MethodChannel _deviceChannel =
+      MethodChannel('com.telkomsel.secure/device');
 
   static String? _cachedDeviceModel;
   static String? _cachedOsVersion;
@@ -32,7 +32,7 @@ class DeviceHardwareService {
 
     if (Platform.isAndroid) {
       try {
-        final result = await _blackwallChannel.invokeMapMethod<String, dynamic>('getDeviceInfo');
+        final result = await _deviceChannel.invokeMapMethod<String, dynamic>('getDeviceInfo');
         if (result != null) {
           _cachedDeviceModel = result['deviceModel'] as String?;
           _cachedOsVersion = result['osVersion'] as String?;

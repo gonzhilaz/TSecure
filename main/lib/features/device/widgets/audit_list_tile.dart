@@ -6,24 +6,32 @@ import '../../../data/models/security_audit_item.dart';
 class AuditListTile extends StatelessWidget {
   final SecurityAuditItem item;
   final VoidCallback? onActionPressed;
+  final VoidCallback? onTap;
 
   const AuditListTile({
     super.key,
     required this.item,
     this.onActionPressed,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.slateBorder),
       ),
-      child: Row(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
         children: [
           Container(
             width: 44,
@@ -62,6 +70,9 @@ class AuditListTile extends StatelessWidget {
           _buildActionOrCheck(),
         ],
       ),
+    ),
+    ),
+    ),
     );
   }
 
@@ -72,8 +83,8 @@ class AuditListTile extends StatelessWidget {
         height: 32,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: isRed ? AppColors.primary : AppColors.slateDivider,
-            foregroundColor: isRed ? Colors.white : AppColors.navyDeep,
+            backgroundColor: isRed ? AppColors.primary : const Color(0xFFFFF1F2),
+            foregroundColor: isRed ? Colors.white : AppColors.primary,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             minimumSize: Size.zero,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -87,7 +98,7 @@ class AuditListTile extends StatelessWidget {
             item.actionLabel!,
             style: AppTypography.labelSm.copyWith(
               fontWeight: FontWeight.w700,
-              color: isRed ? Colors.white : AppColors.navyDeep,
+              color: isRed ? Colors.white : AppColors.primary,
             ),
           ),
         ),

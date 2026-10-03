@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <EditText
+        android:id="@+id/urlToCheckText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:hint="@string/str_dns_check_activity_url_to_check_hint"
+        android:layout_toLeftOf="@+id/checkButton"
+        android:layout_alignBottom="@+id/checkButton"
+        android:inputType="textUri"
+        android:ems="10" >
+
+        <requestFocus />
+    </EditText>
+    
+     <Button
+         android:filterTouchesWhenObscured="true"
+        android:id="@+id/checkButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:text="@string/str_dns_check_activity_check_button" />
+     
+     <CheckBox 
+         android:id="@+id/getExtendedVerdict"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_below="@id/urlToCheckText"
+         android:text="@string/str_dns_check_use_exclusions" />
+    
+    <TextView 
+        android:id="@+id/resultText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/getExtendedVerdict"
+        android:textSize="20sp" />
+    
+     <TextView
+         android:id="@+id/exclusionsListCaption"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_below="@id/resultText"
+         android:textSize="20sp"
+         android:text="@string/str_dns_check_exclusions_list_caption" />
+     
+    <ListView
+        android:id="@+id/listView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/exclusionsListCaption"
+        android:layout_above="@+id/newIpEditText"
+        android:divider="#ff0099cc"
+        android:dividerHeight="2dp"
+        android:headerDividersEnabled="true" />
+
+     <TextView
+         android:id="@+id/emptyListView"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_below="@id/exclusionsListCaption"
+         android:textSize="20sp"
+         android:text="@string/str_dns_check_activity_add_ip_listview" 
+         android:visibility="gone"/>
+
+   <EditText
+       android:id="@+id/newIpEditText"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_alignParentBottom="true"
+       android:layout_alignParentLeft="true"
+       android:layout_toLeftOf="@+id/addIpButton"
+       android:layout_alignTop="@+id/addIpButton"
+       android:ems="10"
+       android:inputType="text" />
+      
+   <Button
+        android:filterTouchesWhenObscured="true"
+     	android:id="@+id/addIpButton"   
+        android:layout_width="wrap_content"
+   		android:layout_height="wrap_content"
+   		android:layout_alignParentRight="true"
+   		android:layout_alignParentBottom="true"
+        android:text="@string/str_dns_check_activity_add_ip_button" />
+
+</RelativeLayout>

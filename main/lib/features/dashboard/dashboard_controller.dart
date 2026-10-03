@@ -47,6 +47,12 @@ class DashboardController extends ChangeNotifier {
       if (!logRepository.isLoaded) {
         await logRepository.loadLogs();
       }
+      try {
+        final actualRtp = await kasperskySdk.isRtpActive();
+        if (kasperskySdk.realtimeProtection != actualRtp) {
+          kasperskySdk.toggleRealtimeProtection(actualRtp);
+        }
+      } catch (_) {}
       _securityScore = SecurityScoreService.computeScore(
         kasperskySdk: kasperskySdk,
       );

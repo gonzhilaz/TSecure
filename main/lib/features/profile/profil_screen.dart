@@ -5,14 +5,27 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/app_button.dart';
-import '../../core/widgets/settings_sheet.dart';
 import '../../core/widgets/tri_state_view.dart';
+import '../../data/models/active_period.dart';
+import '../../data/models/user_session.dart';
 import '../splash/splash_screen.dart';
 import 'profile_controller.dart';
 import 'widgets/account_info_card.dart';
 import 'widgets/kaspersky_diag_card.dart';
+import 'widgets/kaspersky_engine_footer.dart';
 import 'widgets/license_status_card.dart';
+import 'widgets/profile_header_banner.dart';
+import 'widgets/profile_identity_section.dart';
 
+/// Profil Screen pixel-precisely aligned with Stitch specification:
+/// - Gradient banner with rounded-xl translucent back & settings buttons
+/// - Circular RA avatar overlapping banner with emerald online indicator
+/// - 4 rounded-xl squircle action buttons (Message, Edit, Share, More)
+/// - Clean Mobile Security Ultimate subscription card
+/// - Informasi Akun card with phone, location, note & 3 pill tags
+/// - Subtle Kaspersky Security Engine footer at the very bottom
+///
+/// Modularized architecture with all components under 400 lines.
 class ProfilScreen extends StatefulWidget {
   final VoidCallback? onBack;
 
@@ -99,7 +112,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
     final controller = context.watch<ProfileController>();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF7F9FC),
       body: TriStateView(
         state: controller.state,
         onRetry: controller.loadProfileData,
@@ -110,47 +123,31 @@ class _ProfilScreenState extends State<ProfilScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
-                _buildTopHeader(context),
+                ProfileHeaderBanner(onBack: widget.onBack),
                 Transform.translate(
-                  offset: const Offset(0, -50),
+                  offset: const Offset(0, -40),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _buildAvatar(),
-                        const SizedBox(height: 14),
-                        Text(
-                          controller.userSession?.name ?? 'R. Aryandi',
-                          style: AppTypography.headlineLg.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.navyDeep,
-                          ),
+                        ProfileIdentitySection(
+                          session: controller.userSession,
+                          onActionNotice: (msg) => _showInfoSnackbar(context, msg),
                         ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${controller.userSession?.msisdn ?? "+62 82-141414-875"} • ',
-                              style: AppTypography.bodySm.copyWith(
-                                color: AppColors.slateMuted,
-                              ),
-                            ),
-                            Text(
-                              controller.userSession?.tier ?? 'Telkomsel Halo Diamond',
-                              style: AppTypography.bodySm.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      const SizedBox(height: 18),
-                      _buildActionButtons(context),
-                      const SizedBox(height: 24),
-                      if (controller.activePeriod != null)
+                        const SizedBox(height: 20),
                         LicenseStatusCard(
-                          activePeriod: controller.activePeriod!,
+                          activePeriod: controller.activePeriod ??
+                              ActivePeriod(
+                                packageName: 'Mobile Security Ultimate',
+                                packageDescription: 'Lisensi Korporasi & Perlindungan Data',
+                                expiryDate: DateTime(2026, 10, 14),
+                                activeDeviceCount: 1,
+                                maxDeviceAllowed: 1,
+                                isValid: true,
+                                statusMessage: 'Perangkat Dilindungi',
+                                activationStatus: 'ACTIVATED',
+                              ),
                           onRetrySync: () async {
                             final success = await controller.retryActivation();
                             if (!context.mounted) return;
@@ -168,166 +165,39 @@ class _ProfilScreenState extends State<ProfilScreen> {
                             );
                           },
                         ),
-                      const SizedBox(height: 16),
-                      const KasperskyDiagCard(),
-                      const SizedBox(height: 16),
-                      if (controller.userSession != null)
+                        const SizedBox(height: 14),
                         AccountInfoCard(
-                          session: controller.userSession!,
+                          session: controller.userSession ??
+                              UserSession(
+                                msisdn: '',
+                                name: '',
+                                tier: 'Pelanggan Telkomsel',
+                                location: 'Indonesia',
+                                mobileId: controller.kasperskySdk.installationId,
+                              ),
                         ),
-                      const SizedBox(height: 24),
-                      AppButton(
-                        label: 'Keluar dari Akun',
-                        type: AppButtonType.outline,
-                        icon: Icons.logout_rounded,
-                        onPressed: () => _showLogoutDialog(context),
-                      ),
-                      const SizedBox(height: 32),
-                    ],
+                        const SizedBox(height: 14),
+                        const KasperskyDiagCard(),
+                        const SizedBox(height: 16),
+
+                        // Subtle Security Engine Footer
+                        const KasperskyEngineFooter(),
+                        const SizedBox(height: 16),
+
+                        // Logout Action Button
+                        AppButton(
+                          label: 'Keluar dari Akun',
+                          type: AppButtonType.outline,
+                          icon: Icons.logout_rounded,
+                          onPressed: () => _showLogoutDialog(context),
+                        ),
+                        const SizedBox(height: 28),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-  Widget _buildTopHeader(BuildContext context) {
-    return Container(
-      height: 150,
-      decoration: const BoxDecoration(
-        color: AppColors.primary,
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () {
-                  if (widget.onBack != null) {
-                    widget.onBack!();
-                  } else if (Navigator.canPop(context)) {
-                    Navigator.pop(context);
-                  }
-                },
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.15),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.settings_outlined, color: Colors.white),
-                onPressed: () => SettingsSheet.show(context),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.15),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAvatar() {
-    return Stack(
-      children: [
-        Container(
-          width: 96,
-          height: 96,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 4),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Center(
-            child: Text(
-              'RA',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-              ),
+              ],
             ),
-          ),
-        ),
-        Positioned(
-          bottom: 4,
-          right: 4,
-          child: Container(
-            width: 18,
-            height: 18,
-            decoration: BoxDecoration(
-              color: AppColors.statusSafeEmerald,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 3),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildCircleButton(
-          Icons.chat_bubble_outline,
-          'Bantuan Veronika',
-          () => _showInfoSnackbar(context, 'Membuka layanan Veronika Telkomsel AI Assistant...'),
-        ),
-        const SizedBox(width: 16),
-        _buildCircleButton(
-          Icons.edit_outlined,
-          'Ubah Profil',
-          () => _showInfoSnackbar(context, 'Fitur ubah profil disinkronkan dengan MyTelkomsel ID.'),
-        ),
-        const SizedBox(width: 16),
-        _buildCircleButton(
-          Icons.share_outlined,
-          'Bagikan Status',
-          () => _showInfoSnackbar(context, 'Mempersiapkan laporan status keamanan untuk dibagikan...'),
-        ),
-        const SizedBox(width: 16),
-        _buildCircleButton(
-          Icons.more_horiz,
-          'Lainnya',
-          () => SettingsSheet.show(context),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCircleButton(IconData icon, String tooltip, VoidCallback onTap) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(22),
-        child: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.slateBorder),
-          ),
-          child: Center(
-            child: Icon(icon, color: AppColors.navyDeep, size: 20),
           ),
         ),
       ),

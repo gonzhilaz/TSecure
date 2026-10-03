@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        style="@style/Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/str_av_folder_monitor_scanning_options" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/cbScanUdsOnly"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:saveEnabled="false"
+        android:text="@string/str_av_folder_monitor_scan_uds_only" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/cbScanUdsAllow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:saveEnabled="false"
+        android:text="@string/str_av_folder_monitor_scan_uds_allow" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/cbDetectRiskware"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:saveEnabled="false"
+        android:text="@string/str_av_folder_monitor_detect_riskware" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/cbCureInfected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:saveEnabled="false"
+        android:text="@string/str_av_folder_monitor_try_cure_infected_files" />
+
+    <EditText
+        android:id="@+id/etMaxFileSize"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:hint="@string/str_av_folder_monitor_max_file_size"
+        android:saveEnabled="false"
+        android:inputType="number"/>
+
+    <TextView
+        style="@style/Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:layout_marginTop="4dp"
+        android:text="@string/str_av_folder_monitor_monitoring_folders" />
+
+</LinearLayout>

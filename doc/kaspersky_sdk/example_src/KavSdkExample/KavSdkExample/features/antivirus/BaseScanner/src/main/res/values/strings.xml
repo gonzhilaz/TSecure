@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_antivirus_start_scan_button">Start scan</string>
+    <string name="str_antivirus_cancel_scan_button">Cancel scan</string>
+    <string name="str_antivirus_cancelling_scan_button">Cancelling scan</string>
+    <string name="str_antivirus_pause_scan_button">Pause scan</string>
+    <string name="str_antivirus_resume_scan_button">Resume scan</string>
+
+    <string name="str_antivirus_scan_results_title">Scan results</string>
+    <string name="str_antivirus_time_scan_result">Scan duration: </string>
+    <string name="str_antivirus_total_files_scan_result">Files found: </string>
+    <string name="str_antivirus_total_files_calculated_result">Files calculated: </string>
+    <string name="str_antivirus_files_checked_scan_result">Objects scanned: </string>
+    <string name="str_antivirus_files_skipped_scan_result">Objects skipped: </string>
+    <string name="str_antivirus_total_detected_scan_result">Total threats detected: </string>
+    <string name="str_antivirus_malware_detected_scan_result">------- Malware detected: </string>
+    <string name="str_antivirus_risware_adware_detected_scan_result">------- Riskware/Adware detected: </string>
+    <string name="str_antivirus_unknown_applications_result">------- Unknown applications: </string>
+    <string name="str_antivirus_files_cured_scan_result">Objects cured: </string>
+    <string name="str_antivirus_files_deleted_scan_result">Objects deleted: </string>
+    <string name="str_antivirus_files_quarantineed_scan_result">Objects quarantined: </string>
+    <string name="str_antivirus_files_suspicious_scan_result">Suspicious objects found: </string>
+    <string name="str_antivirus_files_scan_result_detail">\u0020(view details)</string>
+    <string name="str_antivirus_files_rooted_scan_result">Rooted: </string>
+    <string name="str_antivirus_files_scan_result_back_button">Back to scan</string>
+    <string name="str_antivirus_files_scan_result_view_applications_button">View applications</string>
+
+    <string name="str_security_scanner_firmware_verdict_result">Firmware check verdict: </string>
+    <string name="str_security_scanner_firmware_extended_result">Firmware extended verdict: </string>
+    <string name="str_security_scanner_wifi_verdict_result">WiFi verdict: </string>
+    <string name="str_security_scanner_wifi_cloud_state_result">WiFi cloud state: </string>
+    <string name="str_security_scanner_wifi_ssid_result">WiFi Ssid: </string>
+    <string name="str_security_scanner_wifi_bssid_result">WiFi BSsid: </string>
+    <string name="str_security_scanner_wifi_encryption_result">WiFi Encryption: </string>
+
+    <string name="str_last_scan_activity_threats_item_pkg_name">Application: %s</string>
+    <string name="str_last_scan_activity_threats_item_file">File on disk</string>
+    <string name="str_last_scan_activity_threats_error_message">Failed to obtain threats list from database</string>
+
+    <string name="str_antivirus_on_demand_scanner_settings">On-Demand Scanner Settings</string>
+    <string name="str_antivirus_scan_cloud_only">KSN scan only</string>
+    <string name="str_antivirus_scan_check_in_cloud">Check in KSN</string>
+    <string name="str_antivirus_scan_detect_riskware_adware">Detect riskware adware</string>
+    <string name="str_antivirus_scan_try_cure">Try to cure</string>
+    <string name="str_antivirus_scan_suspicious">Scan suspicious objects</string>
+    <string name="str_antivirus_scan_action_in_not_cured">Action if not cured:</string>
+    <string name="str_antivirus_scan_radiobutton">What to scan:</string>
+    <string name="str_antivirus_scan_installed_applications">installed applications</string>
+    <string name="str_antivirus_scan_installed_application">specific application: %1$s</string>
+    <string name="str_antivirus_scan_phone_memory">device memory</string>
+    <string name="str_antivirus_scan_selected_folder">specific folder: %1$s</string>
+    <string name="str_antivirus_scan_selected_directory_document">specific directory document: %1$s</string>
+    <string name="str_antivirus_scan_file">specific file: %1$s</string>
+    <string name="str_antivirus_scan_selected_document">specific document: %1$s</string>
+    <string name="str_antivirus_scan_all_files">all files</string>
+    <string name="str_antivirus_sd_card_name">sd card %1$d (%2$s)</string>
+
+    <string name="str_antivirus_path_not_exist">Path not exist: %1$s</string>
+    <string name="str_antivirus_path_not_folder">Path is not a folder: %1$s</string>
+    <string name="str_antivirus_path_not_file">Path is not a file: %1$s</string>
+    <string name="str_antivirus_license_error">License error</string>
+    <string name="str_antivirus_unknown_error">Unknown error</string>
+    <string name="str_applications_not_from_google_play">Number of applications not from Google Play:</string>
+</resources>

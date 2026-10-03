@@ -1,0 +1,67 @@
+<html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+	<head>
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+			<title>${BLOCK_PAGE_TITLE}</title>
+		<style type="text/css">
+			html,body{padding:0;margin:0;height:100%}
+			.header {color:#000000;font:bold 20px tahoma,sans-serif;margin-bottom:15px}
+			.text {color:#777777;font:15px tahoma,sans-serif;}
+			.wrap {margin:0 auto;max-width:400px;height:100%}
+			.wrap td {text-align:center;}
+			input{margin-top:15px}
+			.brd{border:1px solid #828282;border-radius:14px;}
+			.brd td:last-child{padding:15px 15px 15px 0}
+			@media only screen and (orientation:portrait) {
+				#portrait{display:none}
+				.brd td:last-child{padding:0 15px 15px}
+			}
+			@media only screen and (orientation:landscape) {
+				#landscape{display:none}
+			}
+		</style>
+		<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("#addExclusion").click(function(){
+					$.ajax({
+  						url: "/c45c47c08326bb22de272fda665738f1",
+  						type: "POST",
+  						dataType: "json",
+  						data: JSON.stringify({
+							"id" : "${ID_TOKEN}",
+  							"category" : "android.intent.category.BROWSABLE",
+  							"action" : "android.intent.action.INSERT",
+  							"page_uri" : "${BLOCK_PAGE_URL}",
+  							"launch_flags" : 0x14800000
+  						}),
+						complete: function() { },
+					    success: function() { },
+						error: function() { },
+					});
+				});
+			});
+		</script>
+	
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:ContentType msdt:dt="string">Document</mso:ContentType>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+</head>
+	<body>
+		<table class="wrap" role="presentation"><tr><td>
+			<table role="presentation" class="brd">
+				<tr>
+					<td>
+						<div class="header">${BLOCK_PAGE_HEADER}</div>
+						<div class="text">${BLOCK_PAGE_TEXT}</div>
+						
+						<input id="addExclusion" type="submit" value="${BLOCK_PAGE_ADD_EXCLUSION}" name="add_excl">
+					</td>
+				</tr>
+			</table>
+		</td></tr></table>
+	</body>
+</html>

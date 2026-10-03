@@ -14,20 +14,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
-    setTimeout(() => {
-      const res = loginOperator(email, password);
+    try {
+      const res = await loginOperator(email, password);
       setIsLoading(false);
       if (res.success && res.operator) {
         onLoginSuccess(res.operator);
       } else {
         setError(res.error || 'Autentikasi gagal.');
       }
-    }, 400);
+    } catch (err: unknown) {
+      setIsLoading(false);
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat login.');
+    }
   };
 
   const handleQuickLogin = (role: 'admin' | 'analyst' | 'helpdesk') => {

@@ -4,6 +4,7 @@ import 'core/theme/app_theme.dart';
 import 'data/services/activity_log_repository.dart';
 import 'data/services/kaspersky_sdk_bridge.dart';
 import 'data/services/telkomsel_backend_service.dart';
+import 'data/services/threat_manager_service.dart';
 import 'features/auth/auth_controller.dart';
 import 'features/dashboard/dashboard_controller.dart';
 import 'features/device/device_controller.dart';
@@ -29,6 +30,9 @@ class TelkomselSecureApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<ActivityLogRepository>(
           create: (_) => ActivityLogRepository()..loadLogs(),
+        ),
+        ChangeNotifierProvider<ThreatManagerService>(
+          create: (ctx) => ThreatManagerService(ctx.read<ActivityLogRepository>()),
         ),
         ChangeNotifierProvider<KasperskySdkBridge>(
           create: (ctx) {

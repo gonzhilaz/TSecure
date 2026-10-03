@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp" >
+
+        <TextView
+            style="@style/Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="@string/str_av_protection_rtp_monitor_settings" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/RtpEnable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:saveEnabled="false"
+            android:text="@string/str_av_protection_rtp_monitor_enable" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/RtpScanUdsOnly"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:saveEnabled="false"
+            android:text="@string/str_av_protection_rtp_check_in_cloud_only" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/RtpScanUds"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:saveEnabled="false"
+            android:text="@string/str_av_protection_rtp_check_in_cloud" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/RtpDetectRiskwareAdware"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:saveEnabled="false"
+            android:text="@string/str_av_protection_rtp_detect_riskware_adware" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/RtpScanSuspicious"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:saveEnabled="false"
+            android:text="@string/str_av_protection_rtp_scan_suspicious" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            style="@style/TextMedium"
+            android:id="@+id/textViewRtpAction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/str_av_protection_rtp_action" />
+
+        <RadioGroup
+            android:id="@+id/RadioGroupRtpAction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <RadioButton
+                style="@style/TextSmall"
+                android:id="@+id/rtpDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_av_protection_rtp_delete_threat" />
+
+            <RadioButton
+                style="@style/TextSmall"
+                android:id="@+id/rtpQuarantine"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_av_protection_rtp_quarantine_threat" />
+
+            <RadioButton
+                style="@style/TextSmall"
+                android:id="@+id/rtpSkip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:saveEnabled="false"
+                android:text="@string/str_av_protection_rtp_skip_threat" />
+
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/rtpMaxFileSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:saveEnabled="false"
+            android:hint="@string/str_av_protection_rtp_max_file_size"
+            android:inputType="number"/>
+
+        <include layout="@layout/command_item" android:id="@+id/openRtpMonitorDirectoryManager"/>
+
+    </LinearLayout>
+
+</ScrollView>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_app_control_feature_title">Application Control</string>
+    <string name="str_app_control_button">Open Application Control</string>
+    <string name="str_enable_appcontrol">Enable appcontrol</string>
+    <string name="str_use_window_manager_for_blocking">Use window manager for blocking</string>
+    <string name="str_open_accessibility_settings">Open accessibility settings</string>
+    <string name="str_control_mode">Control mode</string>
+    <string name="str_use_both_lists">Use both lists</string>
+    <string name="str_use_block_list">Use block list</string>
+    <string name="str_use_allow_list">Use allow list</string>
+    <string name="str_add_item">Add item</string>
+    <string name="str_appcontrol_add_item_button">Add Item</string>
+    <string name="str_appcontrol_add_dialog_list_type_label">Add to</string>
+    <string name="str_appcontrol_add_dialog_package_name_label">Name of package (leave empty for any)</string>
+    <string name="str_appcontrol_add_dialog_item_category_label">Category</string>
+    <string name="str_appcontrol_add_dialog_add_button">Add</string>
+    <string name="str_appcontrol_add_dialog_cancel_button">Cancel</string>
+    <string name="str_appcontrol_any_package">any package</string>
+    <string name="str_appcontrol_any_category">any category</string>
+    <string name="str_appcontrol_blocklist_header">Block List</string>
+    <string name="str_appcontrol_allowlist_header">Allow List</string>
+    <string name="str_appcontrol_delete_dialog_title">Delete item</string>
+    <string name="str_appcontrol_delete_dialog_confirm">Are you sure?</string>
+    <string name="str_app_control_failed_to_show_window_error">Enable to show blocking window. Check that SDK have system overlay and/or accessibility service permissions</string>
+    <string name="str_appcontrol_block_app_title">The activity was blocked</string>
+    <string name="str_appcontrol_block_app_button">Got it</string>
+    <string name="str_appcontrol_delete_self_dialog_title">Delete self from white list</string>
+    <string name="str_appcontrol_delete_self_dialog_message">Should not delete self or launchers from white list</string>
+    <string name="str_appcontrol_add_self_toast_message">Should not add self and launchers to block list</string>
+</resources>

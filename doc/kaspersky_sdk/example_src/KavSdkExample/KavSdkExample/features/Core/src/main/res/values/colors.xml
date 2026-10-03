@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#009073</color>
+    <color name="primaryDark">#00513E</color>
+    <color name="accent">#009073</color>
+    <color name="divider_dlg_title">#ff33b5e5</color>
+    <color name="quarantine_path_bgr">#4e4e4e</color>
+    <color name="error">#ffcc0000</color>
+    <color name="success">#ff669900</color>
+    <color name="pager_tab_strip_background_color">#00796b</color>
+    <color name="text_color">#616161</color>
+    <color name="background_theme_color">#e0f2f1</color>
+    <color name="drawer_list_item_color">#b2dfdb</color>
+</resources>

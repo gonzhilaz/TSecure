@@ -61,6 +61,16 @@ class ActivityLogRepository extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Updates an existing log item in-place and saves
+  Future<void> updateLog(ActivityLog updated) async {
+    final idx = _logs.indexWhere((l) => l.id == updated.id);
+    if (idx != -1) {
+      _logs[idx] = updated;
+      await _persist();
+      notifyListeners();
+    }
+  }
+
   /// Clears all logs
   Future<void> clearLogs() async {
     _logs.clear();
@@ -87,7 +97,7 @@ class ActivityLogRepository extends ChangeNotifier {
       ActivityLog(
         id: 'ksp-init-${now.millisecondsSinceEpoch}',
         title: 'Pemindaian Sistem Siap',
-        description: 'Kaspersky Engine & BlackWall RASP Aktif • 0 Ancaman',
+        description: 'Kaspersky Security Engine Aktif • 0 Ancaman',
         time: '$timeStr WIB',
         date: now,
         icon: Icons.verified_outlined,

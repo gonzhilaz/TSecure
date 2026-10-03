@@ -1,0 +1,17 @@
+apply plugin: 'com.android.library'
+
+apply from: "${gKavSdkExampleProject.getProjectDir()}/gradle-common/features-android-closure-defaults.gradle"
+apply from: "${gKavSdkExampleProject.getProjectDir()}/gradle/features-dependencies-closure-defaults.gradle"
+
+android {
+    flavorDimensions 'product'
+
+    productFlavors {
+        full {
+            dimension 'product'
+        }
+        av {
+            dimension 'product'
+        }
+    }
+}

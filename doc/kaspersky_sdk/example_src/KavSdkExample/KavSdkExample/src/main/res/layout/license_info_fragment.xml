@@ -1,0 +1,109 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <RelativeLayout
+            android:id="@+id/topLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="top"
+            android:padding="@dimen/activity_horizontal_margin">
+
+            <TextView
+                android:id="@+id/expiredLabel"
+                style="@style/TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:paddingRight="5dip"
+                android:text="@string/str_license_expired"/>
+
+            <TextView
+                android:id="@+id/expired"
+                style="@style/TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_toRightOf="@+id/expiredLabel"/>
+
+            <TextView
+                android:id="@+id/errorMessage"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/expired"/>
+
+            <TextView
+                android:id="@+id/textCode"
+                style="@style/TextSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/errorMessage"
+                android:text="@string/str_enter_code_activation_code_label"/>
+
+            <EditText
+                android:id="@+id/editCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textCode"
+                android:ems="10"
+                android:hint="@string/str_enter_code_activation_code_hint"
+                android:inputType="text">
+
+                <requestFocus/>
+            </EditText>
+
+            <TextView
+                android:id="@+id/hashOfHardwareIdLabel"
+                style="@style/TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/editCode"
+                android:paddingTop="10dip"
+                android:text="@string/str_license_hashOfHardwaredId"/>
+
+            <TextView
+                android:id="@+id/hashOfHardwareId"
+                style="@style/TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/hashOfHardwareIdLabel"
+                android:paddingBottom="10dp"
+                android:textIsSelectable="true"/>
+
+            <TextView
+                android:id="@+id/installationIdLabel"
+                style="@style/TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/hashOfHardwareId"
+                android:text="@string/str_license_installationId"/>
+
+            <TextView
+                android:id="@+id/installationId"
+                style="@style/TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/installationIdLabel"
+                android:textIsSelectable="true"/>
+        </RelativeLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/activate_button"
+        style="?android:attr/buttonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="10dp"
+        android:filterTouchesWhenObscured="true"
+        android:text="@string/str_enter_code_activate"/>
+</LinearLayout>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_antivirus_easy_scanner_feature_tab">Easy Scanner</string>
+    <string name="str_antivirus_easy_scanner_mode">EasyScanner mode</string>
+    <string name="str_antivirus_easy_scanner_basic">Basic</string>
+    <string name="str_antivirus_easy_scanner_light">Light</string>
+    <string name="str_antivirus_easy_scanner_light_plus">LightPlus</string>
+    <string name="str_antivirus_easy_scanner_recommended">Recommended</string>
+    <string name="str_antivirus_easy_scanner_full">Full</string>
+    <string name="str_antivirus_easy_scanner_action">Scan action:</string>
+</resources>

@@ -20,7 +20,9 @@ class DeviceController extends ChangeNotifier {
       if (showLoading) {
         await Future.delayed(const Duration(milliseconds: 300));
       }
-      _auditItems = MockDeviceAudits.getInitialAuditItems();
+      if (_auditItems.isEmpty) {
+        _auditItems = MockDeviceAudits.getInitialAuditItems();
+      }
       _state = _auditItems.isEmpty ? ViewState.empty : ViewState.success;
       notifyListeners();
     } catch (e) {

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_av_folder_monitor_button">Directory Monitor</string>
+
+    <string name="str_av_folder_monitor_scan_uds_only">Scan uds only</string>
+    <string name="str_av_folder_monitor_scan_uds_allow">Scan uds allow</string>
+    <string name="str_av_folder_monitor_try_cure_infected_files">Try cure infected files</string>
+    <string name="str_av_folder_monitor_max_file_size">Max file size</string>
+    <string name="str_av_folder_monitor_btn_add_folder">Add directory</string>
+    <string name="str_av_folder_monitor_btn_clear_all">Clear all</string>
+    <string name="str_av_folder_monitor_alert_fragment_title">Folder monitor</string>
+    <string name="str_av_folder_monitor_directory_already_monitored">Directory already monitored</string>
+    <string name="str_av_folder_monitor_delete_all_folder_monitors">Delete all folder monitors?</string>
+    <string name="str_av_folder_monitor_delete_selected_folder_monitor">Delete selected folder monitor?</string>
+    <string name="str_av_folder_monitor_scanning_options">Scanning options</string>
+    <string name="str_av_folder_monitor_detect_riskware">Detect riskware</string>
+    <string name="str_av_folder_monitor_monitoring_folders">Monitoring folders</string>
+    <string name="str_av_folder_monitor_list_is_empty">No folders were added</string>
+</resources>

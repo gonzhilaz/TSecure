@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_self_checker_title">Self Checker</string>
+    <string name="str_self_checker_scan_self">Check is process compromised</string>
+    <string name="str_self_checker_dialog_title">Check process is compromised</string>
+    <string name="str_self_checker_dialog_compromised">This process is compromised (result is cached for 30 seconds).</string>
+    <string name="str_self_checker_dialog_clean">This process is clean (result is cached for 30 seconds).</string>
+    <string name="str_self_checker_dialog_progress_msg">Checking…</string>
+    <string name="str_self_checker_dialog_positive_button">Check</string>
+    <string name="str_self_checker_dialog_negative_button">Cancel</string>
+</resources>

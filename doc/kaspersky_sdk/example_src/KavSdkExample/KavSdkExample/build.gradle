@@ -1,0 +1,159 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.jakewharton.butterknife'
+
+apply from: "gradle-common/common-android.gradle"
+
+def rootExtensions   = project.getRootProject().ext.getProperties()
+def targetProp             = "p" + "TargetSdkVersion"
+def simWatchProp           = "p" + "UseSimWatch"
+def eulaProp               = "p" + "EulaEnabled"
+def externalBuildProp      = "p" + "ExternalBuildVersionStr"
+def versionCodeKey         = "g" + "VersionCodeForExamples"
+
+def targetSdkVer = project.hasProperty(targetProp)            ? project.getProperties()[targetProp]          : "35"
+def extVer       = project.hasProperty(externalBuildProp)     ? project.getProperties()[externalBuildProp]   : "5.21.0.209"
+def verCode      = rootExtensions.containsKey(versionCodeKey) ? rootExtensions[versionCodeKey]               : "521000209"
+def useSimWatch  = (project.hasProperty(simWatchProp)         ? project.getProperties()[simWatchProp]        : "false").toBoolean() && gradle.ext.isFlavorAvailable("simwatch")
+def useEula      = project.hasProperty(eulaProp)              ? project.getProperties()[eulaProp]            : "false"
+
+android {
+    useLibrary 'org.apache.http.legacy'
+
+    buildToolsVersion '35.0.0'
+
+    defaultConfig {
+
+        multiDexEnabled true
+
+        minSdkVersion    21
+        if (targetSdkVer.startsWith("android-")) {
+            targetSdkVersion targetSdkVer.substring("android-".length())
+        } else {
+            targetSdkVersion Integer.parseInt(targetSdkVer)
+        }
+        versionName      extVer
+        versionCode      verCode as int
+        applicationId    'com.kavsdkexample'
+
+        manifestPlaceholders = [requestLegacyExternalStorage: "${false}", extractNativeLibs: "${pExtractNativeLibs}"]
+    }
+
+    aaptOptions {
+        noCompress 'properties'
+    }
+
+    if (pKeyAlias != null && !pKeyAlias.isEmpty()) {
+        signingConfigs {
+            release {
+                keyAlias pKeyAlias
+                keyPassword pKeyPassword
+                storeFile file(pKeystoreFile)
+                storePassword pKeyStorePassword
+            }
+        }
+    }
+
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources false
+            // OBSOLETE useProguard true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'client_proguard.txt'
+            if (pKeyAlias != null && !pKeyAlias.isEmpty()) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
+            buildConfigField "boolean", "COMPROMISED_ACCOUNTS_ENABLED", "${pCompromisedAccountsEnabled}"
+            buildConfigField "boolean", "COMPROMISED_PASSWORDS_ENABLED", "${pCompromisedPasswordsEnabled}"
+            buildConfigField "String", "UPDATER_URL", "\"${pUpdaterUrl}\""
+        }
+        debug {
+            debuggable true
+            zipAlignEnabled true
+            buildConfigField "boolean", "COMPROMISED_ACCOUNTS_ENABLED", "${pCompromisedAccountsEnabled}"
+            buildConfigField "boolean", "COMPROMISED_PASSWORDS_ENABLED", "${pCompromisedPasswordsEnabled}"
+            buildConfigField "String", "UPDATER_URL", "\"${pUpdaterUrl}\""
+        }
+    }
+
+    if (!gradle.ext.isAnyFlavorAvailable()) {
+        throw new GradleException("Please copy SDK libraries to KavSdkExample/KavSdkExample/libs folder first to build an example")
+    }
+
+    variantFilter { variant ->
+        def names = variant.flavors*.name
+        if (names.contains("av")) {
+            setIgnore(!gradle.ext.isFlavorAvailable("av"))
+        } else if (names.contains("full")) {
+            setIgnore(!gradle.ext.isFlavorAvailable("full"))
+        } else if (names.contains("whocalls")) {
+            setIgnore(!gradle.ext.isFlavorAvailable("whocalls"))
+        }
+    }
+
+    // Hack to set a separate proguard file for each variant (combinations of flavor and build ype)
+    applicationVariants.all { variant ->
+        def field = variant.getBuildType().getClass().getDeclaredField('buildType')
+        field.setAccessible(true)
+        field.get(variant.getBuildType()).proguardFiles.add("proguard_${variant.name.capitalize()}.txt")
+    }
+}
+
+apply from: "gradle-common/common-dependencies.gradle"
+
+configurations {
+    avDebugImplementation{}
+    avReleaseImplementation{}
+    fullDebugImplementation{}
+    fullReleaseImplementation{}
+    whocallsReleaseImplementation{}
+    whocallsDebugImplementation{}
+}
+
+dependencies {
+    debugImplementation   (name:  gradle.ext.isBuildVariantAvailable("base", "debug")   ? 'KL_Base_SDK_Android_5.21.0.209_Debug' : 'KL_Base_SDK_Android_5.21.0.209_Release', ext:'aar')
+    releaseImplementation (name:  gradle.ext.isBuildVariantAvailable("base", "release") ? 'KL_Base_SDK_Android_5.21.0.209_Release' : 'KL_Base_SDK_Android_5.21.0.209_Debug', ext:'aar')
+
+    if (useSimWatch) {
+        debugImplementation   (name: gradle.ext.isBuildVariantAvailable("simwatch", "debug")   ? 'KL_SimWatch_Android_5.21.0.209_Debug' : 'KL_SimWatch_Android_5.21.0.209_Release', ext: 'aar')
+        releaseImplementation (name: gradle.ext.isBuildVariantAvailable("simwatch", "release") ? 'KL_SimWatch_Android_5.21.0.209_Release' : 'KL_SimWatch_Android_5.21.0.209_Debug', ext: 'aar')
+    }
+
+    if (gradle.ext.isFlavorAvailable("simpleUrlReputation")) {
+        debugImplementation   (name: gradle.ext.isBuildVariantAvailable("simpleUrlReputation", "debug")   ? 'KL_UrlReputation_Android_5.21.0.209_Debug' : 'KL_UrlReputation_Android_5.21.0.209_Release', ext: 'aar')
+        releaseImplementation (name: gradle.ext.isBuildVariantAvailable("simpleUrlReputation", "release") ? 'KL_UrlReputation_Android_5.21.0.209_Release' : 'KL_UrlReputation_Android_5.21.0.209_Debug', ext: 'aar')
+    }
+
+    if (gradle.ext.isFlavorAvailable("av"))	{
+        avDebugImplementation     (name:'KL_Mobile_SDK_Android_5.21.0.209' + (gradle.ext.isBuildVariantAvailable("av", "debug")             ? '_AvDebug'    : '_AvRelease'),   ext:'aar')
+        avReleaseImplementation   (name:'KL_Mobile_SDK_Android_5.21.0.209' + (gradle.ext.isBuildVariantAvailable("av", "release")           ? '_AvRelease'  : '_AvDebug'),     ext:'aar')
+    }
+    if (gradle.ext.isFlavorAvailable("full")) {
+        fullDebugImplementation   (name:'KL_Mobile_SDK_Android_5.21.0.209' + (gradle.ext.isBuildVariantAvailable("full", "debug")           ? '_FullDebug'  : '_FullRelease'), ext:'aar')
+        fullReleaseImplementation (name:'KL_Mobile_SDK_Android_5.21.0.209' + (gradle.ext.isBuildVariantAvailable("full", "release")         ? '_FullRelease': '_FullDebug'),   ext:'aar')
+    }
+    if (gradle.ext.isFlavorAvailable("whocalls")) {
+        whocallsDebugImplementation   (name:'KL_Mobile_SDK_Android_5.21.0.209' + (gradle.ext.isBuildVariantAvailable("whocalls", "debug")   ? '_WhocallsDebug'  : '_WhocallsRelease'), ext:'aar')
+        whocallsReleaseImplementation (name:'KL_Mobile_SDK_Android_5.21.0.209' + (gradle.ext.isBuildVariantAvailable("whocalls", "release") ? '_WhocallsRelease': '_WhocallsDebug'),   ext:'aar')
+    }
+    if (useEula.toBoolean()) {
+        implementation gExampleEulaProject
+    }
+
+    implementation fileTree(dir: 'libs', include: ['*.(a|j)ar'])
+
+    compileOnly           'androidx.annotation:annotation:'                   + "1.1.0"
+    implementation        'androidx.appcompat:appcompat:'                     + "1.1.0"
+    implementation        'androidx.core:core:'                               + "1.2.0"
+    implementation        'com.google.android.material:material:'             + "1.2.0"
+    implementation        'androidx.multidex:multidex:'                       + "2.0.1"
+    implementation        'com.google.dagger:dagger:'                         + "2.41"
+    annotationProcessor   'com.google.dagger:dagger-compiler:'                + "2.41"
+    annotationProcessor   'com.google.dagger:dagger-android-processor:'       + "2.41"
+    implementation        'com.google.dagger:dagger-android-support:'         + "2.41"
+    implementation        'com.jakewharton:butterknife:'                      + "10.2.1"
+    annotationProcessor   'com.jakewharton:butterknife-compiler:'             + "10.2.1"
+    //debugImplementation   'com.squareup.leakcanary:leakcanary-android:'       + "2.7"
+}

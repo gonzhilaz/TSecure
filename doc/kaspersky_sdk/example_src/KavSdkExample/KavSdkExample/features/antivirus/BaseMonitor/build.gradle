@@ -1,0 +1,10 @@
+apply plugin: 'com.android.library'
+
+apply from: "${gKavSdkExampleProject.getProjectDir()}/gradle-common/features-android-closure-defaults.gradle"
+apply from: "${gKavSdkExampleProject.getProjectDir()}/gradle/features-dependencies-closure-defaults.gradle"
+
+dependencies {
+    implementation project(path: ':KavSdkExample:features:Core')
+    implementation project(path: ':KavSdkExample:features:antivirus:Base')
+}
+

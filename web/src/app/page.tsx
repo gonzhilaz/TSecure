@@ -9,6 +9,10 @@ import { SubscriberTable } from '@/components/SubscriberTable';
 import { AdminTabNav, DashboardTab } from '@/components/AdminTabNav';
 import { CustomerDiagnosticsDesk } from '@/components/CustomerDiagnosticsDesk';
 import { DeviceIntegrityDesk } from '@/components/DeviceIntegrityDesk';
+import { PhishingIntelDesk } from '@/components/PhishingIntelDesk';
+import { UserManagementDesk } from '@/components/UserManagementDesk';
+import { IngestionGatewayDesk } from '@/components/IngestionGatewayDesk';
+import { DatabaseLifecycleDesk } from '@/components/DatabaseLifecycleDesk';
 import { ReportDesk } from '@/components/ReportDesk';
 import { LoginModal } from '@/components/LoginModal';
 import { getCurrentOperator, logoutOperator, SOCOperator } from '@/lib/auth';
@@ -283,6 +287,11 @@ export default function SOCDashboard() {
           </div>
         )}
 
+        {/* Tab: Phishing Threat Intel Desk */}
+        {activeTab === 'phishing_intel' && (
+          <PhishingIntelDesk loading={loading || isRefreshing} />
+        )}
+
         {/* Tab 2: Customer Care & Diagnostic Helpdesk */}
         {activeTab === 'helpdesk' && (
           <CustomerDiagnosticsDesk
@@ -299,6 +308,21 @@ export default function SOCDashboard() {
             subscribers={subscribers}
             loading={loading || isRefreshing}
           />
+        )}
+
+        {/* Tab: Ingestion Gateway & Dead-Letter Queue */}
+        {activeTab === 'ingestion_dlq' && (
+          <IngestionGatewayDesk />
+        )}
+
+        {/* Tab: User Management & RBAC */}
+        {activeTab === 'users_rbac' && (
+          <UserManagementDesk />
+        )}
+
+        {/* Tab: Database Lifecycle & Maintenance */}
+        {activeTab === 'db_maintenance' && (
+          <DatabaseLifecycleDesk />
         )}
 
         {/* Tab 4: Laporan & Ekspor Audit (Reports) */}

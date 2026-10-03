@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_url_check_features">Url category check features</string>
+    <string name="str_url_check_check_bank_url_button">Check financial category</string>
+    <string name="str_url_check_check_url_button">Check KSN URL reputation</string>
+    <string name="str_url_check_check_url_ext_button">Check KSN URL extended reputation</string>
+    <string name="str_url_check_not_inited">SDK is not initialized yet</string>
+
+    <string name="str_url_reputation_dialog_enter_url">Enter URL for reputation check</string>
+    <string name="str_url_reputation_dialog_result">UrlInfo: </string>
+    <string name="str_url_reputation_dialog_result_null">UrlInfo: null</string>
+    <string name="str_url_reputation_dialog_result_exception">Exception: </string>
+
+    <string name="str_financial_url_check_textview">Enter URL for financial category check</string>
+    <string name="str_financial_category_dialog_result">Category: </string>
+    <string name="str_financial_category_dialog_result_null">UrlInfo: null</string>
+    <string name="str_financial_category_dialog_exception">Exception: </string>
+</resources>

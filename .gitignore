@@ -38,3 +38,15 @@ backend/server
 .env
 .env.local
 .env.*.local
+
+# Temporary local screenshots & scratch files
+current_screen.png
+phone_screen.png
+prompt_screen.png
+screen.png
+settings_screen.png
+classes.jar
+/AndroidManifest.xml
+backend/data_store.json.bak
+flutter_kms-pkg-av/
+

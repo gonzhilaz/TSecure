@@ -252,3 +252,25 @@ func (s *SubscriptionService) ClearAllData() {
 	s.store.ClearAllData()
 }
 
+// Phishing Threat Intelligence delegations
+func (s *SubscriptionService) ListPhishingRecords(brand, status, query string) []*model.PhishingRecord {
+	return s.store.ListPhishingRecords(brand, status, query)
+}
+
+func (s *SubscriptionService) GetPhishingStats() model.PhishingStats {
+	return s.store.GetPhishingStats()
+}
+
+func (s *SubscriptionService) UpdatePhishingStatus(id, status, notes string) (*model.PhishingRecord, error) {
+	return s.store.UpdatePhishingStatus(id, status, notes)
+}
+
+func (s *SubscriptionService) ExportPhishingCSV() ([]byte, error) {
+	return s.store.ExportPhishingCSV()
+}
+
+func (s *SubscriptionService) RecordPhishingFromThreat(event model.ThreatEvent) {
+	s.store.RecordPhishingFromThreat(event)
+}
+
+

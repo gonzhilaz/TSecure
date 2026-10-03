@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_av_protection_rtp_monitor_caption">Real-time Protection Monitor</string>
+
+    <string name="str_av_protection_rtp_monitor_settings">RTP monitor settings</string>
+    <string name="str_av_protection_rtp_monitor_enable">RTP: enable monitor</string>
+    <string name="str_av_protection_rtp_check_in_cloud_only">RTP: check only in KSN</string>
+    <string name="str_av_protection_rtp_check_in_cloud">RTP: check in KSN</string>
+    <string name="str_av_protection_rtp_detect_riskware_adware">RTP: detect riskware adware</string>
+    <string name="str_av_protection_rtp_action">RTP monitor action:</string>
+    <string name="str_av_protection_rtp_delete_threat">RTP: delete threat</string>
+    <string name="str_av_protection_rtp_quarantine_threat">RTP: quarantine threat</string>
+    <string name="str_av_protection_rtp_skip_threat">RTP: skip threat</string>
+    <string name="str_av_protection_rtp_scan_suspicious">RTP: scan suspicious</string>
+    <string name="str_av_protection_rtp_max_file_size">Max file size</string>
+    <string name="str_av_protection_rtp_disable_monitor_to_edit_folders">Please, disable monitor first</string>
+
+    <string name="str_av_protection_rtp_monitor_options">Directory options</string>
+    <string name="str_av_protection_rtp_monitor_flags_description">Note: Modification flags bellow are only supported for default file system. For SAF paths it is not possible to determine detail reason of file modification</string>
+    <string name="str_av_protection_rtp_monitor_notify_access">File was accessed</string>
+    <string name="str_av_protection_rtp_monitor_notify_modify">File was modified</string>
+    <string name="str_av_protection_rtp_monitor_notify_attrib">Metadata changed</string>
+    <string name="str_av_protection_rtp_monitor_notify_close_write">Writtable file was closed</string>
+    <string name="str_av_protection_rtp_monitor_notify_close_no_write">Unwrittable file closed</string>
+    <string name="str_av_protection_rtp_monitor_notify_open">File was opened</string>
+    <string name="str_av_protection_rtp_monitor_notify_moved_from">File was moved from X</string>
+    <string name="str_av_protection_rtp_monitor_notify_moved_to">File was moved to Y</string>
+    <string name="str_av_protection_rtp_monitor_notify_create">Subfile was created</string>
+    <string name="str_av_protection_rtp_monitor_notify_delete">Subfile was deleted</string>
+    <string name="str_av_protection_rtp_monitor_notify_move_self">Self was deleted</string>
+    <string name="str_av_protection_rtp_monitor_notify_delete_self">Self was moved</string>
+    <string name="str_av_protection_open_rtp_monitor_directory_manager">Specify monitored directories</string>
+    <string name="str_av_protection_rtp_monitor_monitored_directories">Monitored directories</string>
+    <string name="str_av_protection_rtp_monitor_excluded_directories">Excluded directories</string>
+    <string name="str_av_protection_rtp_monitor_add_directory_tab">Add directory</string>
+    <string name="str_av_protection_rtp_monitor_directories_tab">Directories</string>
+    <string name="str_av_protection_rtp_monitor_exclusions_tab">Exclusions</string>
+    <string name="str_av_protection_rtp_monitor_exclusions_note">Please note, that the excluded directory must be a subdirectory of one of the monitored directories!</string>
+    <string name="str_av_protection_rtp_monitor_btn_add_folder">Add directory</string>
+    <string name="str_av_protection_rtp_monitor_btn_add_default_folders">Add default directories</string>
+    <string name="str_av_protection_rtp_monitor_btn_remove_default_folders">Remove default directories</string>
+    <string name="str_av_protection_rtp_list_view_is_empty">List view is empty</string>
+
+    <string name="str_av_protection_rtp_delete_selected_folder_title">Remove folder</string>
+    <string name="str_av_protection_rtp_delete_selected_folder_text">Remove selected folder?</string>
+
+    <string name="str_av_protection_rtp_delete_selected_exclusion_title">Remove exclusion</string>
+    <string name="str_av_protection_rtp_delete_selected_exclusion_text">Remove selected exclusion?</string>
+</resources>

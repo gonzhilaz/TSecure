@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_pua_monitor_button">Potentially Unwanted Apps Monitor</string>
+    <string name="str_pua_protection_enable_apk_installation_check">Enable apk installation check</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.kavsdkexample.antivirus.rtp_monitor">
+
+
+<!--
+        <activity
+            android:name=".ui.device_protection.RtpMonitorActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="@string/str_av_app_monitor_title">
+        </activity>
+
+    <activity
+        android:name=".ui.device_protection.RtpMonitorDirectoryManagerActivity"
+        android:label="@string/str_av_open_rtp_monitor_directory_manager">
+    </activity>
+-->
+
+</manifest>

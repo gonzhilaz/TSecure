@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+
+    <issue id="LabelFor" severity="ignore"/>
+
+    <!-- Our app is just a sample, so these warnings could be ignored -->
+    <issue id="IconDensities" severity="ignore"/>
+    <issue id="IconColors" severity="ignore"/>
+    <issue id="ButtonStyle" severity="ignore"/>
+    <issue id="RtlHardcoded" severity="ignore"/>
+    <issue id="IconMissingDensityFolder" severity="ignore"/>
+    <issue id="GoogleAppIndexingWarning" severity="ignore"/>
+    <issue id="TypographyDashes" severity="ignore"/>
+
+    <issue id="NotPublicApiImport">
+        <ignore regexp=".*(?:Kashell|src_internal).*"/>
+    </issue>
+
+    <issue id="LoggerConditional" severity="ignore"/>
+</lint>

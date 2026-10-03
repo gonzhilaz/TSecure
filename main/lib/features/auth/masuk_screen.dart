@@ -1,10 +1,14 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/app_button.dart';
+import '../../core/widgets/settings_sheet.dart';
 import 'auth_controller.dart';
 import 'verifikasi_otp_screen.dart';
+import 'widgets/auth_legal_sheet.dart';
+import 'widgets/phone_input_field.dart';
 
 class MasukScreen extends StatefulWidget {
   const MasukScreen({super.key});
@@ -14,11 +18,32 @@ class MasukScreen extends StatefulWidget {
 }
 
 class _MasukScreenState extends State<MasukScreen> {
-  final _phoneController = TextEditingController(text: '081299887766');
+  final _phoneController = TextEditingController();
+  late final TapGestureRecognizer _termsRecognizer;
+  late final TapGestureRecognizer _privacyRecognizer;
+  late final TapGestureRecognizer _grapariRecognizer;
+  late final TapGestureRecognizer _veronikaRecognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _termsRecognizer = TapGestureRecognizer()
+      ..onTap = () => AuthLegalSheet.showTerms(context);
+    _privacyRecognizer = TapGestureRecognizer()
+      ..onTap = () => AuthLegalSheet.showPrivacy(context);
+    _grapariRecognizer = TapGestureRecognizer()
+      ..onTap = () => AuthLegalSheet.showSupportDialog(context, isVeronika: false);
+    _veronikaRecognizer = TapGestureRecognizer()
+      ..onTap = () => AuthLegalSheet.showSupportDialog(context, isVeronika: true);
+  }
 
   @override
   void dispose() {
     _phoneController.dispose();
+    _termsRecognizer.dispose();
+    _privacyRecognizer.dispose();
+    _grapariRecognizer.dispose();
+    _veronikaRecognizer.dispose();
     super.dispose();
   }
 
@@ -69,44 +94,65 @@ class _MasukScreenState extends State<MasukScreen> {
                   const SizedBox(height: 32),
                   Expanded(
                     child: Container(
-                      decoration: const BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(24),
-                          topRight: Radius.circular(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(36),
+                          topRight: Radius.circular(36),
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.06),
+                            blurRadius: 20,
+                            offset: const Offset(0, -6),
+                          ),
+                        ],
                       ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24.0,
-                        vertical: 20.0,
+                        vertical: 16.0,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Center(
                             child: Container(
-                              width: 44,
+                              width: 48,
                               height: 4,
                               decoration: BoxDecoration(
-                                color: AppColors.slateBorder,
+                                color: const Color(0xFFCBD5E1),
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
                           ),
-                          const SizedBox(height: 24),
-                          Text('Masuk', style: AppTypography.headlineLg),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Masuk',
+                            style: AppTypography.headlineLg.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.navyDeep,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
                           Text(
                             'Gunakan nomor MyTelkomsel Anda',
-                            style: AppTypography.bodyMd,
+                            style: AppTypography.bodyMd.copyWith(
+                              color: AppColors.slateMuted,
+                            ),
                           ),
-                          const SizedBox(height: 28),
-                          Text('Nomor Ponsel', style: AppTypography.labelMd),
+                          const SizedBox(height: 12),
+                          const Divider(color: Color(0xFFF1F5F9), height: 1, thickness: 1),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Nomor Ponsel',
+                            style: AppTypography.labelMd.copyWith(
+                              color: AppColors.slateMid,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                           const SizedBox(height: 8),
-                          _buildPhoneInput(),
-                          const SizedBox(height: 10),
-                          _buildQuickPresets(),
-                          const SizedBox(height: 14),
+                          PhoneInputField(controller: _phoneController),
+                          const SizedBox(height: 16),
                           _buildPdpAgreement(authController),
                           const Spacer(),
                           AppButton(
@@ -117,7 +163,18 @@ class _MasukScreenState extends State<MasukScreen> {
                           ),
                           const SizedBox(height: 16),
                           _buildFooterNotes(),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
+                          Center(
+                            child: Container(
+                              width: 120,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: AppColors.navyDeep.withValues(alpha: 0.8),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
                         ],
                       ),
                     ),
@@ -128,49 +185,6 @@ class _MasukScreenState extends State<MasukScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildQuickPresets() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.science_outlined, size: 13, color: AppColors.slateMuted),
-            const SizedBox(width: 4),
-            Text(
-              'Preset Uji Coba POC:',
-              style: AppTypography.labelSm.copyWith(
-                color: AppColors.slateMuted,
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Wrap(
-          spacing: 6,
-          runSpacing: 4,
-          children: [
-            _PresetChip(
-              label: 'Aktif (30 Hari)',
-              color: AppColors.statusSafeEmerald,
-              onTap: () => setState(() => _phoneController.text = '081299887766'),
-            ),
-            _PresetChip(
-              label: 'Masa Aktif Habis',
-              color: AppColors.statusDanger,
-              onTap: () => setState(() => _phoneController.text = '081200000000'),
-            ),
-            _PresetChip(
-              label: 'Belum Terdaftar',
-              color: AppColors.slateMuted,
-              onTap: () => setState(() => _phoneController.text = '081288880000'),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
@@ -188,67 +202,40 @@ class _MasukScreenState extends State<MasukScreen> {
                 style: AppTypography.headlineSm.copyWith(
                   fontWeight: FontWeight.w800,
                   color: AppColors.navyDeep,
+                  letterSpacing: -0.5,
                 ),
               ),
+              const SizedBox(height: 2),
               Text(
-                'SECURITY',
+                'SECURE',
                 style: AppTypography.labelSm.copyWith(
                   color: AppColors.primary,
-                  letterSpacing: 2.0,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 2.2,
+                  fontSize: 10,
                 ),
               ),
             ],
           ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.more_horiz, color: AppColors.slateMid),
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.slateDivider,
-              padding: const EdgeInsets.all(8),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPhoneInput() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.slateBorder),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-      child: Row(
-        children: [
-          const Text('🇮🇩', style: TextStyle(fontSize: 20)),
-          const SizedBox(width: 8),
-          Text(
-            '+62',
-            style: AppTypography.labelLg.copyWith(color: AppColors.textPrimary),
-          ),
           Container(
-            height: 24,
-            width: 1,
-            color: AppColors.slateBorder,
-            margin: const EdgeInsets.symmetric(horizontal: 12),
-          ),
-          Expanded(
-            child: TextField(
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              style: AppTypography.labelLg.copyWith(
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-                hintText: '812-3456-7890',
-              ),
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: IconButton(
+              onPressed: () => SettingsSheet.show(context),
+              icon: const Icon(Icons.more_horiz, size: 20, color: AppColors.slateMid),
+              padding: EdgeInsets.zero,
             ),
           ),
         ],
@@ -277,26 +264,28 @@ class _MasukScreenState extends State<MasukScreen> {
           child: RichText(
             text: TextSpan(
               style: AppTypography.bodySm.copyWith(color: AppColors.slateMid),
-              children: const [
-                TextSpan(text: 'Saya menyetujui '),
+              children: [
+                const TextSpan(text: 'Saya menyetujui '),
                 TextSpan(
                   text: 'Ketentuan Layanan',
-                  style: TextStyle(
+                  recognizer: _termsRecognizer,
+                  style: const TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.underline,
                   ),
                 ),
-                TextSpan(text: ' & '),
+                const TextSpan(text: ' & '),
                 TextSpan(
                   text: 'Kebijakan Privasi',
-                  style: TextStyle(
+                  recognizer: _privacyRecognizer,
+                  style: const TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.underline,
                   ),
                 ),
-                TextSpan(text: ' Telkomsel (UU PDP No. 27/2022)'),
+                const TextSpan(text: ' Telkomsel (UU PDP No. 27/2022)'),
               ],
             ),
           ),
@@ -324,63 +313,31 @@ class _MasukScreenState extends State<MasukScreen> {
               color: AppColors.slateMuted,
               fontSize: 11,
             ),
-            children: const [
-              TextSpan(text: 'Masuk instan tanpa OTP. Butuh bantuan? Hubungi '),
+            children: [
+              const TextSpan(text: 'Masuk instan tanpa OTP. Butuh bantuan? Hubungi '),
               TextSpan(
                 text: 'GraPARI 188',
-                style: TextStyle(
+                recognizer: _grapariRecognizer,
+                style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
+                  decoration: TextDecoration.underline,
                 ),
               ),
-              TextSpan(text: ' atau '),
+              const TextSpan(text: ' atau '),
               TextSpan(
                 text: 'Veronika',
-                style: TextStyle(
+                recognizer: _veronikaRecognizer,
+                style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   color: AppColors.primary,
+                  decoration: TextDecoration.underline,
                 ),
               ),
             ],
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PresetChip extends StatelessWidget {
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _PresetChip({
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
-        ),
-      ),
     );
   }
 }

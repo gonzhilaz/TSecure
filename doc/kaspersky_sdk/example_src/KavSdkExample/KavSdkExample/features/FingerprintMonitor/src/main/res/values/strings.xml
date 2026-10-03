@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_fingerprint_monitor_current_state">Fingerprint monitor state:</string>
+    <string name="str_fingerprint_monitor_feature_title">Fingerprint Monitor</string>
+    <string name="str_fingerprint_monitor_button">Open fingerprint monitor</string>
+    <string name="str_fingerprint_monitor_state_enabled">Monitor enabled</string>
+    <string name="str_fingerprint_monitor_state_disabled">Monitor disabled</string>
+    <string name="str_fingerprint_monitor_state_failed">Failed to enable fingerprint monitor</string>
+    <string name="str_fingerprint_monitor_fingerprint_changed_msg">Fingerprint changed!</string>
+</resources>

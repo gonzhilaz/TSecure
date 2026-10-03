@@ -110,37 +110,6 @@ class SimWatchCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            height: 42,
-            child: OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary, width: 1.2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text(
-                      '[Uji SIM Watch] Sensor Aktif: Pelepasan SIM terdeteksi akan langsung mengunci layar & memicu sirene darurat.',
-                    ),
-                    backgroundColor: AppColors.navyDeep,
-                    behavior: SnackBarBehavior.floating,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.security, size: 18),
-              label: const Text(
-                'Uji Respon Sensor SIM',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ),
-          ),
         ],
       ),
     );

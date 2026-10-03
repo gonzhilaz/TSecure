@@ -2,7 +2,6 @@ package storage
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -12,22 +11,43 @@ import (
 )
 
 type Storage struct {
-	mu          sync.RWMutex
-	subscribers map[string]*model.Subscriber
-	threats     []model.ThreatEvent
-	otps        map[string]string
-	persistPath string
+	mu              sync.RWMutex
+	subscribers     map[string]*model.Subscriber
+	threats         []model.ThreatEvent
+	phishingRecords map[string]*model.PhishingRecord
+	operators       map[string]*model.Operator
+	auditLogs       []model.AuditLog
+	apiKeys         map[string]*model.IngestionApiKey
+	dlqRecords      []model.DeadLetterRecord
+	otps            map[string]string
+	persistPath     string
+	lastBackupAt    time.Time
+	lastRetentionAt time.Time
 }
 
 func NewStorage(persistPath string) *Storage {
 	s := &Storage{
-		subscribers: make(map[string]*model.Subscriber),
-		threats:     make([]model.ThreatEvent, 0),
-		otps:        make(map[string]string),
-		persistPath: persistPath,
+		subscribers:     make(map[string]*model.Subscriber),
+		threats:         make([]model.ThreatEvent, 0),
+		phishingRecords: make(map[string]*model.PhishingRecord),
+		operators:       make(map[string]*model.Operator),
+		auditLogs:       make([]model.AuditLog, 0),
+		apiKeys:         make(map[string]*model.IngestionApiKey),
+		dlqRecords:      make([]model.DeadLetterRecord, 0),
+		otps:            make(map[string]string),
+		persistPath:     persistPath,
 	}
 	if err := s.loadFromFile(); err != nil {
 		s.seedInitialData()
+	}
+	if len(s.phishingRecords) == 0 {
+		s.seedInitialPhishing()
+	}
+	if len(s.operators) == 0 {
+		s.seedInitialOperators()
+	}
+	if len(s.apiKeys) == 0 {
+		s.seedInitialApiKeys()
 	}
 	return s
 }
@@ -35,6 +55,11 @@ func NewStorage(persistPath string) *Storage {
 func (s *Storage) seedInitialData() {
 	s.subscribers = make(map[string]*model.Subscriber)
 	s.threats = make([]model.ThreatEvent, 0)
+	s.phishingRecords = make(map[string]*model.PhishingRecord)
+	s.operators = make(map[string]*model.Operator)
+	s.auditLogs = make([]model.AuditLog, 0)
+	s.apiKeys = make(map[string]*model.IngestionApiKey)
+	s.dlqRecords = make([]model.DeadLetterRecord, 0)
 }
 
 func (s *Storage) GetSubscriber(msisdn string) (*model.Subscriber, bool) {
@@ -132,176 +157,7 @@ func (s *Storage) SearchSubscribers(query, status, risk string) []*model.Subscri
 	return out
 }
 
-func (s *Storage) ResendActivationCode(msisdn string) (*model.Subscriber, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	cleaned := cleanMsisdn(msisdn)
-	sub, exists := s.subscribers[cleaned]
-	if !exists {
-		return nil, fmt.Errorf("subscriber not found")
-	}
-	sub.ActivationStatus = "ACTIVATED"
-	sub.IsActive = true
-	sub.LastCheckedAt = time.Now()
-	_ = s.saveToFile()
-	copied := *sub
-	return &copied, nil
-}
 
-func (s *Storage) ResyncKasperskyLicense(msisdn string) (*model.Subscriber, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	cleaned := cleanMsisdn(msisdn)
-	sub, exists := s.subscribers[cleaned]
-	if !exists {
-		return nil, fmt.Errorf("subscriber not found")
-	}
-	// Reconcile Kaspersky expiry date with NDP active period end
-	sub.KasperskyExpiryDate = sub.ActivePeriodEnd
-	sub.DesyncDays = 0
-	if sub.ActivationStatus == "DESYNC_WARNING" {
-		sub.ActivationStatus = "ACTIVATED"
-	}
-	_ = s.saveToFile()
-	copied := *sub
-	return &copied, nil
-}
-
-func (s *Storage) MigrateDevice(req model.DeviceMigrationRequest) (*model.Subscriber, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	cleaned := cleanMsisdn(req.MSISDN)
-	sub, exists := s.subscribers[cleaned]
-	if !exists {
-		return nil, fmt.Errorf("subscriber not found")
-	}
-	if req.NewMobileID != "" {
-		sub.MobileID = req.NewMobileID
-	} else {
-		sub.MobileID = fmt.Sprintf("MOBILE ID-MIGRATED-%d", time.Now().Unix()%1000000)
-	}
-	if req.NewDeviceModel != "" {
-		sub.DeviceModel = req.NewDeviceModel
-	}
-	if req.NewOSVersion != "" {
-		sub.OSVersion = req.NewOSVersion
-	}
-	sub.DeviceMigrationCount++
-	sub.LastCheckedAt = time.Now()
-	_ = s.saveToFile()
-	copied := *sub
-	return &copied, nil
-}
-
-func (s *Storage) AddThreatEvent(event model.ThreatEvent) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if event.ID == "" {
-		event.ID = fmt.Sprintf("THREAT-%d", time.Now().UnixNano())
-	}
-	if event.Timestamp.IsZero() {
-		event.Timestamp = time.Now()
-	}
-	s.threats = append([]model.ThreatEvent{event}, s.threats...)
-	if len(s.threats) > 100 {
-		s.threats = s.threats[:100]
-	}
-	_ = s.saveToFile()
-}
-
-func (s *Storage) ListThreats(limit int) []model.ThreatEvent {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	if limit <= 0 || limit > len(s.threats) {
-		limit = len(s.threats)
-	}
-	result := make([]model.ThreatEvent, limit)
-	copy(result, s.threats[:limit])
-	return result
-}
-
-func (s *Storage) SimulateNdpPurchase(req model.NdpOrderRequest) *model.Subscriber {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	cleaned := cleanMsisdn(req.MSISDN)
-	now := time.Now()
-	days := req.DurationDays
-	if days <= 0 {
-		days = 30
-	}
-	sub, exists := s.subscribers[cleaned]
-	if !exists {
-		sub = &model.Subscriber{
-			ID:                fmt.Sprintf("SUB-%s", cleaned),
-			MSISDN:            cleaned,
-			MobileID:          "MOBILE ID-AUTO-" + cleaned[len(cleaned)-4:],
-			DeviceModel:       "Smartphone (Auto-Provisioned)",
-			OSVersion:         "Android 14",
-			ActivationCode:    fmt.Sprintf("TK-%d", 100000+now.Unix()%900000),
-			RootStatus:        "CLEAN",
-			HookStatus:        "CLEAN",
-			BoundIccid:        "89620188" + cleaned[len(cleaned)-8:],
-			CurrentIccid:      "89620188" + cleaned[len(cleaned)-8:],
-			SimSlot:           "Slot 1 (Telkomsel)",
-			PurchaseTimestamp: now,
-			CreatedAt:         now,
-		}
-	}
-	if sub.IsActive && sub.ActivePeriodEnd.After(now) {
-		sub.ActivePeriodEnd = sub.ActivePeriodEnd.Add(time.Duration(days) * 24 * time.Hour)
-	} else {
-		sub.ActivePeriodStart = now
-		sub.ActivePeriodEnd = now.Add(time.Duration(days) * 24 * time.Hour)
-	}
-	sub.KasperskyExpiryDate = sub.ActivePeriodEnd
-	sub.DesyncDays = 0
-	sub.IsActive = true
-	sub.ActivationStatus = "ACTIVATED"
-	sub.PlanName = req.PackageName
-	sub.KasperskyLicenseKey = "6KYKJ-65T6T-WMVBD-NNPEG"
-	sub.LastCheckedAt = now
-	s.subscribers[cleaned] = sub
-	_ = s.saveToFile()
-	copied := *sub
-	return &copied
-}
-
-func (s *Storage) SimulateNdpExpire(msisdn string) (*model.Subscriber, bool) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	cleaned := cleanMsisdn(msisdn)
-	sub, exists := s.subscribers[cleaned]
-	if !exists {
-		return nil, false
-	}
-	sub.IsActive = false
-	sub.ActivationStatus = "EXPIRED"
-	sub.ActivePeriodEnd = time.Now().Add(-1 * time.Hour)
-	sub.KasperskyExpiryDate = sub.ActivePeriodEnd
-	_ = s.saveToFile()
-	copied := *sub
-	return &copied, true
-}
-
-func (s *Storage) SimulateNdpUnactivated(msisdn string) (*model.Subscriber, bool) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	cleaned := cleanMsisdn(msisdn)
-	sub, exists := s.subscribers[cleaned]
-	if !exists {
-		return nil, false
-	}
-	sub.IsActive = false
-	sub.ActivationStatus = "PENDING_ACTIVATION"
-	sub.ActivePeriodStart = time.Time{}
-	sub.ActivePeriodEnd = time.Time{}
-	sub.KasperskyLicenseKey = ""
-	sub.KasperskyExpiryDate = time.Time{}
-	sub.MobileID = ""
-	_ = s.saveToFile()
-	copied := *sub
-	return &copied, true
-}
 
 func (s *Storage) GetDashboardStats() model.DashboardStats {
 	s.mu.RLock()
@@ -377,21 +233,54 @@ func (s *Storage) loadFromFile() error {
 	data, err := os.ReadFile(s.persistPath)
 	if err != nil { return err }
 	var dump struct {
-		Subscribers map[string]*model.Subscriber `json:"subscribers"`
-		Threats     []model.ThreatEvent          `json:"threats"`
+		Subscribers     map[string]*model.Subscriber      `json:"subscribers"`
+		Threats         []model.ThreatEvent               `json:"threats"`
+		PhishingRecords map[string]*model.PhishingRecord  `json:"phishing_records"`
+		Operators       map[string]*model.Operator        `json:"operators"`
+		AuditLogs       []model.AuditLog                  `json:"audit_logs"`
+		ApiKeys         map[string]*model.IngestionApiKey `json:"api_keys"`
+		DLQRecords      []model.DeadLetterRecord          `json:"dlq_records"`
+		LastBackupAt    time.Time                         `json:"last_backup_at"`
+		LastRetentionAt time.Time                         `json:"last_retention_at"`
 	}
 	if err := json.Unmarshal(data, &dump); err != nil { return err }
-	s.subscribers, s.threats = dump.Subscribers, dump.Threats
+	s.subscribers = dump.Subscribers
+	s.threats = dump.Threats
+	if dump.PhishingRecords != nil { s.phishingRecords = dump.PhishingRecords }
+	if dump.Operators != nil { s.operators = dump.Operators }
+	if dump.AuditLogs != nil { s.auditLogs = dump.AuditLogs }
+	if dump.ApiKeys != nil { s.apiKeys = dump.ApiKeys }
+	if dump.DLQRecords != nil { s.dlqRecords = dump.DLQRecords }
+	s.lastBackupAt = dump.LastBackupAt
+	s.lastRetentionAt = dump.LastRetentionAt
 	return nil
 }
 
 func (s *Storage) saveToFile() error {
 	if s.persistPath == "" { return nil }
 	dump := struct {
-		Subscribers map[string]*model.Subscriber `json:"subscribers"`
-		Threats     []model.ThreatEvent          `json:"threats"`
-	}{Subscribers: s.subscribers, Threats: s.threats}
+		Subscribers     map[string]*model.Subscriber      `json:"subscribers"`
+		Threats         []model.ThreatEvent               `json:"threats"`
+		PhishingRecords map[string]*model.PhishingRecord  `json:"phishing_records"`
+		Operators       map[string]*model.Operator        `json:"operators"`
+		AuditLogs       []model.AuditLog                  `json:"audit_logs"`
+		ApiKeys         map[string]*model.IngestionApiKey `json:"api_keys"`
+		DLQRecords      []model.DeadLetterRecord          `json:"dlq_records"`
+		LastBackupAt    time.Time                         `json:"last_backup_at"`
+		LastRetentionAt time.Time                         `json:"last_retention_at"`
+	}{
+		Subscribers:     s.subscribers,
+		Threats:         s.threats,
+		PhishingRecords: s.phishingRecords,
+		Operators:       s.operators,
+		AuditLogs:       s.auditLogs,
+		ApiKeys:         s.apiKeys,
+		DLQRecords:      s.dlqRecords,
+		LastBackupAt:    s.lastBackupAt,
+		LastRetentionAt: s.lastRetentionAt,
+	}
 	data, err := json.MarshalIndent(dump, "", "  ")
 	if err != nil { return err }
 	return os.WriteFile(s.persistPath, data, 0644)
 }
+

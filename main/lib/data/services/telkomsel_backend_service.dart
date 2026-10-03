@@ -43,7 +43,7 @@ class TelkomselBackendService {
         return ActivePeriod(
           packageName: data['plan_name'] ?? (isValid ? 'Telkomsel Secure Guard 30 Hari' : '-'),
           packageDescription: isValid
-              ? 'Proteksi Menyeluruh Kaspersky & BlackWall RASP'
+              ? 'Proteksi Menyeluruh Kaspersky Security Engine'
               : 'Paket Belum Aktif / Telah Berakhir',
           expiryDate: DateTime.tryParse(data['end_date'] ?? '') ?? defaultExpiry,
           activeDeviceCount: 1,
@@ -189,7 +189,7 @@ class TelkomselBackendService {
           'expires_in_days': 30,
         };
       }
-      return {'success': false, 'error': 'Kode OTP salah. Gunakan 123456 untuk testing.'};
+      return {'success': false, 'error': 'Kode OTP tidak valid atau salah. Silakan periksa kembali SMS Anda.'};
     }
   }
 

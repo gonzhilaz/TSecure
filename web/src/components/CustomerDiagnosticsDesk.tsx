@@ -124,7 +124,15 @@ export const CustomerDiagnosticsDesk: React.FC<CustomerDiagnosticsDeskProps> = (
               </tr>
             </thead>
             <tbody className="divide-y divide-[#ffe9e7]">
-              {filteredSubscribers.length === 0 ? (
+              {loading ? (
+                [1, 2, 3, 4].map((i) => (
+                  <tr key={i}>
+                    <td colSpan={9} className="py-3.5 px-4">
+                      <div className="h-8 rounded-lg skeleton-shimmer-light"></div>
+                    </td>
+                  </tr>
+                ))
+              ) : filteredSubscribers.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="py-10 text-center text-[#778ca2]">
                     Tidak ada pelanggan yang cocok dengan kata kunci pencarian.

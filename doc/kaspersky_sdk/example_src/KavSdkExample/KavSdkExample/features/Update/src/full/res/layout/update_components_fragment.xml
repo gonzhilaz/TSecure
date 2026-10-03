@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <TextView
+        style="@style/Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_updates_select_component"/>
+    <RadioGroup 
+        android:id="@+id/RadioGroupUpdateComponent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RadioButton 
+            android:id="@+id/updateComponentAll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/str_update_component_all"/>
+        <RadioButton 
+            android:id="@+id/updateComponentAntivirusProtection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/str_update_component_antivirus_protection"/>
+        <RadioButton 
+            android:id="@+id/updateComponentFinancialCategorizer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/str_update_component_financial_categorizer"/>
+    </RadioGroup>
+</LinearLayout>

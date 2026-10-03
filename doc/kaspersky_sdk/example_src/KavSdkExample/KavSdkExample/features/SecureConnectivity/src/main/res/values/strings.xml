@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_secure_connectivity_dns_checker">DNS Checker</string>
+    <string name="str_secure_connectivity_cert_validator">Certificate Validation</string>
+    <string name="str_secure_connectivity_secure_connection">Secure Connection</string>
+
+    <string name="str_secure_connectivity_open_dns_checker">Check DNS</string>
+    <string name="str_secure_connectivity_check_certificate_url">Check URL certificate</string>
+    <string name="str_check_certificate_dialog_result">CheckResult: </string>
+    <string name="str_check_certificate_dialog_result_null">CheckResult: null</string>
+    <string name="str_check_certificate_dialog_result_error">Error occurred</string>
+    <string name="str_check_certificate_dialog_enter_url">Enter URL for certificate check</string>
+    <string name="str_check_certificate_default_url">https://</string>
+
+    <string name="str_secureconnection_url_not_specified">URL not specified</string>
+    <string name="str_secureconnection_too_big_timeout">Incorrect timeout value. Probably too big number.</string>
+    <string name="str_secureconnection_trustip_title">List of trusted IPv4 addresses</string>
+    <string name="str_secureconnection_list_button">List</string>
+    <string name="str_secureconnection_response_status_code">Response status code: %d</string>
+    <string name="str_secureconnection_strictMode">Use strict mode</string>
+    <string name="str_secureconnection_use_only_first_ip">Use only first IP</string>
+    <string name="str_secureconnection_please_wait">Please wait&#8230;</string>
+    <string name="str_secureconnection_msg_delete_selected_item">Delete selected item?</string>
+    <string name="str_secureconnection_test_button">Check secure connection</string>
+    <string name="str_secureconnection_deprecated_http_client">SecureHttpClient</string>
+    <string name="str_secureconnection_only_in_trusted_list">Only in trusted list</string>
+    <string name="str_secureconnection_url_check_timeout_ms">Url check timeout (ms)</string>
+    <string name="str_secureconnection_certificate_check_timeout_ms">Certificate check timeout (ms)</string>
+    <string name="str_secureconnection_promt_url">https://</string>
+    <string name="str_secureconnection_promt_result">Result</string>
+    <string name="str_secureconnection_run_button">Run</string>
+
+    <string name="str_dns_checker_wrong_url_format">Wrong URL format</string>
+    <string name="str_dns_checker_error">Unable to resolve the domain name or unable to connect to the DNS server</string>
+    <string name="str_dns_check_activity_url_to_check_hint">http://www.w3.org</string>
+    <string name="str_dns_check_activity_check_button">Check</string>
+    <string name="str_dns_check_activity_result_label">Result:</string>
+    <string name="str_dns_check_activity_add_ip_listview">List is empty</string>
+    <string name="str_dns_check_activity_add_ip_button">Add IP</string>
+    <string name="str_dns_check_use_exclusions">Get extended status</string>
+    <string name="str_dns_check_exclusions_list_caption">List of excluded IP addresses</string>
+    <string name="str_dns_check_trusted_list_empty">Trusted IP list is empty</string>
+    <string name="str_dns_check_trusted_list_caption">Trusted Ip list:\n</string>
+    <string name="str_dns_error_license_absent_or_expired">Missing or expired license</string>
+    <string name="str_dns_checker_remove_ip">Delete</string>
+
+    <string name="str_msg_bad_ip_address">Bad IP address</string>
+
+    <string name="str_unsupported_deprecated_dialog_title">The functionality is deprecated</string>
+    <string name="str_unsupported_deprecated_dialog_message">The functionality is deprecated for current android OS version: %d</string>
+</resources>

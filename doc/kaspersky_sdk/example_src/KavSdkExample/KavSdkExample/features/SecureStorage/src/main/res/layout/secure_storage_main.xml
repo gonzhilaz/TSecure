@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@drawable/command_view_selector"
+              android:orientation="vertical"
+              android:padding="@dimen/default_side_padding">
+
+    <TextView
+        style="@style/Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_secure_storage_feature_title"/>
+
+    <View
+        style="?android:attr/listSeparatorTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="center_vertical"
+        android:background="@color/drawer_list_item_color"
+        android:duplicateParentState="true"/>
+
+    <include
+        android:id="@+id/test_database_button"
+        layout="@layout/command_item"/>
+
+    <include
+        android:id="@+id/test_secure_file_button"
+        layout="@layout/command_item"/>
+</LinearLayout>

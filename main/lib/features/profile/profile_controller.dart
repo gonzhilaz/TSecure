@@ -14,8 +14,7 @@ class ProfileController extends ChangeNotifier {
   final TelkomselBackendService? backendService;
 
   ViewState _state = ViewState.success;
-  UserSession? _userSession =
-      MockBackendData.defaultUserSession('TS-MOB-882104-X99');
+  UserSession? _userSession;
   ActivePeriod? _activePeriod;
 
   ProfileController({
@@ -56,7 +55,7 @@ class ProfileController extends ChangeNotifier {
     try {
       final mobileId = await MobileIdService.getOrCreateMobileId();
       final prefs = await SharedPreferences.getInstance();
-      final msisdn = prefs.getString(AppConstants.keyMsisdn) ?? '+62 812-9988-7766';
+      final msisdn = prefs.getString(AppConstants.keyMsisdn) ?? '';
 
       _userSession = MockBackendData.defaultUserSession(mobileId).copyWith(
         msisdn: msisdn,

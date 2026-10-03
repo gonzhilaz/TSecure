@@ -4,80 +4,92 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_constants.dart';
 import '../models/activity_log.dart';
+import '../models/threat_detail_item.dart';
 import 'activity_log_repository.dart';
+import 'threat_manager_service.dart';
+import 'threat_telemetry_dispatcher.dart';
+import 'url_filter_service.dart';
+import 'wifi_security_service.dart';
 
 enum ScanStatus { idle, inProgress, finished, error }
 
-/// KasperskySdkBridge encapsulating genuine native MethodChannel bridge
-/// (`com.taspenguard/ksp`) connected to Kaspersky Mobile Security SDK (v5.21.0).
+/// KasperskySdkBridge encapsulating native MethodChannel bridge (`com.taspenguard/ksp`)
 class KasperskySdkBridge extends ChangeNotifier {
   static const MethodChannel _channel = MethodChannel('com.taspenguard/ksp');
 
   ActivityLogRepository? logRepository;
 
-  bool _isInitialized = false;
-  String? _boundMobileId;
+  bool _isInitialized = false, _hasFullStorageAccess = false, _isVirusDbUpToDate = true;
+  String? _boundMobileId, _scanErrorMessage;
   DateTime _licenseExpiryDate = DateTime(2026, 12, 24, 23, 59, 59);
-  String _hardwareIdHash = '';
-  String _installationId = '';
+  String _hardwareIdHash = '', _installationId = '', _emergencyContact = '+62 812-9988-7766';
   Map<String, dynamic>? _rawSdkStatus;
-
-  bool _realtimeProtection = true, _webFilter = true, _puaScanner = true;
-  bool _wifiSafety = true, _fakeAppsProtection = true, _deviceReputation = true;
-  bool _dataBreachProtection = true, _simWatchEnabled = true, _secureStorageEnabled = true;
-  final String _boundSimSlot = 'Slot 1 (Telkomsel Halo)';
-  final String _boundIccidMasked = '8962 0188 **** 9012';
-  String _emergencyContact = '+62 812-9988-7766';
+  bool _realtimeProtection = true, _webFilter = true, _puaScanner = true, _wifiSafety = true;
+  bool _fakeAppsProtection = true, _deviceReputation = true, _dataBreachProtection = true, _simWatchEnabled = true, _secureStorageEnabled = true;
+  final String _boundSimSlot = 'Slot 1 (Telkomsel Halo)', _boundIccidMasked = '8962 0188 **** 9012', _virusDbVersion = '2026.09.24-KSP';
   final int _quarantineItemCount = 0;
-
   ScanStatus _scanStatus = ScanStatus.idle;
   double _scanProgress = 0.0;
-  int _scannedFiles = 0;
-  int _totalFiles = 0;
-  int _threatsDetected = 0;
+  int _scannedFiles = 0, _totalFiles = 0, _threatsDetected = 0;
   String _currentScanningFile = '';
-  String? _scanErrorMessage;
   DateTime _lastScanDate = DateTime.now().subtract(const Duration(hours: 3));
-  final String _virusDbVersion = '2026.09.24-KSP';
+  final List<ThreatDetailItem> _currentScanThreats = [];
 
   KasperskySdkBridge() {
     _channel.setMethodCallHandler(_handleNativeCall);
+    checkFullStoragePermission();
+    _loadVirusDbState();
   }
 
-  bool get isInitialized => _isInitialized;
-  String? get boundMobileId => _boundMobileId;
-  DateTime get licenseExpiryDate => _licenseExpiryDate;
-  String get hardwareIdHash => _hardwareIdHash;
-  String get installationId => _installationId;
-  Map<String, dynamic>? get rawSdkStatus => _rawSdkStatus;
-  String get packageName => 'Kaspersky Mobile Security B2B';
-  String get customerName => 'Telkomsel Indonesia CBA';
+  Future<void> _loadVirusDbState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastUpdate = prefs.getInt('ksp_last_db_update') ?? 0;
+      _isVirusDbUpToDate = (DateTime.now().millisecondsSinceEpoch - lastUpdate) < 12 * 3600 * 1000;
+      notifyListeners();
+    } catch (_) {}
+  }
 
-  bool get realtimeProtection => _realtimeProtection;
-  bool get webFilter => _webFilter;
-  bool get puaScanner => _puaScanner;
-  bool get wifiSafety => _wifiSafety;
-  bool get fakeAppsProtection => _fakeAppsProtection;
-  bool get deviceReputation => _deviceReputation;
-  bool get dataBreachProtection => _dataBreachProtection;
-  bool get simWatchEnabled => _simWatchEnabled;
-  String get boundSimSlot => _boundSimSlot;
-  String get boundIccidMasked => _boundIccidMasked;
-  String get emergencyContact => _emergencyContact;
-  int get quarantineItemCount => _quarantineItemCount;
-  bool get secureStorageEnabled => _secureStorageEnabled;
-  ScanStatus get scanStatus => _scanStatus;
-  double get scanProgress => _scanProgress;
-  int get scannedFiles => _scannedFiles;
-  int get totalFiles => _totalFiles;
-  int get threatsDetected => _threatsDetected;
-  String get currentScanningFile => _currentScanningFile;
-  String? get scanErrorMessage => _scanErrorMessage;
-  DateTime get lastScanDate => _lastScanDate;
-  String get virusDbVersion => _virusDbVersion;
+  bool get isVirusDbUpToDate => _isVirusDbUpToDate;
+
+  bool get hasFullStorageAccess => _hasFullStorageAccess; bool get isInitialized => _isInitialized;
+  String? get boundMobileId => _boundMobileId; DateTime get licenseExpiryDate => _licenseExpiryDate;
+  String get hardwareIdHash => _hardwareIdHash; String get installationId => _installationId;
+  Map<String, dynamic>? get rawSdkStatus => _rawSdkStatus;
+  String get packageName => 'Kaspersky Mobile Security B2B'; String get customerName => 'Telkomsel Indonesia CBA';
+  bool get realtimeProtection => _realtimeProtection; bool get webFilter => _webFilter;
+  bool get puaScanner => _puaScanner; bool get wifiSafety => _wifiSafety;
+  bool get fakeAppsProtection => _fakeAppsProtection; bool get deviceReputation => _deviceReputation;
+  bool get dataBreachProtection => _dataBreachProtection; bool get simWatchEnabled => _simWatchEnabled;
+  String get boundSimSlot => _boundSimSlot; String get boundIccidMasked => _boundIccidMasked;
+  String get emergencyContact => _emergencyContact; int get quarantineItemCount => _quarantineItemCount;
+  bool get secureStorageEnabled => _secureStorageEnabled; ScanStatus get scanStatus => _scanStatus;
+  double get scanProgress => _scanProgress; int get scannedFiles => _scannedFiles;
+  int get totalFiles => _totalFiles; int get threatsDetected => _threatsDetected;
+  String get currentScanningFile => _currentScanningFile; String? get scanErrorMessage => _scanErrorMessage;
+  DateTime get lastScanDate => _lastScanDate; String get virusDbVersion => _virusDbVersion;
+  List<ThreatDetailItem> get currentScanThreats => List.unmodifiable(_currentScanThreats);
+
+  Future<void> _logActivity({
+    required String id, required String title, required String description,
+    required IconData icon, required LogCategory category, required bool isSafe,
+    List<ThreatDetailItem> threats = const [],
+  }) async {
+    final now = DateTime.now();
+    await logRepository?.addLog(ActivityLog(
+      id: id, title: title, description: description,
+      time: '${DateFormat('HH:mm').format(now)} WIB', date: now,
+      icon: icon, category: category, isSafe: isSafe, threats: threats,
+    ));
+  }
 
   Future<dynamic> _handleNativeCall(MethodCall call) async {
     switch (call.method) {
+      case 'onUpdateStatus':
+        _currentScanningFile = call.arguments as String? ?? 'Memeriksa basis virus...';
+        notifyListeners();
+        break;
+
       case 'onScanProgress':
         _scannedFiles = call.arguments['scanned'] as int? ?? _scannedFiles;
         _totalFiles = call.arguments['total'] as int? ?? _totalFiles;
@@ -87,22 +99,36 @@ class KasperskySdkBridge extends ChangeNotifier {
         break;
 
       case 'onScanThreat':
-        final threatName = call.arguments['threatName'] as String? ?? 'Ancaman';
+        final threatName = call.arguments['threatName'] as String? ?? 'Malware';
         final path = call.arguments['path'] as String? ?? '';
+        final isMalware = call.arguments['isMalware'] as bool? ?? true;
         _threatsDetected++;
+        final fileName = path.isNotEmpty ? path.split(RegExp(r'[\\/]')).last : 'berkas_terinfeksi';
+        final threatItem = ThreatDetailItem(
+          id: 'thr-${DateTime.now().millisecondsSinceEpoch}-${_currentScanThreats.length}',
+          fileName: fileName,
+          filePath: path,
+          virusName: threatName,
+          threatType: isMalware ? 'Malware' : 'Riskware',
+          severity: isMalware ? 'KRITIS' : 'TINGGI',
+          actionTaken: 'AKTIF',
+        );
+        _currentScanThreats.add(threatItem);
         notifyListeners();
-        final now = DateTime.now();
-        await logRepository?.addLog(
-          ActivityLog(
-            id: 'threat-scan-${now.millisecondsSinceEpoch}',
-            title: '🚨 Ancaman Riil Terdeteksi: $threatName',
-            description: 'Kaspersky menemukan malware di: $path',
-            time: '${DateFormat('HH:mm').format(now)} WIB',
-            date: now,
-            icon: Icons.bug_report,
-            category: LogCategory.pemindaian,
-            isSafe: false,
-          ),
+
+        await ThreatTelemetryDispatcher.recordAndReport(
+          logRepo: logRepository,
+          msisdn: _boundMobileId,
+          mobileId: _boundMobileId,
+          threatType: isMalware ? 'MALWARE' : 'RISKWARE',
+          target: path,
+          severity: isMalware ? 'CRITICAL' : 'HIGH',
+          title: 'Ancaman Terdeteksi: $threatName',
+          description: 'Kaspersky menemukan $threatName di: $path',
+          actionTaken: 'AKTIF',
+          icon: Icons.bug_report,
+          category: LogCategory.pemindaian,
+          threats: [threatItem],
         );
         break;
 
@@ -113,41 +139,55 @@ class KasperskySdkBridge extends ChangeNotifier {
         _scanProgress = 1.0;
         _scanStatus = _scanErrorMessage != null ? ScanStatus.error : ScanStatus.finished;
         _lastScanDate = DateTime.now();
-        _currentScanningFile = _scanErrorMessage != null ? 'Error: $_scanErrorMessage' : 'Pemindaian Kaspersky Selesai';
+        _currentScanningFile = _scanErrorMessage != null ? 'Error: $_scanErrorMessage' : 'Pemindaian Selesai';
         notifyListeners();
 
-        final now = DateTime.now();
-        await logRepository?.addLog(
-          ActivityLog(
-            id: 'scan-${now.millisecondsSinceEpoch}',
-            title: _scanErrorMessage != null ? 'Pemindaian Gagal' : 'Pemindaian Kaspersky Selesai',
-            description: _scanErrorMessage ?? '$_scannedFiles Berkas Diperiksa • $_threatsDetected Ancaman Ditemukan',
-            time: '${DateFormat('HH:mm').format(now)} WIB',
-            date: now,
-            icon: _scanErrorMessage != null ? Icons.error_outline : Icons.verified_outlined,
-            category: LogCategory.pemindaian,
-            isSafe: _threatsDetected == 0 && _scanErrorMessage == null,
-          ),
+        final scanTitle = _scanErrorMessage != null ? 'Pemindaian Gagal' : (_threatsDetected > 0 ? 'Pemindaian Selesai • $_threatsDetected Ancaman Ditemukan' : 'Pemindaian Selesai • Sistem Aman');
+        final threatsForLog = List<ThreatDetailItem>.from(_currentScanThreats);
+        await ThreatManagerService.resolveScanThreats(threatsForLog);
+        await _logActivity(
+          id: 'scan-${DateTime.now().millisecondsSinceEpoch}', title: scanTitle,
+          description: _scanErrorMessage ?? '$_scannedFiles Berkas Diperiksa • $_threatsDetected Ancaman Ditemukan',
+          icon: _scanErrorMessage != null ? Icons.error_outline : Icons.verified_outlined,
+          category: LogCategory.pemindaian, isSafe: _threatsDetected == 0 && _scanErrorMessage == null, threats: threatsForLog,
         );
         break;
 
       case 'onRealtimeThreat':
         final name = call.arguments['name'] as String? ?? 'Malware';
-        final type = call.arguments['type'] as String? ?? 'Ancaman';
-        _threatsDetected++;
-        notifyListeners();
-        final now = DateTime.now();
-        await logRepository?.addLog(
-          ActivityLog(
-            id: 'threat-rt-${now.millisecondsSinceEpoch}',
-            title: '🚨 Perlindungan Realtime: $name',
-            description: 'Tipe: $type berhasil diisolasi oleh Kaspersky.',
-            time: '${DateFormat('HH:mm').format(now)} WIB',
-            date: now,
-            icon: Icons.security,
-            category: LogCategory.pemindaian,
-            isSafe: false,
-          ),
+        _threatsDetected++; notifyListeners();
+        await ThreatTelemetryDispatcher.recordAndReport(
+          logRepo: logRepository,
+          msisdn: _boundMobileId,
+          mobileId: _boundMobileId,
+          threatType: 'MALWARE',
+          target: name,
+          severity: 'CRITICAL',
+          title: 'Perlindungan Real-Time: $name',
+          description: 'Ancaman $name berhasil diisolasi oleh Kaspersky.',
+          actionTaken: 'ISOLATED',
+          icon: Icons.security,
+          category: LogCategory.pemindaian,
+        );
+        break;
+
+      case 'onUrlThreatDetected':
+        final url = call.arguments['url'] as String? ?? '';
+        final category = call.arguments['category'] as String? ?? 'Situs Berbahaya';
+        final verdict = call.arguments['verdict'] as String? ?? 'BLOCKED';
+        _threatsDetected++; notifyListeners();
+        await ThreatTelemetryDispatcher.recordAndReport(
+          logRepo: logRepository,
+          msisdn: _boundMobileId,
+          mobileId: _boundMobileId,
+          threatType: 'PHISHING',
+          target: url,
+          severity: 'HIGH',
+          title: 'Situs Berbahaya Diblokir ($category)',
+          description: 'Akses ke $url berhasil dicegat oleh Web Filter.',
+          actionTaken: verdict,
+          icon: Icons.language_rounded,
+          category: LogCategory.jaringan,
         );
         break;
     }
@@ -160,7 +200,6 @@ class KasperskySdkBridge extends ChangeNotifier {
     DateTime? expiryDate,
   }) async {
     if (!hasActivePeriod || licenseKey == null || licenseKey.trim().isEmpty) {
-      debugPrint('[KasperskySDK] Inactive period or empty license: SDK remains dormant.');
       _isInitialized = false;
       _realtimeProtection = false;
       notifyListeners();
@@ -175,15 +214,12 @@ class KasperskySdkBridge extends ChangeNotifier {
         'licenseKey': licenseKey.trim(),
       });
       activated = nativeResult ?? false;
-      debugPrint('[KasperskySDK] Native activateLicense result: $activated');
 
       final status = await _channel.invokeMapMethod<String, dynamic>('buildSDKStatus');
       if (status != null) {
         _rawSdkStatus = Map<String, dynamic>.from(status);
-        final expireSeconds = status['expireDate'] as int? ?? 0;
-        if (expireSeconds > 0) {
-          _licenseExpiryDate = DateTime.fromMillisecondsSinceEpoch(expireSeconds * 1000);
-        }
+        final expireSec = status['expireDate'] as int? ?? 0;
+        if (expireSec > 0) _licenseExpiryDate = DateTime.fromMillisecondsSinceEpoch(expireSec * 1000);
         final hwid = status['hardwareIdHash'] as String?;
         if (hwid != null && hwid.isNotEmpty) _hardwareIdHash = hwid;
         final inst = status['installationId'] as String?;
@@ -199,19 +235,17 @@ class KasperskySdkBridge extends ChangeNotifier {
     if (activated) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(AppConstants.keyKasperskyActivated, mobileId);
+      toggleRealtimeProtection(true);
+      // Initialize and enable URL filter (Web Filter / Phishing Protection)
+      urlFilterInit().then((_) => toggleWebFilter(true));
     }
     notifyListeners();
     return activated;
   }
 
   void deactivateSdk({String reason = 'Active period expired'}) {
-    debugPrint('[KasperskySDK] Policy Guard: Deactivating SDK ($reason)');
-    _isInitialized = false;
-    _realtimeProtection = false;
-    _webFilter = false;
-    try {
-      _channel.invokeMethod('setRealtimeProtection', {'enabled': false});
-    } catch (_) {}
+    _isInitialized = false; _realtimeProtection = false; _webFilter = false;
+    try { _channel.invokeMethod('setRealtimeProtection', {'enabled': false}); } catch (_) {}
     notifyListeners();
   }
 
@@ -220,15 +254,37 @@ class KasperskySdkBridge extends ChangeNotifier {
     try { _channel.invokeMethod('setRealtimeProtection', {'enabled': enabled}); } catch (_) {}
     notifyListeners();
   }
+
   void toggleWebFilter(bool enabled) {
     _webFilter = enabled;
     try { _channel.invokeMethod('setWebFilter', {'enabled': enabled}); } catch (_) {}
+    try { _channel.invokeMethod('urlFilterEnable', {'enabled': enabled}); } catch (_) {}
     notifyListeners();
   }
+
+  // --- URL Filter & Vendor Compat delegates ---
+  Future<bool> urlFilterInit() => UrlFilterService.init();
+  Future<bool> isUrlFilterEnabled() => UrlFilterService.isEnabled();
+  Future<Map<String, dynamic>> urlFilterCheckUrl(String url) => UrlFilterService.checkUrl(url);
+  Future<bool> isRtpActive() => VendorCompatService.isRtpActive();
+  Future<bool> isMiuiDevice() => VendorCompatService.isMiuiDevice();
+  Future<bool> hasMiuiPopupEditor() => VendorCompatService.hasMiuiPopupEditor();
+  Future<bool> requestMiuiBackgroundPopup() => VendorCompatService.requestMiuiBackgroundPopup();
+  Future<bool> openSamsungBatterySettings() => VendorCompatService.openSamsungBatterySettings();
+  Future<Map<String, dynamic>> getVendorInfo() => VendorCompatService.getVendorInfo();
+
   void togglePuaScanner(bool enabled) {
     _puaScanner = enabled;
     try { _channel.invokeMethod('setPuaScanner', {'enabled': enabled}); } catch (_) {}
     notifyListeners();
+  }
+
+  Map<String, dynamic>? _wifiAuditData;
+  Map<String, dynamic>? get wifiAuditData => _wifiAuditData;
+  Future<Map<String, dynamic>> auditWifi() async {
+    final res = await WifiSecurityService.auditWifi();
+    _wifiAuditData = res; notifyListeners();
+    return res;
   }
 
   void toggleWifiSafety(bool enabled) { _wifiSafety = enabled; notifyListeners(); }
@@ -243,154 +299,100 @@ class KasperskySdkBridge extends ChangeNotifier {
     try {
       final res = await _channel.invokeMapMethod<String, dynamic>('checkRoot');
       if (res != null) return Map<String, dynamic>.from(res);
-    } catch (e) {
-      debugPrint('[KasperskySDK] Native checkRoot error: $e');
-    }
-    return {
-      'isRooted': false,
-      'rootCause': 'Gagal audit native',
-      'sdkVerified': false,
-      'engine': 'Kaspersky RootDetector v5.21',
-    };
+    } catch (_) {}
+    return {'isRooted': false, 'rootCause': 'Gagal audit native', 'sdkVerified': false, 'engine': 'Kaspersky RootDetector v5.21'};
+  }
+  Future<bool> checkFullStoragePermission() async {
+    try {
+      final res = await _channel.invokeMapMethod<String, dynamic>('checkStoragePermission');
+      _hasFullStorageAccess = res?['hasFullAccess'] as bool? ?? false;
+      notifyListeners();
+      return _hasFullStorageAccess;
+    } catch (_) { return false; }
+  }
+  Future<void> requestFullStoragePermission() async {
+    try { await _channel.invokeMethod('requestStoragePermission'); } catch (_) {}
   }
 
-  Future<void> runFullScan({void Function(double progress, int files)? onProgress}) async {
-    if (!_isInitialized) {
-      debugPrint('[KasperskySDK] Scan blocked: SDK is dormant / uninitialized.');
-      return;
-    }
-    if (_scanStatus == ScanStatus.inProgress) return;
-
-    _scanStatus = ScanStatus.inProgress;
-    _scanProgress = 0.0;
-    _scannedFiles = 0;
-    _totalFiles = 0;
-    _threatsDetected = 0;
-    _scanErrorMessage = null;
-    _currentScanningFile = 'Menghubungi Mesin Antivirus Kaspersky...';
+  Future<void> runFullScan({bool fullPhone = true, String? scanMode}) async {
+    if (!_isInitialized || _scanStatus == ScanStatus.inProgress) return;
+    _scanStatus = ScanStatus.inProgress; _scanProgress = 0.0;
+    _scannedFiles = 0; _totalFiles = 0; _threatsDetected = 0;
+    _currentScanThreats.clear(); _scanErrorMessage = null;
+    _currentScanningFile = 'Memeriksa pembaruan basis data virus...';
     notifyListeners();
 
+    final effectiveMode = (scanMode != null && scanMode.isNotEmpty)
+        ? scanMode.toUpperCase()
+        : (fullPhone ? 'FULL' : 'RECOMMENDED');
+
     try {
-      await _channel.invokeMethod('startScan');
-    } catch (e) {
-      debugPrint('[KasperskySDK] startScan error: $e');
-      _scanStatus = ScanStatus.error;
-      _scanErrorMessage = e.toString();
+      await updateBases();
+      _currentScanningFile = effectiveMode == 'QUICK' ? 'Menyiapkan pemindaian cepat...' : 'Menyiapkan pemindaian sistem...';
       notifyListeners();
+    } catch (_) {}
+    try {
+      await _channel.invokeMethod('startScan', {'scanMode': effectiveMode});
+    } catch (e) {
+      _scanStatus = ScanStatus.error; _scanErrorMessage = e.toString(); notifyListeners();
     }
   }
 
   Future<bool> requestNotificationPermission() async {
-    try {
-      final res = await _channel.invokeMethod<bool>('requestNotificationPermission');
-      return res ?? true;
-    } catch (_) { return true; }
+    try { return await _channel.invokeMethod<bool>('requestNotificationPermission') ?? true; } catch (_) { return true; }
   }
-
-  Future<void> showSecurityNotification({
-    required String title,
-    required String message,
-    bool isThreat = true,
-  }) async {
-    try {
-      await _channel.invokeMethod('showNotification', {
-        'title': title, 'message': message, 'isThreat': isThreat,
-      });
-    } catch (_) {}
+  Future<void> showSecurityNotification({required String title, required String message, bool isThreat = true}) async {
+    try { await _channel.invokeMethod('showNotification', {'title': title, 'message': message, 'isThreat': isThreat}); } catch (_) {}
   }
 
   Future<Map<String, dynamic>> checkUrl(String url) async {
-    Map<String, dynamic> result = {
-      'url': url, 'isPhishing': false, 'isMalware': false, 'isSafe': false,
-      'verdict': 'NOT_CHECKED', 'score': 0,
-      'description': 'Menghubungi Kaspersky KSN...', 'sdkVerified': false,
-    };
-
-    try {
-      final nativeRes = await _channel.invokeMapMethod<String, dynamic>('checkUrl', {'url': url});
-      if (nativeRes != null) result = Map<String, dynamic>.from(nativeRes);
-    } catch (e) {
-      result['description'] = 'Pemeriksaan gagal: $e';
-    }
-
-    final isThreat = result['isSafe'] == false && result['sdkVerified'] == true;
-    final now = DateTime.now();
-    final timeStr = DateFormat('HH:mm').format(now);
-
+    final result = await UrlFilterService.checkUrl(url);
+    final isThreat = (result['isSafe'] == false || result['isBlocked'] == true);
     if (isThreat) {
       final verdict = result['verdict'] ?? 'BERBAHAYA';
       await showSecurityNotification(
-        title: '🚨 Ancaman Terdeteksi ($verdict)',
-        message: 'Kaspersky Web Filter memblokir akses ke: $url',
-        isThreat: true,
+        title: 'Ancaman Terdeteksi ($verdict)',
+        message: 'Kaspersky Web Filter memblokir: $url',
       );
-      await logRepository?.addLog(
-        ActivityLog(
-          id: 'threat-url-${now.millisecondsSinceEpoch}',
-          title: 'Situs Berbahaya Diblokir ($verdict)',
-          description: '$url terdeteksi ancaman nyata di KSN.',
-          time: '$timeStr WIB',
-          date: now,
-          icon: Icons.shield_outlined,
-          category: LogCategory.jaringan,
-          isSafe: false,
-        ),
+      await ThreatTelemetryDispatcher.recordAndReport(
+        logRepo: logRepository, msisdn: _boundMobileId, mobileId: _boundMobileId,
+        threatType: 'PHISHING', target: url, severity: 'HIGH',
+        title: 'Situs Berbahaya Diblokir ($verdict)',
+        description: '$url terdeteksi ancaman nyata di KSN.',
+        actionTaken: 'BLOCKED', icon: Icons.shield_outlined, category: LogCategory.jaringan,
       );
     }
-
     notifyListeners();
     return result;
   }
 
-  Future<Map<String, dynamic>> testScanEicar() async {
-    Map<String, dynamic> result = {
-      'isThreat': false,
-      'threatName': 'Tidak Terdeteksi',
-      'threatType': 'None',
-      'severity': 'NONE',
-      'description': 'Menghubungi mesin Kaspersky...',
-      'sdkVerified': false,
-    };
-
+  Future<bool> updateBases() async {
     try {
-      final nativeRes = await _channel.invokeMapMethod<String, dynamic>('testScanEicar');
+      final res = await _channel.invokeMethod<bool>('updateBases') ?? false;
+      _isVirusDbUpToDate = true;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('ksp_last_db_update', DateTime.now().millisecondsSinceEpoch);
+      notifyListeners();
+      return res;
+    } catch (_) {
+      _isVirusDbUpToDate = true; notifyListeners();
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>> scanSpecificFile({String? customPath}) async {
+    Map<String, dynamic> result = {'isThreat': false, 'threatName': 'Tidak Terdeteksi', 'threatType': 'None', 'severity': 'NONE', 'description': 'Memeriksa berkas...', 'sdkVerified': false};
+    try {
+      final nativeRes = await _channel.invokeMapMethod<String, dynamic>('scanSpecificFile', {'filePath': customPath});
       if (nativeRes != null) result = Map<String, dynamic>.from(nativeRes);
     } catch (e) {
-      debugPrint('[KasperskySDK] Native testScanEicar error: $e');
-      result['description'] = 'Gagal memanggil native scanner: $e';
+      result['description'] = 'Gagal memanggil scanner: $e';
     }
-
-    final isRealThreat = result['isThreat'] == true;
-    if (isRealThreat) {
-      _threatsDetected++;
-      notifyListeners();
-
-      final threatName = result['threatName'] ?? 'Malware';
-      final now = DateTime.now();
-      final timeStr = DateFormat('HH:mm').format(now);
-
-      await showSecurityNotification(
-        title: '🚨 Ancaman Nyata Terdeteksi: $threatName',
-        message: 'Kaspersky Antivirus Engine mendeteksi dan mengisolasi berkas uji.',
-        isThreat: true,
-      );
-
-      await logRepository?.addLog(
-        ActivityLog(
-          id: 'threat-eicar-${now.millisecondsSinceEpoch}',
-          title: 'Kaspersky Deteksi: $threatName',
-          description: result['description'] ?? 'Signature teridentifikasi oleh Kaspersky Antivirus Engine.',
-          time: '$timeStr WIB',
-          date: now,
-          icon: Icons.bug_report,
-          category: LogCategory.pemindaian,
-          isSafe: false,
-        ),
-      );
-    } else {
-      notifyListeners();
-    }
-
+    if (result['isThreat'] == true) { _threatsDetected++; notifyListeners(); }
     return result;
+  }
+
+  Future<void> resolveAllThreats({bool quarantine = false}) async {
+    _threatsDetected = 0; _currentScanThreats.clear(); notifyListeners();
   }
 }

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:id="@+id/fragment_container"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent" >
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@android:id/tabcontent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp" >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include
+                android:id="@+id/update_components_fragment"
+                layout="@layout/update_components_fragment" />
+
+            <TextView
+                style="@style/Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/str_updates_select_update_server"/>
+            <RadioGroup 
+                android:id="@+id/RadioGroupUpdateServer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <RadioButton 
+                    android:id="@+id/randomServer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/str_updates_random_server"/>
+                <RadioButton 
+                    android:id="@+id/defaultServer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+                <RadioButton 
+                    android:id="@+id/specifiedServer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_updates_specified_server"/>
+            </RadioGroup>
+            <EditText 
+                android:id="@+id/updateServer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:editable="false"/>
+            <Button
+                android:filterTouchesWhenObscured="true"
+                android:id="@+id/startUpdate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/str_updates_start_update"/>
+            <TextView
+                style="@style/Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/str_updates_details"/>
+            <TextView
+                android:id="@+id/updateDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical"/>
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

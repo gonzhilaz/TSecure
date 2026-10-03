@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="str_secure_storage_feature_title">Secure Storage</string>
+
+    <string name="str_secure_storage_test_database_button">Test database</string>
+    <string name="str_secure_storage_test_database_name_label">Database name</string>
+    <string name="str_secure_storage_test_database_status">Database: %s</string>
+    <string name="str_secure_storage_test_database_status_opened">opened</string>
+    <string name="str_secure_storage_test_database_status_closed">closed</string>
+    <string name="str_secure_storage_test_database_hint">Enter database path</string>
+    <string name="str_secure_storage_test_database_name">/sdcard/test.db</string>
+    <string name="str_secure_storage_test_database_password_label">Database password</string>
+    <string name="str_secure_storage_test_database_password_hint">Enter password</string>
+    <string name="str_secure_storage_test_database_open">Open</string>
+    <string name="str_secure_storage_test_database_close">Close</string>
+    <string name="str_secure_storage_test_database_delete">Delete</string>
+    <string name="str_secure_storage_test_database_view_tables">View Tables</string>
+    <string name="str_secure_storage_test_database_execute_sql">Execute SQL</string>
+    <string name="str_secure_storage_test_database_enter_sql_hint">Enter SQL</string>
+
+    <string name="str_secure_storage_test_database_error_already_opened">This database is already opened</string>
+    <string name="str_secure_storage_test_database_error_delete_failed">Failed to delete database file: %s</string>
+    <string name="str_secure_storage_test_database_error_not_opened">Database is not opened. Open a database first.</string>
+
+    <string name="str_secure_storage_test_secure_file_button">Test secure file</string>
+    <string name="str_secure_storage_test_file_name_label">File name</string>
+    <string name="str_secure_storage_test_file_name">/sdcard/test.txt</string>
+    <string name="str_secure_storage_test_file_hint">Enter path to file</string>
+    <string name="str_secure_storage_test_file_password_label">File password</string>
+    <string name="str_secure_storage_test_file_password_hint">Enter password</string>
+    <string name="str_secure_storage_test_file_read">Read file</string>
+    <string name="str_secure_storage_test_file_write">Write to file</string>
+    <string name="str_secure_storage_test_file_enter_text_hint">Enter text</string>
+    <string name="str_secure_storage_test_file_append">Append</string>
+    <string name="str_secure_storage_test_file_overwrite_dialog_title">File exists</string>
+    <string name="str_secure_storage_test_file_overwrite_dialog_message">Do you want to overwrite it?</string>
+    <string name="str_secure_storage_test_file_overwrite_dialog_positive">Yes</string>
+    <string name="str_secure_storage_test_file_overwrite_dialog_negative">No</string>
+    <string name="str_secure_storage_previous_file_page_button">Previous page</string>
+    <string name="str_secure_storage_next_file_page_button">Next page</string>
+    <string name="str_secure_storage_large_file_warning">File is too large, you can`t change its content in this example, but this is not a limitation of SDK itself . Page %1$d of %2$d</string>
+    <string name="str_secure_storage_database_error">Error: </string>
+
+    <string name="str_secure_storage_test_error_occured">Error occurred: </string>
+    <string name="str_secure_storage_test_fingerprint_error">Fingeprint operations are not allowed: %s</string>
+    <string name="str_secure_storage_test_error_empty_passwords">Password must not be empty</string>
+
+    <string name="fingerprint_add_password">Add fingerprint password</string>
+    <string name="fingerprint_password_added">Fingerprint password has been added</string>
+    <string name="fingerprint_key_updated">Secret key has been updated</string>
+    <string name="fingerprint_password_removed">Fingerprint password for file: %s has been removed</string>
+    <string name="fingerprint_remove_password">Remove fingerprint password</string>
+    <string name="fingerprint_update_secret_key">Update secret key</string>
+    <string name="fingerprint_use_fingerprint_checkbox">Use fingerprint to open secure object</string>
+    <string name="fingerprint_dialog_title">Fingerprint input</string>
+    <string name="fingerprint_dialog_message">Touch fingerprint sensor by your finger</string>
+    <string name="fingerprint_error_empty_data">Path and password must not be empty or null</string>
+    <string name="fingerprint_error_empty_path">Path must not be empty or null</string>
+    <string name="fingerprint_error_key_permanent_invalidated">Secret key is invalidated. Update key and try again</string>
+    <string name="fingerprint_error_unknown">Unknown error occurred while fingerprint access</string>
+    <string name="fingerprint_error_password_operations_error">Password files corrupted. Set new password</string>
+    <string name="fingerprint_error_invalid_input">Invalid fingerprint has been recognized.</string>
+    <string name="fingerprint_error_no_enrolled_fingerprints">No enrolled fingerprints has been founded.</string>
+    <string name="fingerprint_error_encrypt_decrypt">Some errors has been occurred while encryption error. Reset password.</string>
+    <string name="fingerprint_error_old_api">Fingerprint input are not supported at API older than 23></string>
+    <string name="fingerprint_error_hardware_not_found">Fingerprint hardware was not found on this device</string>
+    <string name="fingerprint_error_need_setup_lock_screen">Need to set up secure lock screen.\n Go to \'Settings\' -&gt; \'Security\' -&gt; \'Fingerprint\' to set up a fingerprint</string>
+    <string name="fingerprint_error_no_fingerprint_registered">Go to \'Settings\' -&gt; \'Security\' -&gt; \'Fingerprint\' and register at least one fingerprint</string>
+    <string name="str_secure_storage_test_database_test_table_button">Make test table</string>
+</resources>

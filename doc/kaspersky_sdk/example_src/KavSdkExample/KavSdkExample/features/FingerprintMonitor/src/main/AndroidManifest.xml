@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.kavsdkexample.fingerprintmonitor">
+    <application>
+        <activity android:name=".view.impl.FingerprintMonitorActivity"/>
+    </application>
+</manifest>

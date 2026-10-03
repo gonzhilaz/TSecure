@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../../data/services/kaspersky_sdk_bridge.dart';
-import 'security_test_lab_sheet.dart';
 
 class AdvancedSecurityHubSheet extends StatefulWidget {
   final KasperskySdkBridge sdk;
@@ -93,7 +92,7 @@ class _AdvancedSecurityHubSheetState extends State<AdvancedSecurityHubSheet> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Kaspersky Mobile Security & BlackWall Enterprise',
+                          'Kaspersky Mobile Security Enterprise',
                           style: AppTypography.bodySm.copyWith(
                             color: AppColors.slateMuted,
                             fontSize: 11,
@@ -127,12 +126,6 @@ class _AdvancedSecurityHubSheetState extends State<AdvancedSecurityHubSheet> {
                         : 'Nonaktif',
                   ),
                 ],
-                actionLabel: 'Uji Respon Sensor SIM',
-                onAction: () {
-                  _showSnack(
-                    '[SIM Watch Test] Sensor Aktif: Pelepasan SIM terdeteksi akan langsung mengunci layar & memicu sirene darurat.',
-                  );
-                },
               ),
               const SizedBox(height: 12),
 
@@ -180,31 +173,6 @@ class _AdvancedSecurityHubSheetState extends State<AdvancedSecurityHubSheet> {
                 },
               ),
               const SizedBox(height: 16),
-
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary, width: 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    SecurityTestLabSheet.show(context, sdk: sdk);
-                  },
-                  icon: const Icon(Icons.science_outlined, size: 20),
-                  label: const Text(
-                    'Buka Lab Uji Keamanan (EICAR & Phishing)',
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-
               SizedBox(
                 width: double.infinity,
                 height: 44,
@@ -236,8 +204,8 @@ class _AdvancedSecurityHubSheetState extends State<AdvancedSecurityHubSheet> {
     bool? toggleValue,
     ValueChanged<bool>? onToggle,
     required List<_InfoRow> rows,
-    required String actionLabel,
-    required VoidCallback onAction,
+    String? actionLabel,
+    VoidCallback? onAction,
   }) {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -316,21 +284,23 @@ class _AdvancedSecurityHubSheetState extends State<AdvancedSecurityHubSheet> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            height: 34,
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary, width: 1),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                padding: EdgeInsets.zero,
+          if (actionLabel != null && onAction != null) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 34,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary, width: 1),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: EdgeInsets.zero,
+                ),
+                onPressed: onAction,
+                child: Text(actionLabel, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
               ),
-              onPressed: onAction,
-              child: Text(actionLabel, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
             ),
-          ),
+          ],
         ],
       ),
     );

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/activity_vertical_margin">
+
+    <TextView
+        android:id="@+id/permissions_fragment_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        style="@style/TextLarge"
+        android:text="@string/str_insufficient_permissions_fragment_title"/>
+
+    <TextView
+        android:id="@+id/permissions_fragment_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_below="@+id/permissions_fragment_title"
+        style="@style/TextMedium"/>
+
+    <Button
+        android:id="@+id/permissions_fragment_try_again_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_insufficient_permissions_fragment_try_again_button"
+        android:layout_above="@+id/permissions_fragment_proceed_button"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+
+    <Button
+        android:id="@+id/permissions_fragment_proceed_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_insufficient_permissions_fragment_proceed"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+
+</RelativeLayout>

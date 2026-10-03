@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Smartphone, Zap, AlertTriangle, CheckCircle2, ShieldOff, Clock } from 'lucide-react';
+import { Smartphone, Zap, AlertTriangle, CheckCircle2, ShieldOff } from 'lucide-react';
 import { simulateNdpPurchase, simulateNdpExpire, simulateNdpUnactivated } from '@/lib/api';
 import { Subscriber } from '@/types';
 
