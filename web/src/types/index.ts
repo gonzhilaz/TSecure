@@ -218,6 +218,7 @@ export type DashboardTab =
   | 'threat_map'
   | 'phishing_intel'
   | 'helpdesk'
+  | 'billing_licenses'
   | 'device_integrity'
   | 'ingestion_dlq'
   | 'users_rbac'

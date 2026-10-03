@@ -6,6 +6,7 @@ import {
   MapPin,
   Globe,
   Smartphone,
+  CreditCard,
   Cpu,
   Server,
   Database,
@@ -89,6 +90,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: Smartphone,
           badge: helpdeskIssuesCount,
           badgeColor: 'bg-[#ed0226] text-white',
+        },
+        {
+          id: 'billing_licenses',
+          label: 'Billing & Lisensi',
+          icon: CreditCard,
         },
         {
           id: 'device_integrity',

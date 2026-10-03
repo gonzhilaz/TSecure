@@ -11,6 +11,7 @@ import { NdpSimulator } from '@/components/NdpSimulator';
 import { ThreatFeed } from '@/components/ThreatFeed';
 import { SubscriberTable } from '@/components/SubscriberTable';
 import { CustomerDiagnosticsDesk } from '@/components/CustomerDiagnosticsDesk';
+import { BillingLicenseDesk } from '@/components/BillingLicenseDesk';
 import { DeviceIntegrityDesk } from '@/components/DeviceIntegrityDesk';
 import { PhishingIntelDesk } from '@/components/PhishingIntelDesk';
 import { UserManagementDesk } from '@/components/UserManagementDesk';
@@ -315,7 +316,17 @@ export default function SOCDashboard() {
             />
           )}
 
-          {/* TAB 5: DEVICE INTEGRITY & SIM WATCH */}
+          {/* TAB 5: BILLING & B2B LICENSES */}
+          {activeTab === 'billing_licenses' && (
+            <BillingLicenseDesk
+              subscribers={subscribers}
+              stats={stats}
+              loading={loading || isRefreshing}
+              onRefresh={handleManualRefresh}
+            />
+          )}
+
+          {/* TAB 6: DEVICE INTEGRITY & SIM WATCH */}
           {activeTab === 'device_integrity' && (
             <DeviceIntegrityDesk
               subscribers={subscribers}
