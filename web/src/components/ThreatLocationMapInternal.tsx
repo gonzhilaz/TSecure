@@ -62,10 +62,10 @@ export const ThreatLocationMapInternal: React.FC<ThreatLocationMapInternalProps>
       zoomControl: false,
     });
 
-    // Dark Matter Tactical Map Tiles (Free, High Performance, High Contrast for SOC)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-      subdomains: 'abcd',
+    // OpenStreetMap with High-Contrast Dark Tactical Inversion Filter (Zero Watermark, Zero API Key)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      className: 'soc-dark-tiles',
       maxZoom: 19,
     }).addTo(map);
 

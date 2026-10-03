@@ -86,3 +86,8 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #ed0226;
 }
+
+/* SOC Dark Tactical Map Tiles (High-contrast dark mode for OSM tiles) */
+.soc-dark-tiles {
+  filter: brightness(0.65) invert(1) contrast(2.5) hue-rotate(205deg) saturate(0.25) brightness(0.8);
+}
