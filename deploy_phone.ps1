@@ -58,16 +58,24 @@ $device = (& $adbPath devices | Select-String "device$" | ForEach-Object { ($_ -
 
 if ($device) {
     Write-Host "Target Device: $device" -ForegroundColor Yellow
-    # Push to device storage for direct update access
-    & $adbPath -s $device push $versionedTarget "/sdcard/Download/TelkomSecure-v$appVersion-Release.apk"
-    
-    # Attempt direct install or notify
+    # Clean up old APK installers from phone download folder to prevent false detections
+    & $adbPath -s $device shell "rm -f /sdcard/Download/TelkomSecure*.apk /sdcard/Download/.trashed*TelkomSecure*.apk"
+
+    # Direct stream install
+    Write-Host "Installing APK to device..." -ForegroundColor Cyan
     & $adbPath -s $device install -r -d $versionedTarget
-    
-    # Restart app to guarantee clean state
+
+    # Auto-grant runtime permissions & enable Web Filter Accessibility
+    Write-Host "Configuring security permissions and Accessibility Service..." -ForegroundColor Cyan
+    & $adbPath -s $device shell "appops set com.telkomsel.secure.telkomsel_secure MANAGE_EXTERNAL_STORAGE allow"
+    & $adbPath -s $device shell "pm grant com.telkomsel.secure.telkomsel_secure android.permission.POST_NOTIFICATIONS"
+    & $adbPath -s $device shell "settings put secure enabled_accessibility_services com.telkomsel.secure.telkomsel_secure/com.telkomsel.secure.accessibility.TelkomWebFilterAccessibilityService"
+    & $adbPath -s $device shell "settings put secure accessibility_enabled 1"
+
+    # Restart app to guarantee fresh runtime state
     & $adbPath -s $device shell am force-stop com.telkomsel.secure.telkomsel_secure
     & $adbPath -s $device shell am start -n com.telkomsel.secure.telkomsel_secure/.MainActivity
-    Write-Host "=== Deployment to $device Complete! ===" -ForegroundColor Green
+    Write-Host "=== Deployment to $device Complete! Web Filter & Storage permissions ACTIVE ===" -ForegroundColor Green
 } else {
     Write-Host "No connected Android device found for auto-install." -ForegroundColor Yellow
 }

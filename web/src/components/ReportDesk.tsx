@@ -81,7 +81,7 @@ export const ReportDesk: React.FC<ReportDeskProps> = ({
       { label: 'Action Taken', key: 'action_taken' },
       { label: 'Description', key: 'description' },
     ];
-    exportToCSV(`TelkomSecure-Incident-Audit-${new Date().toISOString().slice(0, 10)}`, headers, filteredThreats);
+    exportToCSV(`TelkomselSecure-Incident-Audit-${new Date().toISOString().slice(0, 10)}`, headers, filteredThreats);
   };
 
   const handleExportExcel = () => {
@@ -96,7 +96,7 @@ export const ReportDesk: React.FC<ReportDeskProps> = ({
       { label: 'Description', key: 'description' },
     ];
     exportToExcel(
-      `TelkomSecure-Incident-Audit-${new Date().toISOString().slice(0, 10)}`,
+      `TelkomselSecure-Incident-Audit-${new Date().toISOString().slice(0, 10)}`,
       'Security Audit Log',
       headers,
       filteredThreats

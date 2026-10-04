@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../auth/masuk_screen.dart';
 import '../shell/main_shell_screen.dart';
@@ -63,151 +62,165 @@ class _SplashScreenState extends State<SplashScreen>
     final controller = context.watch<SplashController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF070C18),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 32.0),
-          child: Column(
-            children: [
-              const Spacer(),
-              // Security Emblem / Pulsing Glowing Shield
-              ScaleTransition(
-                scale: _scaleAnimation,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Outer glow ring
-                    Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.25),
-                          width: 2,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFED0226), // Telkomsel Primary Red
+              Color(0xFFBE001C), // Telkomsel Crimson Red
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 32.0),
+            child: Column(
+              children: [
+                const Spacer(),
+                // Security Emblem / Pulsing Glowing Shield
+                ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Outer glow ring
+                      Container(
+                        width: 140,
+                        height: 140,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.35),
+                            width: 2,
+                          ),
                         ),
                       ),
-                    ),
-                    // Inner glow container
-                    Container(
-                      width: 110,
-                      height: 110,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFFFF2D38),
-                            Color(0xFFB80010),
+                      // Inner white emblem container for maximum contrast
+                      Container(
+                        width: 110,
+                        height: 110,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              blurRadius: 32,
+                              offset: const Offset(0, 10),
+                            ),
                           ],
                         ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.55),
-                            blurRadius: 36,
-                            offset: const Offset(0, 8),
+                        child: const Center(
+                          child: Icon(
+                            Icons.shield_rounded,
+                            size: 62,
+                            color: Color(0xFFED0226),
                           ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.shield_rounded,
-                          size: 60,
-                          color: Colors.white,
                         ),
                       ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 36),
+                // Brand & Title
+                Text(
+                  'Telkomsel',
+                  style: AppTypography.headlineXl.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                    fontSize: 32,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 2,
+                      width: 28,
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'SECURE',
+                      style: AppTypography.labelMd.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 5.0,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      height: 2,
+                      width: 28,
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 36),
-              // Brand & Title
-              Text(
-                'Telkomsel',
-                style: AppTypography.headlineXl.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  letterSpacing: -0.5,
-                  fontSize: 30,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    height: 1.5,
-                    width: 24,
-                    color: AppColors.primary,
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'SECURITY',
-                    style: AppTypography.labelMd.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 4.5,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    height: 1.5,
-                    width: 24,
-                    color: AppColors.primary,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Text(
-                'Powered by Kaspersky',
-                style: AppTypography.bodySm.copyWith(
-                  color: const Color(0xFF8E9BAE),
-                  fontWeight: FontWeight.w500,
-                  fontSize: 12,
-                ),
-              ),
-              const Spacer(),
-              // Telemetry Loading Bar & Status Message
-              Container(
-                width: 200,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF162032),
-                  borderRadius: BorderRadius.circular(3),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: controller.progress,
-                    backgroundColor: Colors.transparent,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppColors.primary,
+                  child: Text(
+                    'Powered by Kaspersky Mobile Security',
+                    style: AppTypography.bodySm.copyWith(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                controller.statusMessage,
-                style: AppTypography.bodySm.copyWith(
-                  color: const Color(0xFFC5D1E0),
-                  fontWeight: FontWeight.w500,
+                const Spacer(),
+                // Telemetry Loading Bar & Status Message
+                Container(
+                  width: 220,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: LinearProgressIndicator(
+                      value: controller.progress,
+                      backgroundColor: Colors.transparent,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              if (controller.mobileId != null)
+                const SizedBox(height: 16),
                 Text(
-                  'Hardware ID: ${controller.mobileId}',
-                  style: AppTypography.labelSm.copyWith(
-                    color: const Color(0xFF5D6B82),
-                    fontSize: 10,
+                  controller.statusMessage,
+                  style: AppTypography.bodySm.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
                   ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-            ],
+                const SizedBox(height: 8),
+                if (controller.mobileId != null)
+                  Text(
+                    'Hardware ID: ${controller.mobileId}',
+                    style: AppTypography.labelSm.copyWith(
+                      color: Colors.white.withValues(alpha: 0.75),
+                      fontSize: 10,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

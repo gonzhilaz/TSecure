@@ -108,9 +108,12 @@ class _ScanThreatDetailSheetState extends State<ScanThreatDetailSheet> {
   }
 
   Future<void> _handleQuarantineSingle(ThreatDetailItem t) async {
-    await widget.threatManager.quarantineThreat(widget.log, t);
+    final ok = await widget.threatManager.quarantineThreat(widget.log, t);
     setState(() {});
-    _showSnack('Berkas ${t.fileName} dipindahkan ke karantina.', bg: AppColors.statusWarning);
+    _showSnack(
+      ok ? 'Berkas ${t.fileName} dipindahkan ke karantina.' : 'Gagal: berkas tidak ditemukan di penyimpanan perangkat.',
+      bg: ok ? AppColors.statusWarning : AppColors.statusDanger,
+    );
   }
 
   Future<void> _handleClearSingle(ThreatDetailItem t) async {

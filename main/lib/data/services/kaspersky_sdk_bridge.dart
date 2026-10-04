@@ -6,7 +6,6 @@ import '../../core/constants/app_constants.dart';
 import '../models/activity_log.dart';
 import '../models/threat_detail_item.dart';
 import 'activity_log_repository.dart';
-import 'threat_manager_service.dart';
 import 'threat_telemetry_dispatcher.dart';
 import 'url_filter_service.dart';
 import 'wifi_security_service.dart';
@@ -145,7 +144,6 @@ class KasperskySdkBridge extends ChangeNotifier {
 
         final scanTitle = _scanErrorMessage != null ? 'Pemindaian Gagal' : (_threatsDetected > 0 ? 'Pemindaian Selesai • $_threatsDetected Ancaman Ditemukan' : 'Pemindaian Selesai • Sistem Aman');
         final threatsForLog = List<ThreatDetailItem>.from(_currentScanThreats);
-        await ThreatManagerService.resolveScanThreats(threatsForLog);
         await _logActivity(
           id: 'scan-${DateTime.now().millisecondsSinceEpoch}', title: scanTitle,
           description: _scanErrorMessage ?? '$_scannedFiles Berkas Diperiksa • $_threatsDetected Ancaman Ditemukan',

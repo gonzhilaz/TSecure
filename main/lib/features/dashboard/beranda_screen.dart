@@ -9,10 +9,10 @@ import '../../core/widgets/security_feature_sheet.dart';
 import '../../core/widgets/tri_state_view.dart';
 import '../../data/services/kaspersky_sdk_bridge.dart';
 import 'dashboard_controller.dart';
-import 'widgets/protection_status_card.dart';
+import 'widgets/bento_security_features_grid.dart';
 import 'widgets/recent_activity_preview.dart';
-import 'widgets/security_features_grid.dart';
-import 'widgets/security_gauge_card.dart';
+import 'widgets/threat_telemetry_strip.dart';
+import 'widgets/unified_hero_status_card.dart';
 
 class BerandaScreen extends StatefulWidget {
   final VoidCallback onNavigateToScanner;
@@ -80,7 +80,20 @@ class _BerandaScreenState extends State<BerandaScreen> with WidgetsBindingObserv
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Dashboard', style: AppTypography.headlineSm),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Telkomsel Secure', style: AppTypography.headlineSm),
+            Text(
+              'Kaspersky Mobile Security Engine',
+              style: AppTypography.bodySm.copyWith(
+                fontSize: 10,
+                color: AppColors.slateMuted,
+              ),
+            ),
+          ],
+        ),
         leading: Padding(
           padding: const EdgeInsets.only(left: 16.0),
           child: IconButton(
@@ -136,16 +149,17 @@ class _BerandaScreenState extends State<BerandaScreen> with WidgetsBindingObserv
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SecurityGaugeCard(
+                // 1. Bento Hero Status & Primary Scan Action
+                UnifiedHeroStatusCard(
                   securityScore: controller.securityScore,
-                ),
-                const SizedBox(height: 16),
-                ProtectionStatusCard(
-                  securityScore: controller.securityScore,
-                  isRealtimeActive:
-                      controller.kasperskySdk.realtimeProtection,
                   lastScanText: _formatLastScan(controller.kasperskySdk.lastScanDate),
                   onScanPressed: widget.onNavigateToScanner,
+                ),
+                const SizedBox(height: 14),
+
+                // 2. Threat Telemetry Strip with Realtime Toggle
+                ThreatTelemetryStrip(
+                  isRealtimeActive: controller.kasperskySdk.realtimeProtection,
                   onRealtimeToggled: (enabled) async {
                     if (enabled) {
                       final ok = await PermissionGate.ensure(context, GateFeature.realtime);
@@ -154,8 +168,10 @@ class _BerandaScreenState extends State<BerandaScreen> with WidgetsBindingObserv
                     controller.toggleRealtimeProtection(enabled);
                   },
                 ),
-                const SizedBox(height: 24),
-                SecurityFeaturesGrid(
+                const SizedBox(height: 20),
+
+                // 3. 2x2 Bento Module Feature Grid
+                BentoSecurityFeaturesGrid(
                   onFeatureTapped: (featureName) {
                     if (featureName == 'Lainnya') {
                       AdvancedSecurityHubSheet.show(
@@ -175,7 +191,9 @@ class _BerandaScreenState extends State<BerandaScreen> with WidgetsBindingObserv
                     }
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+
+                // 4. Contextual Recent Threat & Activity Preview
                 RecentActivityPreview(
                   latestLog: controller.latestLog,
                   onViewAll: widget.onNavigateToHistory,

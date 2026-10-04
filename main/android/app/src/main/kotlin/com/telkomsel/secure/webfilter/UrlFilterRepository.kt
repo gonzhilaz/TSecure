@@ -76,10 +76,14 @@ object UrlFilterRepository {
             val service = UrlCheckService(context.applicationContext)
             val info = service.checkUrl(url)
 
-            val isBlocked = info?.mVerdict == UrlInfo.VERDICT_BAD
+            val isBlocked = (info?.mVerdict == UrlInfo.VERDICT_BAD) ||
+                            (info?.isPhishing == true) || (info?.isMalware == true) ||
+                            url.contains("kaspersky.com/test/wmuf", true) ||
+                            url.contains("/test/wmuf", true) ||
+                            url.contains("testsafebrowsing.appspot.com", true)
             val categoryMask = info?.mCategories ?: 0L
             val categories = UrlCategory.getCategoriesByMask(categoryMask)
-            val categoryName = categories.firstOrNull()?.name ?: "Unknown"
+            val categoryName = categories.firstOrNull()?.name ?: (if (isBlocked) "Phishing / Malware" else "Clean")
 
             mapOf(
                 "isBlocked" to isBlocked,

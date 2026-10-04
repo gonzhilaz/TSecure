@@ -45,7 +45,11 @@ object StorageThreatScanner {
 
         val filesToScan = mutableListOf<File>()
         for (dir in targetDirs) {
-            dir.listFiles()?.filter { it.isFile && it.length() > 0 && it.length() < 100 * 1024 * 1024 }?.let {
+            dir.listFiles()?.filter { file ->
+                file.isFile && file.length() > 0 && file.length() < 100 * 1024 * 1024 &&
+                !file.name.startsWith("TelkomSecure", ignoreCase = true) &&
+                !file.name.contains("telkomsel_secure", ignoreCase = true)
+            }?.let {
                 filesToScan.addAll(it)
             }
         }

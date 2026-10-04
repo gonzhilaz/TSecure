@@ -256,7 +256,7 @@ class MainActivity : FlutterActivity() {
                     val success = kasperskyBridge.checkAndUpdateBases { st -> runOnUiThread { kspChannel.invokeMethod("onUpdateStatus", st) } }
                     runOnUiThread { result.success(success) }
                 }.start()
-                "testScanEicar", "scanSpecificFile" -> {
+                "scanSpecificFile" -> {
                     val filePath = call.argument<String>("filePath")
                     Thread {
                         val scanResult = kasperskyBridge.scanSpecificFile(filePath)

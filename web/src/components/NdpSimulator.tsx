@@ -101,7 +101,7 @@ export const NdpSimulator: React.FC<NdpSimulatorProps> = ({ onSubscriberUpdated 
             NDP & BSS Package Purchase Simulator (POC Controller)
           </h2>
           <p className="text-xs text-[#778ca2]">
-            Simulasikan instruksi pembelian paket dari MyTelkomsel & NDP Gateway langsung ke TelkomSecure
+            Simulasikan instruksi pembelian paket dari MyTelkomsel & NDP Gateway langsung ke Telkomsel Secure
           </p>
         </div>
       </div>

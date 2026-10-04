@@ -71,16 +71,22 @@ class TelkomWebFilterAccessibilityService : AccessibilityService() {
     }
 
     private fun extractUrlFromNode(node: AccessibilityNodeInfo): String? {
-        val viewId = node.viewIdResourceName
-        if (viewId != null) {
-            val lowerId = viewId.lowercase()
-            if (lowerId.contains("url_bar") || lowerId.contains("address_bar") ||
-                lowerId.contains("location_bar") || lowerId.contains("search_box") ||
-                lowerId.contains("toolbar_url")
-            ) {
-                val text = node.text?.toString()
-                if (!text.isNullOrBlank()) return text
-            }
+        val viewId = node.viewIdResourceName?.lowercase() ?: ""
+        val text = node.text?.toString()?.trim()
+        val desc = node.contentDescription?.toString()?.trim()
+
+        if (viewId.contains("url") || viewId.contains("address") ||
+            viewId.contains("location") || viewId.contains("search") ||
+            viewId.contains("toolbar") || viewId.contains("omnibox")
+        ) {
+            if (!text.isNullOrBlank() && (text.contains(".") || text.startsWith("http"))) return text
+            if (!desc.isNullOrBlank() && (desc.contains(".") || desc.startsWith("http"))) return desc
+        }
+
+        if (!text.isNullOrBlank()) {
+            if (text.startsWith("http://", true) || text.startsWith("https://", true) ||
+                text.contains("kaspersky.com/test/wmuf", true) || text.contains("/test/wmuf", true)
+            ) return text
         }
 
         val childCount = node.childCount
@@ -101,7 +107,6 @@ class TelkomWebFilterAccessibilityService : AccessibilityService() {
                     rawUrl
                 }
 
-                // Check against Kaspersky URL service
                 val result = kasperskyBridge.checkUrl(formattedUrl)
                 ProtectionLog.countUrl(applicationContext)
                 val isPhishing = result["isPhishing"] as? Boolean ?: false
@@ -112,8 +117,31 @@ class TelkomWebFilterAccessibilityService : AccessibilityService() {
                     val verdict = if (isPhishing) "Situs Phishing / Penipuan" else "Situs Penyebar Malware"
                     Log.w(TAG, "[WEB FILTER BLOCKED] Threat detected: $formattedUrl ($verdict)")
                     ProtectionLog.event(applicationContext, "WEB", "BLOCKED", "$verdict | $formattedUrl")
+
+                    // 1. Immediately force browser BACK to navigate away from dangerous page
+                    android.os.Handler(android.os.Looper.getMainLooper()).post {
+                        try {
+                            performGlobalAction(GLOBAL_ACTION_BACK)
+                        } catch (e: Throwable) {
+                            Log.w(TAG, "Global back action failed: ${e.message}")
+                        }
+                    }
+
+                    // 2. High priority notification
                     showThreatAlertNotification(formattedUrl, verdict)
+
+                    // 3. Notify Flutter UI and SOC telemetry
                     MainActivity.notifyUrlThreat(formattedUrl, verdict, "BLOCKED")
+
+                    // 4. Bring TelkomSecure to front with alert dialog
+                    try {
+                        val alertIntent = Intent(applicationContext, MainActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                            putExtra("blocked_url", formattedUrl)
+                            putExtra("blocked_reason", verdict)
+                        }
+                        startActivity(alertIntent)
+                    } catch (_: Throwable) {}
                 }
             } catch (e: Throwable) {
                 Log.e(TAG, "Error checking URL: ${e.message}")
@@ -130,6 +158,7 @@ class TelkomWebFilterAccessibilityService : AccessibilityService() {
             ).apply {
                 description = "Peringatan real-time saat mendeteksi situs phishing atau malware di peramban"
                 enableVibration(true)
+                vibrationPattern = longArrayOf(0, 500, 200, 500)
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
             val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -140,6 +169,8 @@ class TelkomWebFilterAccessibilityService : AccessibilityService() {
     private fun showThreatAlertNotification(url: String, threatReason: String) {
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("blocked_url", url)
+            putExtra("blocked_reason", threatReason)
         }
         val pendingIntent = PendingIntent.getActivity(
             this,
@@ -150,11 +181,14 @@ class TelkomWebFilterAccessibilityService : AccessibilityService() {
 
         val builder = NotificationCompat.Builder(this, NOTIF_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Peringatan: $threatReason")
-            .setContentText("Akses ke $url berbahaya dicegat oleh TelkomSecure.")
-            .setStyle(NotificationCompat.BigTextStyle().bigText("TelkomSecure memblokir akses ke: $url\nAncaman terdeteksi oleh Kaspersky Security Network (KSN). Segera tutup tab peramban ini."))
+            .setContentTitle("ANCAMAN TERDETEKSI: $threatReason")
+            .setContentText("Akses ke $url dicegat oleh TelkomSecure.")
+            .setStyle(NotificationCompat.BigTextStyle().bigText("TelkomSecure Web Filter memblokir akses ke situs berbahaya:\n$url\n\nKaspersky Security Network (KSN) mendeteksi indikasi bahaya. Tab peramban telah ditutup otomatis."))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setDefaults(Notification.DEFAULT_ALL)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setFullScreenIntent(pendingIntent, true)
+            .setVibrate(longArrayOf(0, 500, 200, 500))
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
 

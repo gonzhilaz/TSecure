@@ -215,12 +215,14 @@ class ThreatManagerService extends ChangeNotifier {
     }
     await loadQuarantinedItems();
     notifyListeners();
-
     if (logRepository != null) {
+      final allSuccess = threatsToProcess.every((t) => t.actionTaken == 'DIKARANTINA');
       final updatedLog = log.copyWith(
-        isSafe: true,
-        title: 'Pemindaian Selesai • Berkas Aman',
-        description: 'Semua berkas ancaman telah diisolasi di Brankas Karantina.',
+        isSafe: allSuccess,
+        title: allSuccess ? 'Pemindaian Selesai • Berkas Aman' : 'Pemindaian Selesai • Butuh Perhatian',
+        description: allSuccess
+            ? 'Semua berkas ancaman telah diisolasi di Brankas Karantina.'
+            : 'Sebagian berkas gagal diisolasi (periksa izin penyimpanan).',
         threats: threatsToProcess,
       );
       await logRepository!.updateLog(updatedLog);
@@ -246,20 +248,26 @@ class ThreatManagerService extends ChangeNotifier {
   }
 
   /// Quarantines a single threat natively
-  Future<void> quarantineThreat(ActivityLog log, ThreatDetailItem item) async {
-    item.actionTaken = 'DIKARANTINA';
+  Future<bool> quarantineThreat(ActivityLog log, ThreatDetailItem item) async {
     try {
-      await _kspChannel.invokeMethod('quarantineFile', {
+      final res = await _kspChannel.invokeMapMethod<String, dynamic>('quarantineFile', {
         'filePath': item.filePath,
         'threatName': item.virusName,
         'threatType': item.threatType,
         'severity': item.severity,
       });
+      final success = res?['success'] as bool? ?? false;
+      item.actionTaken = success ? 'DIKARANTINA' : 'GAGAL';
       await loadQuarantinedItems();
-    } catch (_) {}
-    notifyListeners();
-    if (logRepository != null) {
-      await logRepository!.updateLog(log);
+      notifyListeners();
+      if (logRepository != null) {
+        await logRepository!.updateLog(log);
+      }
+      return success;
+    } catch (_) {
+      item.actionTaken = 'GAGAL';
+      notifyListeners();
+      return false;
     }
   }
 

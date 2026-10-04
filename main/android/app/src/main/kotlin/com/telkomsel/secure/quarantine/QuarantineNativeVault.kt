@@ -52,7 +52,15 @@ class QuarantineNativeVault(private val context: Context) {
         threatType: String,
         severity: String
     ): Map<String, Any> {
-        val srcFile = File(originalFilePath)
+        var srcFile = File(originalFilePath)
+        if (!srcFile.exists() && originalFilePath.startsWith("/storage/emulated/0/")) {
+            val alt = File(originalFilePath.replace("/storage/emulated/0/", "/sdcard/"))
+            if (alt.exists()) srcFile = alt
+        } else if (!srcFile.exists() && originalFilePath.startsWith("/sdcard/")) {
+            val alt = File(originalFilePath.replace("/sdcard/", "/storage/emulated/0/"))
+            if (alt.exists()) srcFile = alt
+        }
+
         if (!srcFile.exists()) {
             val registry = loadRegistry()
             for (i in 0 until registry.length()) {
@@ -66,8 +74,8 @@ class QuarantineNativeVault(private val context: Context) {
                 }
             }
             return mapOf(
-                "success" to true,
-                "message" to "Berkas sudah tidak ada di sistem penyimpanan."
+                "success" to false,
+                "message" to "Berkas tidak ditemukan atau akses penyimpanan ditolak."
             )
         }
 
@@ -357,20 +365,13 @@ class QuarantineNativeVault(private val context: Context) {
         val list = mutableListOf<Map<String, Any>>()
         for (i in 0 until registry.length()) {
             val obj = registry.getJSONObject(i)
-            list.add(
-                mapOf(
-                    "id" to obj.optString("id"),
-                    "fileName" to obj.optString("fileName"),
-                    "originalPath" to obj.optString("originalPath"),
-                    "vaultPath" to obj.optString("vaultPath"),
-                    "threatName" to obj.optString("threatName"),
-                    "threatType" to obj.optString("threatType"),
-                    "severity" to obj.optString("severity"),
-                    "fileSize" to obj.optLong("fileSize"),
-                    "quarantineDate" to obj.optString("quarantineDate"),
-                    "status" to obj.optString("status")
-                )
-            )
+            list.add(mapOf(
+                "id" to obj.optString("id"), "fileName" to obj.optString("fileName"),
+                "originalPath" to obj.optString("originalPath"), "vaultPath" to obj.optString("vaultPath"),
+                "threatName" to obj.optString("threatName"), "threatType" to obj.optString("threatType"),
+                "severity" to obj.optString("severity"), "fileSize" to obj.optLong("fileSize"),
+                "quarantineDate" to obj.optString("quarantineDate"), "status" to obj.optString("status")
+            ))
         }
         return list
     }
@@ -380,16 +381,11 @@ class QuarantineNativeVault(private val context: Context) {
         return try {
             val text = metadataFile.readText()
             if (text.isBlank()) JSONArray() else JSONArray(text)
-        } catch (_: Throwable) {
-            JSONArray()
-        }
+        } catch (_: Throwable) { JSONArray() }
     }
 
     private fun saveRegistry(array: JSONArray) {
-        try {
-            metadataFile.writeText(array.toString(2))
-        } catch (e: Throwable) {
-            Log.e(TAG, "Failed to write quarantine registry: ${e.message}", e)
-        }
+        try { metadataFile.writeText(array.toString(2)) }
+        catch (e: Throwable) { Log.e(TAG, "Failed to write registry: ${e.message}", e) }
     }
 }
