@@ -51,7 +51,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({ stats, loading }) => {
     {
       title: 'Ancaman Dicegah Hari Ini',
       value: stats.threats_today.toString(),
-      subtitle: `${stats.total_threats_blocked} total ancaman sejak deployment`,
+      subtitle: `${stats.total_threats_blocked} total (Judol, SMS Scam, Malware)`,
       icon: ShieldAlert,
       color: 'text-[#be001c]',
       iconBg: 'bg-[#ffdad6] border-[#e9bcb8]',

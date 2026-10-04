@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { StatsCards } from '@/components/StatsCards';
-import { ThreatLocationMap } from '@/components/ThreatLocationMap';
+import { OverviewPackagePulse } from '@/components/OverviewPackagePulse';
 import { ThreatAnalytics } from '@/components/ThreatAnalytics';
 import { ThreatMapDesk } from '@/components/ThreatMapDesk';
 import { NdpSimulator } from '@/components/NdpSimulator';
@@ -269,16 +269,15 @@ export default function SOCDashboard() {
           {/* Top KPI Metrics Cards */}
           <StatsCards stats={stats} loading={loading} />
 
-          {/* TAB 1: OVERVIEW (Map + Analytics + Table + Feed) */}
+          {/* TAB 1: OVERVIEW (Analytics + Threat Feed + Package Pulse + Table) */}
           {activeTab === 'overview' && (
             <div className="space-y-6">
-              {/* GIS Map & Analytic Highlights */}
+              {/* Bento Grid: Analytics & Real-Time Incident Stream */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-7">
-                  <ThreatLocationMap
+                  <ThreatAnalytics
                     threats={threats}
-                    height="480px"
-                    selectedCity={selectedMapCity}
+                    onSelectCity={(city) => setSelectedMapCity(city)}
                   />
                 </div>
                 <div className="lg:col-span-5">
@@ -286,10 +285,13 @@ export default function SOCDashboard() {
                 </div>
               </div>
 
-              {/* Comprehensive Analytics Suite */}
-              <ThreatAnalytics
-                threats={threats}
-                onSelectCity={(city) => setSelectedMapCity(city)}
+              {/* Package Monetization & Ghost Subscriber Radar Pulse */}
+              <OverviewPackagePulse
+                subscribers={subscribers}
+                onNavigateToPackages={() => setActiveTab('package_manager')}
+                onSendNudgeBlast={() => {
+                  alert('Blast SMS Nudge onboarding berhasil disimulasikan ke seluruh Ghost Subscriber.');
+                }}
               />
 
               {/* Subscriber Fleet Table */}

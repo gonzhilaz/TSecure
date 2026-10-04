@@ -24,8 +24,10 @@ interface ThreatAnalyticsProps {
 }
 
 const VECTOR_COLORS: Record<string, string> = {
+  JUDI_ONLINE: '#ea580c',
+  SMISHING: '#dc2626',
   MALWARE: '#ed0226',
-  PHISHING: '#f97316',
+  PHISHING: '#9333ea',
   WIFI: '#eab308',
   RASP: '#a855f7',
   SIM_WATCH: '#3b82f6',
@@ -41,6 +43,8 @@ export const ThreatAnalytics: React.FC<ThreatAnalyticsProps> = ({ threats, onSel
   // 1. Vector Distribution Data
   const vectorData = useMemo(() => {
     const counts: Record<string, number> = {
+      JUDI_ONLINE: 0,
+      SMISHING: 0,
       MALWARE: 0,
       PHISHING: 0,
       WIFI: 0,
@@ -49,14 +53,19 @@ export const ThreatAnalytics: React.FC<ThreatAnalyticsProps> = ({ threats, onSel
     };
 
     threats.forEach((t) => {
-      if (t.threat_type === 'MALWARE' || t.threat_type === 'EICAR') counts.MALWARE++;
-      else if (t.threat_type === 'PHISHING') counts.PHISHING++;
-      else if (t.threat_type === 'WIFI') counts.WIFI++;
-      else if (t.threat_type === 'RASP') counts.RASP++;
-      else if (t.threat_type === 'SIM_WATCH') counts.SIM_WATCH++;
+      const type = t.threat_type?.toUpperCase();
+      if (type === 'JUDI_ONLINE') counts.JUDI_ONLINE++;
+      else if (type === 'SMISHING') counts.SMISHING++;
+      else if (type === 'MALWARE' || type === 'EICAR') counts.MALWARE++;
+      else if (type === 'PHISHING') counts.PHISHING++;
+      else if (type === 'WIFI') counts.WIFI++;
+      else if (type === 'RASP') counts.RASP++;
+      else if (type === 'SIM_WATCH') counts.SIM_WATCH++;
     });
 
     return [
+      { name: 'Judi Online', key: 'JUDI_ONLINE', value: counts.JUDI_ONLINE, color: VECTOR_COLORS.JUDI_ONLINE },
+      { name: 'SMS Scam', key: 'SMISHING', value: counts.SMISHING, color: VECTOR_COLORS.SMISHING },
       { name: 'Malware', key: 'MALWARE', value: counts.MALWARE, color: VECTOR_COLORS.MALWARE },
       { name: 'Phishing', key: 'PHISHING', value: counts.PHISHING, color: VECTOR_COLORS.PHISHING },
       { name: 'Wi-Fi', key: 'WIFI', value: counts.WIFI, color: VECTOR_COLORS.WIFI },

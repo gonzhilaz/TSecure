@@ -241,8 +241,12 @@ class SmsPhishingReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
         )
 
-        val notification = NotificationCompat.Builder(context, NOTIF_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+        val largeIcon = try {
+            android.graphics.BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+        } catch (_: Exception) { null }
+
+        val builder = NotificationCompat.Builder(context, NOTIF_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_shield)
             .setContentTitle(title)
             .setContentText("SMS dari $sender terindikasi $reason. Jangan klik tautan!")
             .setStyle(
@@ -258,8 +262,12 @@ class SmsPhishingReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .setColor(if (isJudi) 0xFFE65100.toInt() else 0xFFED0226.toInt())
-            .build()
 
+        if (largeIcon != null) {
+            builder.setLargeIcon(largeIcon)
+        }
+
+        val notification = builder.build()
         notificationManager.notify(NOTIF_ID, notification)
     }
 }

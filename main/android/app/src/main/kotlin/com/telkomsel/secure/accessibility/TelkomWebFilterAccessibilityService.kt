@@ -179,11 +179,16 @@ class TelkomWebFilterAccessibilityService : AccessibilityService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val largeIcon = try {
+            android.graphics.BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
+        } catch (_: Exception) { null }
+
         val builder = NotificationCompat.Builder(this, NOTIF_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_shield)
+            .setColor(0xFFED0226.toInt())
             .setContentTitle("ANCAMAN TERDETEKSI: $threatReason")
-            .setContentText("Akses ke $url dicegat oleh TelkomSecure.")
-            .setStyle(NotificationCompat.BigTextStyle().bigText("TelkomSecure Web Filter memblokir akses ke situs berbahaya:\n$url\n\nKaspersky Security Network (KSN) mendeteksi indikasi bahaya. Tab peramban telah ditutup otomatis."))
+            .setContentText("Akses ke $url dicegat oleh Telkomsel Secure.")
+            .setStyle(NotificationCompat.BigTextStyle().bigText("Telkomsel Secure Web Filter memblokir akses ke situs berbahaya:\n$url\n\nKaspersky Security Network (KSN) mendeteksi indikasi bahaya. Tab peramban telah ditutup otomatis."))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setDefaults(Notification.DEFAULT_ALL)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
@@ -191,6 +196,8 @@ class TelkomWebFilterAccessibilityService : AccessibilityService() {
             .setVibrate(longArrayOf(0, 500, 200, 500))
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
+
+        if (largeIcon != null) builder.setLargeIcon(largeIcon)
 
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.notify((System.currentTimeMillis() % 100000).toInt(), builder.build())

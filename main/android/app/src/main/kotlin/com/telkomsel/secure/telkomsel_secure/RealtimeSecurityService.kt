@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Environment
 import android.os.IBinder
@@ -309,15 +310,25 @@ class RealtimeSecurityService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        return NotificationCompat.Builder(this, STATUS_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Real-Time Protection Active")
-            .setContentText("Kaspersky Engine actively protecting your device")
+        val largeIcon = try {
+            BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
+        } catch (_: Exception) { null }
+
+        val builder = NotificationCompat.Builder(this, STATUS_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_shield)
+            .setContentTitle("Telkomsel Secure • Aktif")
+            .setContentText("Kaspersky Engine aktif melindungi perangkat")
             .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setColor(0xFFED0226.toInt())
             .setOngoing(true)
             .setContentIntent(pi)
             .setCategory(Notification.CATEGORY_SERVICE)
-            .build()
+
+        if (largeIcon != null) {
+            builder.setLargeIcon(largeIcon)
+        }
+
+        return builder.build()
     }
 
     private fun showThreatNotification(threatInfo: ThreatInfo, threatType: ThreatType) {
@@ -333,20 +344,29 @@ class RealtimeSecurityService : Service() {
         val name = threatInfo.virusName ?: "Malware"
         val path = threatInfo.fileFullPath ?: "unknown"
 
-        val notification = NotificationCompat.Builder(this, THREAT_CHANNEL_ID)
+        val largeIcon = try {
+            BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
+        } catch (_: Exception) { null }
+
+        val builder = NotificationCompat.Builder(this, THREAT_CHANNEL_ID)
             .setContentTitle("🚨 Ancaman Terdeteksi!")
             .setContentText("$name ditemukan dan $actionLabel.")
             .setStyle(NotificationCompat.BigTextStyle()
                 .bigText("File: $path\nAncaman: $name ($threatType)\nTindakan: $actionLabel"))
-            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setSmallIcon(R.drawable.ic_stat_shield)
+            .setColor(0xFFED0226.toInt())
             .setContentIntent(pi)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setDefaults(Notification.DEFAULT_ALL)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(Notification.CATEGORY_ERROR)
-            .build()
 
+        if (largeIcon != null) {
+            builder.setLargeIcon(largeIcon)
+        }
+
+        val notification = builder.build()
         val nm = getSystemService(NotificationManager::class.java)
         nm.notify(THREAT_NOTIFICATION_ID_BASE + (System.currentTimeMillis() % 1000).toInt(), notification)
     }
