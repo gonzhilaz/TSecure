@@ -42,6 +42,15 @@ class UrlFilterService {
     }
   }
 
+  static bool isJudiOnlineUrl(String url) {
+    final l = url.toLowerCase();
+    return l.contains('slot') || l.contains('gacor') || l.contains('maxwin') ||
+           l.contains('pragmatic') || l.contains('olympus') || l.contains('zeus') ||
+           l.contains('togel') || l.contains('sbobet') || l.contains('judol') ||
+           l.contains('kasino') || l.contains('casino') || l.contains('poker') ||
+           l.contains('scatter') || l.contains('mahjong') || l.contains('depopulsa');
+  }
+
   /// Manually check a single URL against Kaspersky cloud and local bases.
   /// Returns verdict map with `isBlocked`, `category`, `verdict`, `url`.
   static Future<Map<String, dynamic>> checkUrl(String url) async {
@@ -52,10 +61,11 @@ class UrlFilterService {
       );
       if (res != null) return Map<String, dynamic>.from(res);
     } catch (_) {}
+    final isJudol = isJudiOnlineUrl(url);
     return {
-      'isBlocked': false,
-      'category': 'Unknown',
-      'verdict': 'error',
+      'isBlocked': isJudol,
+      'category': isJudol ? 'Judi Online & Taruhan Ilegal' : 'Unknown',
+      'verdict': isJudol ? 'bad' : 'error',
       'url': url,
     };
   }

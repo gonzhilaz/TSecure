@@ -67,6 +67,16 @@ object UrlFilterRepository {
         }
     }
 
+    fun isJudiOnlineDomain(url: String): Boolean {
+        val lower = url.lowercase()
+        return lower.contains("slot") || lower.contains("gacor") || lower.contains("maxwin") ||
+               lower.contains("pragmatic") || lower.contains("olympus") || lower.contains("zeus") ||
+               lower.contains("togel") || lower.contains("sbobet") || lower.contains("judol") ||
+               lower.contains("kasino") || lower.contains("casino") || lower.contains("poker") ||
+               lower.contains("scatter") || lower.contains("mahjong") || lower.contains("depopulsa") ||
+               lower.contains("anti-rungkad") || lower.contains("freebet")
+    }
+
     /**
      * Checks a single URL against the Kaspersky cloud and local database.
      * Returns a structured verdict map.
@@ -75,15 +85,22 @@ object UrlFilterRepository {
         return try {
             val service = UrlCheckService(context.applicationContext)
             val info = service.checkUrl(url)
+            val isJudol = isJudiOnlineDomain(url)
 
-            val isBlocked = (info?.mVerdict == UrlInfo.VERDICT_BAD) ||
+            val isBlocked = isJudol ||
+                            (info?.mVerdict == UrlInfo.VERDICT_BAD) ||
                             (info?.isPhishing == true) || (info?.isMalware == true) ||
                             url.contains("kaspersky.com/test/wmuf", true) ||
                             url.contains("/test/wmuf", true) ||
                             url.contains("testsafebrowsing.appspot.com", true)
             val categoryMask = info?.mCategories ?: 0L
             val categories = UrlCategory.getCategoriesByMask(categoryMask)
-            val categoryName = categories.firstOrNull()?.name ?: (if (isBlocked) "Phishing / Malware" else "Clean")
+            val categoryName = when {
+                isJudol -> "Judi Online & Taruhan Ilegal"
+                categories.isNotEmpty() -> categories.first().name
+                isBlocked -> "Phishing / Malware"
+                else -> "Clean"
+            }
 
             mapOf(
                 "isBlocked" to isBlocked,
@@ -93,10 +110,11 @@ object UrlFilterRepository {
             )
         } catch (e: Exception) {
             Log.e(TAG, "URL check error for $url", e)
+            val isJudol = isJudiOnlineDomain(url)
             mapOf(
-                "isBlocked" to false,
-                "category" to "Error",
-                "verdict" to "error",
+                "isBlocked" to isJudol,
+                "category" to if (isJudol) "Judi Online & Taruhan Ilegal" else "Error",
+                "verdict" to if (isJudol) "bad" else "error",
                 "url" to url,
                 "error" to (e.message ?: "Unknown error")
             )
@@ -112,7 +130,8 @@ object UrlFilterRepository {
             override fun getBlockPageData(url: String, info: UrlInfo?): InputStream? {
                 val categoryMask = info?.mCategories ?: 0L
                 val categories = UrlCategory.getCategoriesByMask(categoryMask)
-                val categoryName = categories.firstOrNull()?.name ?: "Situs Berbahaya"
+                val isJudol = isJudiOnlineDomain(url)
+                val categoryName = if (isJudol) "Judi Online & Taruhan Ilegal" else (categories.firstOrNull()?.name ?: "Situs Berbahaya")
 
                 Log.w(TAG, "[BLOCKING URL] $url — Category: $categoryName")
                 MainActivity.notifyUrlThreat(url, categoryName, "BLOCKED")

@@ -11,6 +11,7 @@ import '../../data/models/user_session.dart';
 import '../splash/splash_screen.dart';
 import 'profile_controller.dart';
 import 'widgets/account_info_card.dart';
+import 'widgets/developer_simulation_card.dart';
 import 'widgets/kaspersky_diag_card.dart';
 import 'widgets/kaspersky_engine_footer.dart';
 import 'widgets/license_status_card.dart';
@@ -178,6 +179,8 @@ class _ProfilScreenState extends State<ProfilScreen> {
                         ),
                         const SizedBox(height: 14),
                         const KasperskyDiagCard(),
+                        const SizedBox(height: 14),
+                        const DeveloperSimulationCard(),
                         const SizedBox(height: 16),
 
                         // Subtle Security Engine Footer

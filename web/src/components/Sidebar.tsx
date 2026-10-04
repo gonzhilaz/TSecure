@@ -72,7 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       title: 'MONITORING',
       items: [
         { id: 'overview', label: 'Ringkasan', icon: Shield },
-        { id: 'threat_map', label: 'Peta Lokasi', icon: MapPin },
+        { id: 'threat_map', label: 'Peta Ancaman', icon: MapPin },
         {
           id: 'phishing_intel',
           label: 'Intel Phishing',

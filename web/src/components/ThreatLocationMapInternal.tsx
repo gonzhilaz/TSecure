@@ -31,6 +31,8 @@ export const ThreatLocationMapInternal: React.FC<ThreatLocationMapInternalProps>
       const hasCoords = typeof t.latitude === 'number' && typeof t.longitude === 'number';
       if (!hasCoords) return false;
 
+      if (activeFilter === 'JUDI_ONLINE' && t.threat_type !== 'JUDI_ONLINE') return false;
+      if (activeFilter === 'SMISHING' && t.threat_type !== 'SMISHING') return false;
       if (activeFilter === 'MALWARE' && t.threat_type !== 'MALWARE' && t.threat_type !== 'EICAR') return false;
       if (activeFilter === 'PHISHING' && t.threat_type !== 'PHISHING') return false;
       if (activeFilter === 'WIFI' && t.threat_type !== 'WIFI') return false;
@@ -91,16 +93,21 @@ export const ThreatLocationMapInternal: React.FC<ThreatLocationMapInternalProps>
     validThreats.forEach((threat) => {
       if (typeof threat.latitude !== 'number' || typeof threat.longitude !== 'number') return;
 
-      const isCritical = threat.severity === 'CRITICAL';
       let pinColor = '#3b82f6';
       let ringColor = 'rgba(59, 130, 246, 0.4)';
 
-      if (threat.threat_type === 'MALWARE' || threat.threat_type === 'EICAR') {
+      if (threat.threat_type === 'JUDI_ONLINE') {
+        pinColor = '#f59e0b';
+        ringColor = 'rgba(245, 158, 11, 0.5)';
+      } else if (threat.threat_type === 'SMISHING') {
+        pinColor = '#dc2626';
+        ringColor = 'rgba(220, 38, 38, 0.5)';
+      } else if (threat.threat_type === 'MALWARE' || threat.threat_type === 'EICAR') {
         pinColor = '#ed0226';
         ringColor = 'rgba(237, 2, 38, 0.5)';
       } else if (threat.threat_type === 'PHISHING') {
-        pinColor = '#f97316';
-        ringColor = 'rgba(249, 115, 22, 0.5)';
+        pinColor = '#ea580c';
+        ringColor = 'rgba(234, 88, 12, 0.5)';
       } else if (threat.threat_type === 'WIFI') {
         pinColor = '#eab308';
         ringColor = 'rgba(234, 179, 8, 0.5)';
@@ -159,10 +166,11 @@ export const ThreatLocationMapInternal: React.FC<ThreatLocationMapInternalProps>
         <div className="flex items-center space-x-1.5 overflow-x-auto text-[11px]">
           {[
             { id: 'ALL', label: 'Semua' },
-            { id: 'MALWARE', label: 'Malware' },
+            { id: 'JUDI_ONLINE', label: 'Judi Online' },
+            { id: 'SMISHING', label: 'SMS Scam' },
             { id: 'PHISHING', label: 'Phishing' },
+            { id: 'MALWARE', label: 'Malware' },
             { id: 'WIFI', label: 'Wi-Fi' },
-            { id: 'DEVICE', label: 'SIM/RASP' },
           ].map((f) => (
             <button
               key={f.id}
