@@ -81,20 +81,24 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           )}
 
-          <div className="flex items-center space-x-2.5">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-[#be001c] to-[#ed0226] text-white shadow-xs">
-              <Shield className="w-4 h-4" />
+          {/* Mobile Only Logo (shown only when sidebar is hidden) */}
+          <div className="flex lg:hidden items-center space-x-2">
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-[#be001c] to-[#ed0226] text-white shadow-xs">
+              <Shield className="w-3.5 h-3.5" />
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-extrabold tracking-tight text-sm sm:text-base text-[#0b132b]">
-                  TELKOMSEL <span className="text-[#ed0226]">SECURE</span>
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ffe9e7] text-[#be001c] border border-[#e9bcb8] font-bold">
-                  SOC v2.4
-                </span>
-              </div>
-            </div>
+            <span className="font-extrabold tracking-tight text-sm text-[#0b132b]">
+              TELKOMSEL <span className="text-[#ed0226]">SECURE</span>
+            </span>
+          </div>
+
+          {/* Desktop Operational Header (Zero duplicate brand logo) */}
+          <div className="hidden lg:flex items-center space-x-2.5">
+            <span className="text-sm font-bold text-[#0b132b]">
+              Security Operations Center
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ffe9e7] text-[#be001c] border border-[#e9bcb8] font-bold">
+              SOC v2.4
+            </span>
           </div>
         </div>
 
