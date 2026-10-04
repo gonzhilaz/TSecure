@@ -1,9 +1,8 @@
-'use client';
-
-import React, { useState } from 'react';
-import { Smartphone, Zap, AlertTriangle, CheckCircle2, ShieldOff } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Smartphone, Zap, AlertTriangle, CheckCircle2, ShieldOff, Ghost, Package } from 'lucide-react';
 import { simulateNdpPurchase, simulateNdpExpire, simulateNdpUnactivated } from '@/lib/api';
-import { Subscriber } from '@/types';
+import { Subscriber, SecurityPackage } from '@/types';
+import { getStoredPackages } from '@/lib/packageService';
 
 interface NdpSimulatorProps {
   onSubscriberUpdated: (sub: Subscriber) => void;
@@ -18,6 +17,15 @@ export const NdpSimulator: React.FC<NdpSimulatorProps> = ({ onSubscriberUpdated 
     message: string;
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const [packages, setPackages] = useState<SecurityPackage[]>([]);
+  const [selectedPkgId, setSelectedPkgId] = useState<string>('');
+
+  useEffect(() => {
+    const list = getStoredPackages().filter((p) => p.is_active);
+    setPackages(list);
+    if (list.length > 0) setSelectedPkgId(list[0].id);
+  }, []);
 
   const handleUnactivated = async () => {
     if (!msisdn.trim()) {
@@ -68,6 +76,46 @@ export const NdpSimulator: React.FC<NdpSimulatorProps> = ({ onSubscriberUpdated 
     }
   };
 
+  const handlePurchaseSelected = () => {
+    const target = packages.find((p) => p.id === selectedPkgId);
+    if (!target) return;
+    handlePurchase(target.duration_days, target.name);
+  };
+
+  const handleGhostSimulation = async () => {
+    if (!msisdn.trim()) {
+      setErrorMsg('Masukkan nomor MSISDN terlebih dahulu');
+      return;
+    }
+    setErrorMsg(null);
+    setLoadingAction('ghost');
+    try {
+      const res = await simulateNdpPurchase({
+        msisdn: msisdn.trim(),
+        package_name: 'Telkomsel Secure Basic 30 Hari',
+        duration_days: 30,
+        channel: 'MyTelkomsel UMB *363# (Ghost User)',
+      });
+      const ghostSub: Subscriber = {
+        ...res.subscriber,
+        mobile_id: '',
+        device_model: 'Unknown (Belum Pasang APK)',
+        activation_status: 'SMS_FAILED',
+        is_active: false,
+      };
+      setLastResult({
+        type: 'purchase',
+        subscriber: ghostSub,
+        message: 'Status di-set: GHOST SUBSCRIBER (Pulsa Terpotong, APK Belum Terpasang)!',
+      });
+      onSubscriberUpdated(ghostSub);
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Gagal simulasi Ghost Subscriber');
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
   const handleExpire = async () => {
     if (!msisdn.trim()) {
       setErrorMsg('Masukkan nomor MSISDN terlebih dahulu');
@@ -98,7 +146,7 @@ export const NdpSimulator: React.FC<NdpSimulatorProps> = ({ onSubscriberUpdated 
         </div>
         <div>
           <h2 className="text-base font-bold text-[#0b132b] tracking-tight">
-            NDP & BSS Package Purchase Simulator (POC Controller)
+            Simulator Pembelian Paket & Aktivasi (POC Controller)
           </h2>
           <p className="text-xs text-[#778ca2]">
             Simulasikan instruksi pembelian paket dari MyTelkomsel & NDP Gateway langsung ke Telkomsel Secure
@@ -158,6 +206,41 @@ export const NdpSimulator: React.FC<NdpSimulatorProps> = ({ onSubscriberUpdated 
           >
             <AlertTriangle className="w-4 h-4 text-[#ba1a1a]" />
             <span>{loadingAction === 'expire' ? 'Memproses...' : '🔴 3. Masa Aktif Habis (Lisensi Ada)'}</span>
+          </button>
+        </div>
+
+        {/* Row 2: Dynamic Package Selection from Package Manager & Ghost Simulation */}
+        <div className="md:col-span-12 pt-3 border-t border-[#f1f5f9] flex flex-col sm:flex-row items-center gap-3">
+          <div className="flex-1 w-full flex items-center space-x-2">
+            <Package className="w-4 h-4 text-[#ed0226] shrink-0" />
+            <select
+              value={selectedPkgId}
+              onChange={(e) => setSelectedPkgId(e.target.value)}
+              className="w-full text-xs px-3 py-2 bg-white border border-[#cbd5e1] rounded-lg text-[#0b132b] focus:outline-none focus:border-[#ed0226]"
+            >
+              {packages.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} — Rp {p.price.toLocaleString('id-ID')} ({p.duration_days} Hari)
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={handlePurchaseSelected}
+              disabled={loadingAction !== null || !selectedPkgId}
+              className="px-4 py-2 bg-[#0b132b] hover:bg-[#1e293b] text-white text-xs font-bold rounded-lg transition whitespace-nowrap"
+            >
+              Beli Paket Terpilih
+            </button>
+          </div>
+
+          <button
+            onClick={handleGhostSimulation}
+            disabled={loadingAction !== null}
+            className="w-full sm:w-auto px-4 py-2 bg-[#fff8f7] hover:bg-[#fff0ef] text-[#be001c] border border-[#e9bcb8] text-xs font-bold rounded-lg transition flex items-center justify-center space-x-1.5 whitespace-nowrap"
+            title="Simulasikan user beli paket di MyTelkomsel tetapi tidak pernah menginstal APK"
+          >
+            <Ghost className="w-4 h-4 text-[#be001c]" />
+            <span>Simulasi Ghost User (Tanpa APK)</span>
           </button>
         </div>
       </div>

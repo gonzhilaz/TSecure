@@ -12,6 +12,7 @@ import { ThreatFeed } from '@/components/ThreatFeed';
 import { SubscriberTable } from '@/components/SubscriberTable';
 import { CustomerDiagnosticsDesk } from '@/components/CustomerDiagnosticsDesk';
 import { BillingLicenseDesk } from '@/components/BillingLicenseDesk';
+import { PackageManagerDesk } from '@/components/PackageManagerDesk';
 import { DeviceIntegrityDesk } from '@/components/DeviceIntegrityDesk';
 import { PhishingIntelDesk } from '@/components/PhishingIntelDesk';
 import { UserManagementDesk } from '@/components/UserManagementDesk';
@@ -322,6 +323,14 @@ export default function SOCDashboard() {
               subscribers={subscribers}
               stats={stats}
               loading={loading || isRefreshing}
+              onRefresh={handleManualRefresh}
+            />
+          )}
+
+          {/* TAB: PACKAGE MANAGER & GHOST SUBSCRIBERS */}
+          {activeTab === 'package_manager' && (
+            <PackageManagerDesk
+              subscribers={subscribers}
               onRefresh={handleManualRefresh}
             />
           )}

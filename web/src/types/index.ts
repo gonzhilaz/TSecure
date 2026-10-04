@@ -213,11 +213,28 @@ export interface RetentionRunResult {
   executed_at: string;
 }
 
+export interface SecurityPackage {
+  id: string;
+  name: string;
+  code: string;
+  price: number;
+  duration_days: number;
+  billing_cycle: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+  segment: 'PRABAYAR' | 'PASCABAYAR' | 'ENTERPRISE_B2B';
+  is_active: boolean;
+  description: string;
+  features: string[];
+  subscriber_count: number;
+  total_revenue: number;
+  created_at: string;
+}
+
 export type DashboardTab =
   | 'overview'
   | 'threat_map'
   | 'phishing_intel'
   | 'helpdesk'
+  | 'package_manager'
   | 'billing_licenses'
   | 'device_integrity'
   | 'ingestion_dlq'

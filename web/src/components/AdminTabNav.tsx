@@ -1,18 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Shield, Headphones, Smartphone, Cpu, FileText, Globe, Users, Server, Database } from 'lucide-react';
-
-export type DashboardTab =
-  | 'overview'
-  | 'phishing_intel'
-  | 'helpdesk'
-  | 'device_integrity'
-  | 'ingestion_dlq'
-  | 'users_rbac'
-  | 'db_maintenance'
-  | 'reports'
-  | 'ndp_simulator';
+import { Shield, Headphones, Smartphone, Cpu, FileText, Globe, Users, Server, Database, Package } from 'lucide-react';
+import { DashboardTab } from '@/types';
 
 interface AdminTabNavProps {
   activeTab: DashboardTab;
@@ -97,6 +87,12 @@ export const AdminTabNav: React.FC<AdminTabNavProps> = ({
       badgeColor: 'bg-[#f59e0b] text-white',
     },
     {
+      id: 'package_manager',
+      label: 'Manajemen Paket',
+      description: 'CRUD paket & Ghost users',
+      icon: Package,
+    },
+    {
       id: 'reports',
       label: 'Laporan & Ekspor Audit',
       description: 'Download CSV, Excel, & PDF',
@@ -104,7 +100,7 @@ export const AdminTabNav: React.FC<AdminTabNavProps> = ({
     },
     {
       id: 'ndp_simulator',
-      label: 'NDP Simulator',
+      label: 'Simulator',
       description: 'Simulasi pembelian & billing',
       icon: Cpu,
     },

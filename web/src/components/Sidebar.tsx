@@ -13,6 +13,7 @@ import {
   Users,
   FileText,
   Radio,
+  Package,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -97,6 +98,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: CreditCard,
         },
         {
+          id: 'package_manager',
+          label: 'Manajemen Paket',
+          icon: Package,
+        },
+        {
           id: 'device_integrity',
           label: 'Integritas SIM',
           icon: Cpu,
@@ -123,7 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'users_rbac', label: 'Manajemen User', icon: Users },
         { id: 'reports', label: 'Laporan Audit', icon: FileText },
-        { id: 'ndp_simulator', label: 'Simulator NDP', icon: Radio },
+        { id: 'ndp_simulator', label: 'Simulator', icon: Radio },
       ],
     },
   ];
