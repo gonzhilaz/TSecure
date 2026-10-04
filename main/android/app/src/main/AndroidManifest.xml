@@ -49,6 +49,9 @@
     <!-- 7. In-App APK Updates -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
+    <!-- 8. SMS Scam & Smishing Phishing Guardian -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
@@ -159,6 +162,17 @@
                 <action android:name="android.intent.action.PACKAGE_REMOVED" />
                 <action android:name="android.intent.action.PACKAGE_REPLACED" />
                 <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <!-- SMS Scam / Smishing Phishing Protection Receiver -->
+        <receiver
+            android:name="com.telkomsel.secure.sms.SmsPhishingReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
 

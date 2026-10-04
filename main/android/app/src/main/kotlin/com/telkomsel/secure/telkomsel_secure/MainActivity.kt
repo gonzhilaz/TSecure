@@ -66,6 +66,17 @@ class MainActivity : FlutterActivity() {
                 ))
             }
         }
+
+        fun notifySmishingThreat(sender: String, message: String, url: String) {
+            val activity = activeInstance ?: return
+            activity.runOnUiThread {
+                activity.kasperskyChannel?.invokeMethod("onSmishingThreatDetected", mapOf(
+                    "sender" to sender,
+                    "message" to message,
+                    "url" to url
+                ))
+            }
+        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

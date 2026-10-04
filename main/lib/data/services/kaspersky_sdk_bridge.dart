@@ -170,17 +170,23 @@ class KasperskySdkBridge extends ChangeNotifier {
         final verdict = call.arguments['verdict'] as String? ?? 'BLOCKED';
         _threatsDetected++; notifyListeners();
         await ThreatTelemetryDispatcher.recordAndReport(
-          logRepo: logRepository,
-          msisdn: _boundMobileId,
-          mobileId: _boundMobileId,
-          threatType: 'PHISHING',
-          target: url,
-          severity: 'HIGH',
-          title: 'Situs Berbahaya Diblokir ($category)',
-          description: 'Akses ke $url berhasil dicegat oleh Web Filter.',
-          actionTaken: verdict,
-          icon: Icons.language_rounded,
-          category: LogCategory.jaringan,
+          logRepo: logRepository, msisdn: _boundMobileId, mobileId: _boundMobileId,
+          threatType: 'PHISHING', target: url, severity: 'HIGH',
+          title: 'Situs Berbahaya Diblokir ($category)', description: 'Akses ke $url berhasil dicegat oleh Web Filter.',
+          actionTaken: verdict, icon: Icons.language_rounded, category: LogCategory.jaringan,
+        );
+        break;
+
+      case 'onSmishingThreatDetected':
+        final sender = call.arguments['sender'] as String? ?? 'SMS Scam';
+        final url = call.arguments['url'] as String? ?? '';
+        _threatsDetected++; notifyListeners();
+        await ThreatTelemetryDispatcher.recordAndReport(
+          logRepo: logRepository, msisdn: _boundMobileId, mobileId: _boundMobileId,
+          threatType: 'SMISHING', target: sender, severity: 'CRITICAL',
+          title: 'SMS Scam / Smishing Dicegat ($sender)',
+          description: 'SMS mencurigakan berisi tautan $url berhasil diblokir.',
+          actionTaken: 'BLOCKED', icon: Icons.sms_failed_rounded, category: LogCategory.jaringan,
         );
         break;
     }
@@ -342,10 +348,8 @@ class KasperskySdkBridge extends ChangeNotifier {
     if (_scanStatus != ScanStatus.inProgress && _scanStatus != ScanStatus.paused) return false;
     try {
       final ok = await _channel.invokeMethod<bool>('stopScan') ?? false;
-      _scanStatus = ScanStatus.finished; _scanProgress = 1.0;
-      _currentScanningFile = 'Pemindaian dihentikan.';
-      notifyListeners();
-      return ok;
+      _scanStatus = ScanStatus.finished; _scanProgress = 1.0; _currentScanningFile = 'Pemindaian dihentikan.';
+      notifyListeners(); return ok;
     } catch (_) { return false; }
   }
   Future<bool> requestNotificationPermission() async {
