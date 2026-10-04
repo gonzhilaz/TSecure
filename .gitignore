@@ -32,6 +32,7 @@ yarn-error.log*
 server.exe
 backend/server.exe
 backend/server
+backend/telkomsecure-backend*
 *.exe
 
 # Secrets & Environment variables
