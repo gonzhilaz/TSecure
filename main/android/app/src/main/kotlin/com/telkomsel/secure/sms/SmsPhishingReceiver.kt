@@ -27,13 +27,20 @@ import java.util.regex.Pattern
  */
 class SmsPhishingReceiver : BroadcastReceiver() {
 
+    data class SmsThreatEvaluation(
+        val isThreat: Boolean,
+        val threatType: String = "",
+        val reason: String = "",
+        val targetUrl: String = ""
+    )
+
     companion object {
         private const val TAG = "TelkomSmsGuardian"
         private const val NOTIF_CHANNEL_ID = "telkom_sms_phishing_alerts"
         private const val NOTIF_ID = 9021
 
         // Regex to extract URLs, bit.ly, shortlinks, raw domains, and direct APK download links
-        private val URL_PATTERN = Pattern.compile(
+        val URL_PATTERN: Pattern = Pattern.compile(
             "(https?://[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]+|" +
             "[\\w\\d.-]+\\.(?:apk|top|xyz|icu|buzz|club|site|online|app|vip|link|live|shop)/?[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*|" +
             "(?:bit\\.ly|tinyurl\\.com|t\\.me|s\\.id|cutt\\.ly|is\\.gd)/[\\w\\d\\-_]+)",
@@ -41,7 +48,7 @@ class SmsPhishingReceiver : BroadcastReceiver() {
         )
 
         // Indonesian common smishing / APK malware trigger terms
-        private val SCAM_KEYWORD_PATTERNS = listOf(
+        val SCAM_KEYWORD_PATTERNS = listOf(
             Pattern.compile("undangan.*(?:pernikahan|nikah|digital).*\\.apk", Pattern.CASE_INSENSITIVE),
             Pattern.compile("surat.*(?:tilang|etle|kepolisian).*\\.apk", Pattern.CASE_INSENSITIVE),
             Pattern.compile("(?:paket|resi|jne|j&t|sicepat|pos|ninja|antaraja).*\\.apk", Pattern.CASE_INSENSITIVE),
@@ -52,13 +59,80 @@ class SmsPhishingReceiver : BroadcastReceiver() {
         )
 
         // Indonesian Judi Online / Slot Gacor SMS Patterns
-        private val JUDI_ONLINE_PATTERNS = listOf(
+        val JUDI_ONLINE_PATTERNS = listOf(
             Pattern.compile("(?:slot|gacor|maxwin|scatter|pragmatic|zeus|olympus|mahjong|pgsoft|anti.?rungkad)", Pattern.CASE_INSENSITIVE),
             Pattern.compile("(?:judi|kasino|casino|togel|sbobet|parlay|poker|domino.?qiu|bandar)", Pattern.CASE_INSENSITIVE),
             Pattern.compile("(?:depo|deposit|wd|withdraw).*(?:pulsa|tanpa potongan|bonus|receh)", Pattern.CASE_INSENSITIVE),
             Pattern.compile("(?:freebet|bonus new member|modal receh|pasti bayar|garansi kekalahan)", Pattern.CASE_INSENSITIVE),
             Pattern.compile("(?:link alternatif|daftar sekarang|klik login).*(?:slot|gacor|maxwin|menang)", Pattern.CASE_INSENSITIVE)
         )
+
+        fun extractUrls(text: String): List<String> {
+            val list = mutableListOf<String>()
+            val matcher = URL_PATTERN.matcher(text)
+            while (matcher.find()) {
+                val url = matcher.group()
+                if (!url.isNullOrBlank()) list.add(url)
+            }
+            return list
+        }
+
+        fun evaluateSmsText(body: String): SmsThreatEvaluation {
+            val urls = extractUrls(body)
+            val firstUrl = urls.firstOrNull() ?: ""
+
+            // 1. Heuristic check for Judi Online & Slot Gacor
+            for (pattern in JUDI_ONLINE_PATTERNS) {
+                if (pattern.matcher(body).find()) {
+                    return SmsThreatEvaluation(
+                        isThreat = true,
+                        threatType = "JUDI_ONLINE",
+                        reason = "Promosi Judi Online & Slot Ilegal",
+                        targetUrl = firstUrl
+                    )
+                }
+            }
+
+            // 2. Heuristic scan for Smishing APK delivery / social engineering
+            for (pattern in SCAM_KEYWORD_PATTERNS) {
+                if (pattern.matcher(body).find()) {
+                    return SmsThreatEvaluation(
+                        isThreat = true,
+                        threatType = "SMISHING",
+                        reason = "Modus Penipuan APK / Rekayasa Sosial",
+                        targetUrl = firstUrl
+                    )
+                }
+            }
+
+            // 3. Direct check for .apk string
+            if (body.contains(".apk", ignoreCase = true)) {
+                return SmsThreatEvaluation(
+                    isThreat = true,
+                    threatType = "SMISHING",
+                    reason = "Tautan Unduhan Malware Android (.APK)",
+                    targetUrl = firstUrl
+                )
+            }
+
+            // 4. Urgency + link check
+            if (urls.isNotEmpty()) {
+                val lower = body.lowercase()
+                val containsUrgency = lower.contains("segera") || lower.contains("blokir") ||
+                                     lower.contains("hadiah") || lower.contains("menang") ||
+                                     lower.contains("klaim") || lower.contains("kadaluarsa")
+                if (containsUrgency) {
+                    return SmsThreatEvaluation(
+                        isThreat = true,
+                        threatType = "SMISHING",
+                        reason = "Pesan Mendesak Mencurigakan dengan Tautan Tak Dikenal",
+                        targetUrl = firstUrl
+                    )
+                }
+            }
+
+            return SmsThreatEvaluation(isThreat = false)
+        }
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
@@ -83,68 +157,26 @@ class SmsPhishingReceiver : BroadcastReceiver() {
     }
 
     private fun inspectSmsContent(context: Context, sender: String, body: String) {
-        val extractedUrls = extractUrls(body)
-        var isScamDetected = false
-        var threatType = "SMISHING"
-        var detectedReason = ""
-        var targetUrl = ""
+        val eval = evaluateSmsText(body)
+        var isScamDetected = eval.isThreat
+        var threatType = eval.threatType
+        var detectedReason = eval.reason
+        var targetUrl = eval.targetUrl
 
-        // 1a. Heuristic check for Judi Online & Slot Gacor
-        for (pattern in JUDI_ONLINE_PATTERNS) {
-            if (pattern.matcher(body).find()) {
-                isScamDetected = true
-                threatType = "JUDI_ONLINE"
-                detectedReason = "Promosi Judi Online & Slot Ilegal"
-                break
-            }
-        }
-
-        // 1b. Heuristic Scan against known Smishing APK delivery and Telco scam templates
+        // Also check extracted URLs against Kaspersky SDK WebFilter / KSN if not already blocked
         if (!isScamDetected) {
-            for (pattern in SCAM_KEYWORD_PATTERNS) {
-                if (pattern.matcher(body).find()) {
+            val extractedUrls = extractUrls(body)
+            for (url in extractedUrls) {
+                targetUrl = url
+                val verdict = UrlFilterRepository.checkUrl(context, url)
+                val isBad = verdict["isBlocked"] as? Boolean ?: false
+                if (isBad) {
                     isScamDetected = true
-                    threatType = "SMISHING"
-                    detectedReason = "Modus Penipuan APK / Rekayasa Sosial"
-                    break
-                }
-            }
-        }
-
-        // 2. Direct check for .apk download strings
-        if (!isScamDetected && body.contains(".apk", ignoreCase = true)) {
-            isScamDetected = true
-            threatType = "SMISHING"
-            detectedReason = "Tautan Unduhan Malware Android (.APK)"
-        }
-
-        // 3. Inspect every extracted URL against Kaspersky SDK WebFilter / KSN
-        for (url in extractedUrls) {
-            targetUrl = url
-            val verdict = UrlFilterRepository.checkUrl(context, url)
-            val isBad = verdict["isBlocked"] as? Boolean ?: false
-            if (isBad) {
-                isScamDetected = true
-                val category = verdict["category"] as? String ?: "Malicious URL"
-                if (threatType != "JUDI_ONLINE") {
+                    val category = verdict["category"] as? String ?: "Malicious URL"
                     threatType = "PHISHING"
                     detectedReason = "Phishing / Malware URL ($category)"
+                    break
                 }
-                break
-            }
-        }
-
-        // If high-risk scam pattern found even without known bad URL
-        if (!isScamDetected && extractedUrls.isNotEmpty()) {
-            val lower = body.lowercase()
-            val containsUrgency = lower.contains("segera") || lower.contains("blokir") ||
-                                 lower.contains("hadiah") || lower.contains("menang") ||
-                                 lower.contains("klaim") || lower.contains("kadaluarsa")
-            if (containsUrgency) {
-                isScamDetected = true
-                threatType = "SMISHING"
-                detectedReason = "Pesan Mendesak Mencurigakan dengan Tautan Tak Dikenal"
-                targetUrl = extractedUrls[0]
             }
         }
 
@@ -165,18 +197,6 @@ class SmsPhishingReceiver : BroadcastReceiver() {
             // Notify Foreground Flutter Engine
             MainActivity.notifySmishingThreat(sender, body, targetUrl, threatType, detectedReason)
         }
-    }
-
-    private fun extractUrls(text: String): List<String> {
-        val list = mutableListOf<String>()
-        val matcher = URL_PATTERN.matcher(text)
-        while (matcher.find()) {
-            val url = matcher.group()
-            if (!url.isNullOrBlank()) {
-                list.add(url)
-            }
-        }
-        return list
     }
 
     private fun triggerSmishingNotification(
