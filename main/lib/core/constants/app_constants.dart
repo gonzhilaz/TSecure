@@ -5,7 +5,7 @@ class AppConstants {
   static const String appTagline = 'Perlindungan Menyeluruh Jaringan & Perangkat';
   static const String defaultBackendUrl = String.fromEnvironment(
     'BACKEND_URL',
-    defaultValue: 'https://backend-i3wy.vercel.app',
+    defaultValue: 'http://api-telkomsel-secure.digit.co.id',
   );
 
   // Storage Keys

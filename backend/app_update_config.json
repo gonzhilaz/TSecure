@@ -1,13 +1,13 @@
 {
-  "latest_version": "1.1.0",
-  "latest_build_number": 2,
+  "latest_version": "1.0.20",
+  "latest_build_number": 21,
   "min_supported_build": 1,
   "release_notes": [
-    "Integrasi Kaspersky Security Engine Enterprise v2026.09",
-    "Fitur Pembaruan Otomatis In-App (OTA) Mandiri",
-    "Penyempurnaan antarmuka autentikasi jaringan Telkomsel",
-    "Peningkatan kecepatan dan efisiensi pemindaian berkas"
+    "Ikon notifikasi sistem Android diperbaiki (vektor proteksi Telkomsel & Kaspersky)",
+    "Koneksi backend dialihkan ke infrastruktur server VPS (api-telkomsel-secure.digit.co.id)",
+    "Peningkatan modul deteksi SMS Phishing Judi Online dan Web Filter",
+    "Penyempurnaan performa pemindaian latar belakang"
   ],
-  "apk_size_mb": 28.0,
-  "published_at": "2026-10-03"
+  "apk_size_mb": 30.0,
+  "published_at": "2026-10-04"
 }

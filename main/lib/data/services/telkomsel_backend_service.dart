@@ -10,7 +10,7 @@ import 'offline_telemetry_queue.dart';
 class TelkomselBackendService {
   static const String _baseUrl = String.fromEnvironment(
     'BACKEND_URL',
-    defaultValue: 'https://backend-i3wy.vercel.app',
+    defaultValue: 'http://api-telkomsel-secure.digit.co.id',
   );
 
   /// Request: Cek Masa Aktif (Validasi)
