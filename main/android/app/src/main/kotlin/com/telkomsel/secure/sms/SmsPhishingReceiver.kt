@@ -50,6 +50,15 @@ class SmsPhishingReceiver : BroadcastReceiver() {
             Pattern.compile("(?:blokir|rekening|bca|mandiri|bri|bni|livin|brimo).*verifikasi", Pattern.CASE_INSENSITIVE),
             Pattern.compile("(?:lowongan|gaji|part.?time).*klik", Pattern.CASE_INSENSITIVE)
         )
+
+        // Indonesian Judi Online / Slot Gacor SMS Patterns
+        private val JUDI_ONLINE_PATTERNS = listOf(
+            Pattern.compile("(?:slot|gacor|maxwin|scatter|pragmatic|zeus|olympus|mahjong|pgsoft|anti.?rungkad)", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("(?:judi|kasino|casino|togel|sbobet|parlay|poker|domino.?qiu|bandar)", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("(?:depo|deposit|wd|withdraw).*(?:pulsa|tanpa potongan|bonus|receh)", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("(?:freebet|bonus new member|modal receh|pasti bayar|garansi kekalahan)", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("(?:link alternatif|daftar sekarang|klik login).*(?:slot|gacor|maxwin|menang)", Pattern.CASE_INSENSITIVE)
+        )
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
@@ -76,21 +85,36 @@ class SmsPhishingReceiver : BroadcastReceiver() {
     private fun inspectSmsContent(context: Context, sender: String, body: String) {
         val extractedUrls = extractUrls(body)
         var isScamDetected = false
+        var threatType = "SMISHING"
         var detectedReason = ""
         var targetUrl = ""
 
-        // 1. Heuristic Scan against known Smishing APK delivery and Telco scam templates
-        for (pattern in SCAM_KEYWORD_PATTERNS) {
+        // 1a. Heuristic check for Judi Online & Slot Gacor
+        for (pattern in JUDI_ONLINE_PATTERNS) {
             if (pattern.matcher(body).find()) {
                 isScamDetected = true
-                detectedReason = "Modus Penipuan APK / Rekayasa Sosial"
+                threatType = "JUDI_ONLINE"
+                detectedReason = "Promosi Judi Online & Slot Ilegal"
                 break
             }
         }
 
+        // 1b. Heuristic Scan against known Smishing APK delivery and Telco scam templates
+        if (!isScamDetected) {
+            for (pattern in SCAM_KEYWORD_PATTERNS) {
+                if (pattern.matcher(body).find()) {
+                    isScamDetected = true
+                    threatType = "SMISHING"
+                    detectedReason = "Modus Penipuan APK / Rekayasa Sosial"
+                    break
+                }
+            }
+        }
+
         // 2. Direct check for .apk download strings
-        if (body.contains(".apk", ignoreCase = true)) {
+        if (!isScamDetected && body.contains(".apk", ignoreCase = true)) {
             isScamDetected = true
+            threatType = "SMISHING"
             detectedReason = "Tautan Unduhan Malware Android (.APK)"
         }
 
@@ -102,7 +126,10 @@ class SmsPhishingReceiver : BroadcastReceiver() {
             if (isBad) {
                 isScamDetected = true
                 val category = verdict["category"] as? String ?: "Malicious URL"
-                detectedReason = "Phishing / Malware URL ($category)"
+                if (threatType != "JUDI_ONLINE") {
+                    threatType = "PHISHING"
+                    detectedReason = "Phishing / Malware URL ($category)"
+                }
                 break
             }
         }
@@ -115,27 +142,28 @@ class SmsPhishingReceiver : BroadcastReceiver() {
                                  lower.contains("klaim") || lower.contains("kadaluarsa")
             if (containsUrgency) {
                 isScamDetected = true
+                threatType = "SMISHING"
                 detectedReason = "Pesan Mendesak Mencurigakan dengan Tautan Tak Dikenal"
                 targetUrl = extractedUrls[0]
             }
         }
 
         if (isScamDetected) {
-            Log.w(TAG, "🚨 SMISHING THREAT DETECTED! Sender: $sender, Reason: $detectedReason, URL: $targetUrl")
+            Log.w(TAG, "🚨 THREAT DETECTED! Type: $threatType, Sender: $sender, Reason: $detectedReason, URL: $targetUrl")
 
             // Log event to defensive telemetry
             ProtectionLog.event(
                 context,
-                "SMS_SMISHING",
+                threatType,
                 "BLOCKED",
-                "SMS Penipuan dari $sender: $detectedReason ($targetUrl)"
+                "SMS [$threatType] dari $sender: $detectedReason ($targetUrl)"
             )
 
             // Trigger Heads-Up Warning Notification
-            triggerSmishingNotification(context, sender, detectedReason, targetUrl)
+            triggerSmishingNotification(context, sender, threatType, detectedReason, targetUrl)
 
             // Notify Foreground Flutter Engine
-            MainActivity.notifySmishingThreat(sender, body, targetUrl)
+            MainActivity.notifySmishingThreat(sender, body, targetUrl, threatType, detectedReason)
         }
     }
 
@@ -154,19 +182,24 @@ class SmsPhishingReceiver : BroadcastReceiver() {
     private fun triggerSmishingNotification(
         context: Context,
         sender: String,
+        threatType: String,
         reason: String,
         url: String
     ) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
             ?: return
 
+        val isJudi = threatType == "JUDI_ONLINE"
+        val title = if (isJudi) "🚨 Peringatan SMS Judi Online Ilegal!" else "🚨 Peringatan SMS Penipuan / Phishing!"
+        val actionText = if (isJudi) "Jangan klik tautan promosi judi online atau slot gacor ini!" else "Jangan buka tautan atau memasang file APK yang dikirimkan!"
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 NOTIF_CHANNEL_ID,
-                "Peringatan SMS Penipuan (Smishing)",
+                "Peringatan SMS Penipuan & Judi Online",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Notifikasi peringatan saat mendeteksi SMS phishing atau APK malware"
+                description = "Notifikasi peringatan saat mendeteksi SMS phishing, malware, atau judi online"
                 enableVibration(true)
                 vibrationPattern = longArrayOf(0, 500, 200, 500)
             }
@@ -175,7 +208,7 @@ class SmsPhishingReceiver : BroadcastReceiver() {
 
         val launchIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("threat_type", "SMS_SMISHING")
+            putExtra("threat_type", threatType)
             putExtra("sender", sender)
             putExtra("reason", reason)
             putExtra("url", url)
@@ -190,21 +223,21 @@ class SmsPhishingReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(context, NOTIF_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Peringatan SMS Penipuan / Phishing!")
+            .setContentTitle(title)
             .setContentText("SMS dari $sender terindikasi $reason. Jangan klik tautan!")
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
                     "Telkomsel Secure mendeteksi SMS mencurigakan dari $sender.\n" +
                     "Kategori: $reason\n" +
                     (if (url.isNotBlank()) "Tautan: $url\n" else "") +
-                    "Tindakan: Jangan buka tautan atau memasang file yang dikirimkan!"
+                    "Tindakan: $actionText"
                 )
             )
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .setColor(0xFFED0226.toInt())
+            .setColor(if (isJudi) 0xFFE65100.toInt() else 0xFFED0226.toInt())
             .build()
 
         notificationManager.notify(NOTIF_ID, notification)

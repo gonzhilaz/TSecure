@@ -67,13 +67,12 @@ class MainActivity : FlutterActivity() {
             }
         }
 
-        fun notifySmishingThreat(sender: String, message: String, url: String) {
+        fun notifySmishingThreat(sender: String, message: String, url: String, threatType: String = "SMISHING", reason: String = "SMS Penipuan") {
             val activity = activeInstance ?: return
             activity.runOnUiThread {
                 activity.kasperskyChannel?.invokeMethod("onSmishingThreatDetected", mapOf(
-                    "sender" to sender,
-                    "message" to message,
-                    "url" to url
+                    "sender" to sender, "message" to message, "url" to url,
+                    "threatType" to threatType, "reason" to reason
                 ))
             }
         }

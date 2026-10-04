@@ -180,13 +180,16 @@ class KasperskySdkBridge extends ChangeNotifier {
       case 'onSmishingThreatDetected':
         final sender = call.arguments['sender'] as String? ?? 'SMS Scam';
         final url = call.arguments['url'] as String? ?? '';
+        final tType = call.arguments['threatType'] as String? ?? 'SMISHING';
+        final reason = call.arguments['reason'] as String? ?? 'SMS Penipuan';
+        final isJudi = tType == 'JUDI_ONLINE';
         _threatsDetected++; notifyListeners();
         await ThreatTelemetryDispatcher.recordAndReport(
           logRepo: logRepository, msisdn: _boundMobileId, mobileId: _boundMobileId,
-          threatType: 'SMISHING', target: sender, severity: 'CRITICAL',
-          title: 'SMS Scam / Smishing Dicegat ($sender)',
-          description: 'SMS mencurigakan berisi tautan $url berhasil diblokir.',
-          actionTaken: 'BLOCKED', icon: Icons.sms_failed_rounded, category: LogCategory.jaringan,
+          threatType: tType, target: sender, severity: isJudi ? 'HIGH' : 'CRITICAL',
+          title: isJudi ? 'SMS Judi Online Terdeteksi ($sender)' : 'SMS Scam Dicegat ($sender)',
+          description: '$reason. Tautan: ${url.isNotEmpty ? url : "Tanpa tautan"}',
+          actionTaken: 'BLOCKED', icon: isJudi ? Icons.casino_outlined : Icons.sms_failed_rounded, category: LogCategory.jaringan,
         );
         break;
     }
@@ -376,23 +379,20 @@ class KasperskySdkBridge extends ChangeNotifier {
     try {
       final res = await _channel.invokeMethod<bool>('updateBases') ?? false;
       _isVirusDbUpToDate = true;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('ksp_last_db_update', DateTime.now().millisecondsSinceEpoch);
+      (await SharedPreferences.getInstance()).setInt('ksp_last_db_update', DateTime.now().millisecondsSinceEpoch);
       notifyListeners(); return res;
     } catch (_) { _isVirusDbUpToDate = true; notifyListeners(); return false; }
   }
 
   Future<Map<String, dynamic>> scanSpecificFile({String? customPath}) async {
-    Map<String, dynamic> result = {'isThreat': false, 'threatName': 'Tidak Terdeteksi', 'threatType': 'None', 'severity': 'NONE', 'description': 'Memeriksa berkas...', 'sdkVerified': false};
+    Map<String, dynamic> r = {'isThreat': false, 'threatName': 'Tidak Terdeteksi', 'threatType': 'None', 'severity': 'NONE', 'description': 'Memeriksa berkas...', 'sdkVerified': false};
     try {
-      final nativeRes = await _channel.invokeMapMethod<String, dynamic>('scanSpecificFile', {'filePath': customPath});
-      if (nativeRes != null) result = Map<String, dynamic>.from(nativeRes);
-    } catch (e) { result['description'] = 'Gagal memanggil scanner: $e'; }
-    if (result['isThreat'] == true) { _threatsDetected++; notifyListeners(); }
-    return result;
+      final nRes = await _channel.invokeMapMethod<String, dynamic>('scanSpecificFile', {'filePath': customPath});
+      if (nRes != null) r = Map<String, dynamic>.from(nRes);
+    } catch (e) { r['description'] = 'Gagal memanggil scanner: $e'; }
+    if (r['isThreat'] == true) { _threatsDetected++; notifyListeners(); }
+    return r;
   }
 
-  Future<void> resolveAllThreats({bool quarantine = false}) async {
-    _threatsDetected = 0; _currentScanThreats.clear(); notifyListeners();
-  }
+  Future<void> resolveAllThreats({bool quarantine = false}) async { _threatsDetected = 0; _currentScanThreats.clear(); notifyListeners(); }
 }
