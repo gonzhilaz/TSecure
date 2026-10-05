@@ -1,4 +1,1179 @@
 {
-  "subscribers": {},
-  "threats": []
+  "subscribers": {
+    "081122334455": {
+      "id": "SUB-081122334455",
+      "msisdn": "081122334455",
+      "mobile_id": "MOB-77A4B190288EFA11",
+      "device_model": "Samsung Galaxy S24 Ultra",
+      "os_version": "Android 14 / OneUI 6.1",
+      "plan_name": "Telkomsel Enterprise Protection 1 Tahun",
+      "purchase_timestamp": "2026-08-06T08:01:09.7141411+07:00",
+      "active_period_start": "2026-08-06T08:01:09.7141411+07:00",
+      "active_period_end": "2027-08-06T08:01:09.7141411+07:00",
+      "kaspersky_expiry_date": "2027-08-06T08:01:09.7141411+07:00",
+      "desync_days": 0,
+      "is_active": true,
+      "activation_code": "TK-552190",
+      "activation_status": "ACTIVATED",
+      "kaspersky_license_key": "6KYKJ-65T6T-WMVBD-NNPEG",
+      "root_status": "CLEAN",
+      "hook_status": "CLEAN",
+      "bound_iccid": "89620101445566778899",
+      "current_iccid": "89620101445566778899",
+      "sim_slot": "Slot 1 (Telkomsel Halo)",
+      "quarantine_count": 0,
+      "device_migration_count": 1,
+      "purchase_history": [
+        {
+          "id": "ORD-20260727-889",
+          "package_name": "Telkomsel Enterprise Protection 1 Tahun",
+          "purchased_at": "2026-08-06T08:01:09.7141411+07:00",
+          "duration_days": 365,
+          "price": 240000,
+          "channel": "BSS Corporate Portal",
+          "status": "ACTIVE"
+        }
+      ],
+      "recent_scan_logs": [
+        {
+          "id": "SCAN-101",
+          "module": "ANTIVIRUS",
+          "scan_type": "QUICK_SCAN",
+          "result": "CLEAN",
+          "items_scanned": 1840,
+          "threats_found": 0,
+          "details": "Kaspersky Engine memindai sistem dan memori kerja. Tidak ada malware ditemukan.",
+          "timestamp": "2026-10-05T07:46:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-102",
+          "module": "WEB_PROTECTION",
+          "scan_type": "REALTIME_MONITOR",
+          "result": "CLEAN",
+          "items_scanned": 42,
+          "threats_found": 0,
+          "details": "Kaspersky Web Filter memverifikasi trafik DNS \u0026 browser Chrome.",
+          "timestamp": "2026-10-05T07:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-103",
+          "module": "SIM_WATCH",
+          "scan_type": "HARDWARE_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "Kartu SIM terdaftar resmi di slot utama.",
+          "timestamp": "2026-10-05T06:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-104",
+          "module": "RASP",
+          "scan_type": "TAMPER_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 14,
+          "threats_found": 0,
+          "details": "Integritas binary APK valid, tidak ada hooking dynamic.",
+          "timestamp": "2026-10-05T04:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-105",
+          "module": "ANTIVIRUS",
+          "scan_type": "FILE_DOWNLOAD",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "File lampiran aman dari trojan dan ransomware.",
+          "timestamp": "2026-10-05T00:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-106",
+          "module": "NETWORK_ATTACK_BLOCKER",
+          "scan_type": "WI-FI_INSPECTION",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "Wi-Fi SSID terlindungi dengan enkripsi WPA3, tidak ada serangan Man-in-the-Middle (MitM).",
+          "timestamp": "2026-10-04T20:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-107",
+          "module": "ANTIVIRUS",
+          "scan_type": "FULL_SCAN",
+          "result": "CLEAN",
+          "items_scanned": 15420,
+          "threats_found": 0,
+          "details": "Pemindaian menyeluruh internal storage selesai dalam 1 menit 12 detik.",
+          "timestamp": "2026-10-04T08:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-108",
+          "module": "WEB_PROTECTION",
+          "scan_type": "ANTI-PHISHING",
+          "result": "CLEAN",
+          "items_scanned": 88,
+          "threats_found": 0,
+          "details": "Pengecekan database reputasi Kaspersky Security Network (KSN) aktif.",
+          "timestamp": "2026-10-04T02:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-109",
+          "module": "APP_CONTROL",
+          "scan_type": "PERMISSION_AUDIT",
+          "result": "CLEAN",
+          "items_scanned": 64,
+          "threats_found": 0,
+          "details": "Audit izin akses SMS, Kamera, dan Lokasi pada semua aplikasi pihak ketiga.",
+          "timestamp": "2026-10-03T20:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-110",
+          "module": "SYSTEM_AUDIT",
+          "scan_type": "HEALTH_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 5,
+          "threats_found": 0,
+          "details": "Basis data antivirus Kaspersky v2026.09 terpasang dan diperbarui otomatis.",
+          "timestamp": "2026-10-03T08:01:09.7141411+07:00"
+        }
+      ],
+      "data_retention_days": 30,
+      "retention_expires_at": "2027-08-06T08:01:09.7141411+07:00",
+      "is_archived": false,
+      "last_checked_at": "2026-10-05T07:01:09.7141411+07:00",
+      "created_at": "2026-08-06T08:01:09.7141411+07:00"
+    },
+    "081200000000": {
+      "id": "SUB-081200000000",
+      "msisdn": "081200000000",
+      "mobile_id": "MOB-EXP-081200000000",
+      "device_model": "Google Pixel 6 (Android 14)",
+      "os_version": "Android 14 / UpsideDownCake",
+      "plan_name": "Telkomsel Secure Guard 30 Hari",
+      "purchase_timestamp": "2026-08-31T08:01:09.7141411+07:00",
+      "active_period_start": "2026-08-31T08:01:09.7141411+07:00",
+      "active_period_end": "2026-09-30T08:01:09.7141411+07:00",
+      "kaspersky_expiry_date": "2026-09-30T08:01:09.7141411+07:00",
+      "desync_days": 0,
+      "is_active": false,
+      "activation_code": "TK-000000",
+      "activation_status": "EXPIRED",
+      "kaspersky_license_key": "",
+      "root_status": "CLEAN",
+      "hook_status": "CLEAN",
+      "bound_iccid": "89620101000000001122",
+      "current_iccid": "89620101000000001122",
+      "sim_slot": "Slot 1 (Telkomsel Prepaid)",
+      "quarantine_count": 0,
+      "device_migration_count": 0,
+      "purchase_history": [
+        {
+          "id": "ORD-20260824-001",
+          "package_name": "Telkomsel Secure Guard 30 Hari",
+          "purchased_at": "2026-08-31T08:01:09.7141411+07:00",
+          "duration_days": 30,
+          "price": 25000,
+          "channel": "MyTelkomsel App",
+          "status": "EXPIRED"
+        }
+      ],
+      "recent_scan_logs": [
+        {
+          "id": "SCAN-101",
+          "module": "ANTIVIRUS",
+          "scan_type": "QUICK_SCAN",
+          "result": "CLEAN",
+          "items_scanned": 1840,
+          "threats_found": 0,
+          "details": "Kaspersky Engine memindai sistem dan memori kerja. Tidak ada malware ditemukan.",
+          "timestamp": "2026-10-05T07:46:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-102",
+          "module": "WEB_PROTECTION",
+          "scan_type": "REALTIME_MONITOR",
+          "result": "CLEAN",
+          "items_scanned": 42,
+          "threats_found": 0,
+          "details": "Kaspersky Web Filter memverifikasi trafik DNS \u0026 browser Chrome.",
+          "timestamp": "2026-10-05T07:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-103",
+          "module": "SIM_WATCH",
+          "scan_type": "HARDWARE_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "Kartu SIM terdaftar resmi di slot utama.",
+          "timestamp": "2026-10-05T06:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-104",
+          "module": "RASP",
+          "scan_type": "TAMPER_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 14,
+          "threats_found": 0,
+          "details": "Integritas binary APK valid, tidak ada hooking dynamic.",
+          "timestamp": "2026-10-05T04:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-105",
+          "module": "ANTIVIRUS",
+          "scan_type": "FILE_DOWNLOAD",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "File lampiran aman dari trojan dan ransomware.",
+          "timestamp": "2026-10-05T00:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-106",
+          "module": "NETWORK_ATTACK_BLOCKER",
+          "scan_type": "WI-FI_INSPECTION",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "Wi-Fi SSID terlindungi dengan enkripsi WPA3, tidak ada serangan Man-in-the-Middle (MitM).",
+          "timestamp": "2026-10-04T20:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-107",
+          "module": "ANTIVIRUS",
+          "scan_type": "FULL_SCAN",
+          "result": "CLEAN",
+          "items_scanned": 15420,
+          "threats_found": 0,
+          "details": "Pemindaian menyeluruh internal storage selesai dalam 1 menit 12 detik.",
+          "timestamp": "2026-10-04T08:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-108",
+          "module": "WEB_PROTECTION",
+          "scan_type": "ANTI-PHISHING",
+          "result": "CLEAN",
+          "items_scanned": 88,
+          "threats_found": 0,
+          "details": "Pengecekan database reputasi Kaspersky Security Network (KSN) aktif.",
+          "timestamp": "2026-10-04T02:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-109",
+          "module": "APP_CONTROL",
+          "scan_type": "PERMISSION_AUDIT",
+          "result": "CLEAN",
+          "items_scanned": 64,
+          "threats_found": 0,
+          "details": "Audit izin akses SMS, Kamera, dan Lokasi pada semua aplikasi pihak ketiga.",
+          "timestamp": "2026-10-03T20:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-110",
+          "module": "SYSTEM_AUDIT",
+          "scan_type": "HEALTH_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 5,
+          "threats_found": 0,
+          "details": "Basis data antivirus Kaspersky v2026.09 terpasang dan diperbarui otomatis.",
+          "timestamp": "2026-10-03T08:01:09.7141411+07:00"
+        }
+      ],
+      "data_retention_days": 30,
+      "retention_expires_at": "2026-09-30T08:01:09.7141411+07:00",
+      "is_archived": false,
+      "last_checked_at": "2026-10-04T08:01:09.7141411+07:00",
+      "created_at": "2026-08-31T08:01:09.7141411+07:00"
+    },
+    "081299887766": {
+      "id": "SUB-081299887766",
+      "msisdn": "081299887766",
+      "mobile_id": "MOBILE_TEST",
+      "device_model": "Google Pixel 6 (Android 14)",
+      "os_version": "Android 14 / UpsideDownCake",
+      "plan_name": "Telkomsel Secure Guard 30 Hari",
+      "purchase_timestamp": "2026-10-01T08:01:09.7141411+07:00",
+      "active_period_start": "2026-10-01T08:01:09.7141411+07:00",
+      "active_period_end": "2026-10-31T08:01:09.7141411+07:00",
+      "kaspersky_expiry_date": "2026-10-31T08:01:09.7141411+07:00",
+      "desync_days": 0,
+      "is_active": true,
+      "activation_code": "TK-889123",
+      "activation_status": "ACTIVATED",
+      "kaspersky_license_key": "6KYKJ-65T6T-WMVBD-NNPEG",
+      "root_status": "CLEAN",
+      "hook_status": "CLEAN",
+      "bound_iccid": "89620101998877665544",
+      "current_iccid": "89620101998877665544",
+      "sim_slot": "Slot 1 (Telkomsel Halo)",
+      "quarantine_count": 1,
+      "device_migration_count": 0,
+      "purchase_history": [
+        {
+          "id": "ORD-20260922-001",
+          "package_name": "Telkomsel Secure Guard 30 Hari",
+          "purchased_at": "2026-10-01T08:01:09.7141411+07:00",
+          "duration_days": 30,
+          "price": 25000,
+          "channel": "MyTelkomsel App",
+          "status": "ACTIVE"
+        },
+        {
+          "id": "ORD-20260822-094",
+          "package_name": "Telkomsel Secure Guard 30 Hari",
+          "purchased_at": "2026-09-01T08:01:09.7141411+07:00",
+          "duration_days": 30,
+          "price": 25000,
+          "channel": "MyTelkomsel App",
+          "status": "EXPIRED"
+        }
+      ],
+      "recent_scan_logs": [
+        {
+          "id": "SCAN-101",
+          "module": "ANTIVIRUS",
+          "scan_type": "QUICK_SCAN",
+          "result": "CLEAN",
+          "items_scanned": 1840,
+          "threats_found": 0,
+          "details": "Kaspersky Engine memindai sistem dan memori kerja. Tidak ada malware ditemukan.",
+          "timestamp": "2026-10-05T07:46:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-102",
+          "module": "WEB_PROTECTION",
+          "scan_type": "REALTIME_MONITOR",
+          "result": "CLEAN",
+          "items_scanned": 42,
+          "threats_found": 0,
+          "details": "Kaspersky Web Filter memverifikasi trafik DNS \u0026 browser Chrome.",
+          "timestamp": "2026-10-05T07:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-103",
+          "module": "SIM_WATCH",
+          "scan_type": "HARDWARE_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "Kartu SIM terdaftar resmi di slot utama.",
+          "timestamp": "2026-10-05T06:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-104",
+          "module": "RASP",
+          "scan_type": "TAMPER_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 14,
+          "threats_found": 0,
+          "details": "Integritas binary APK valid, tidak ada hooking dynamic.",
+          "timestamp": "2026-10-05T04:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-105",
+          "module": "ANTIVIRUS",
+          "scan_type": "FILE_DOWNLOAD",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "File lampiran aman dari trojan dan ransomware.",
+          "timestamp": "2026-10-05T00:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-106",
+          "module": "NETWORK_ATTACK_BLOCKER",
+          "scan_type": "WI-FI_INSPECTION",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "Wi-Fi SSID terlindungi dengan enkripsi WPA3, tidak ada serangan Man-in-the-Middle (MitM).",
+          "timestamp": "2026-10-04T20:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-107",
+          "module": "ANTIVIRUS",
+          "scan_type": "FULL_SCAN",
+          "result": "CLEAN",
+          "items_scanned": 15420,
+          "threats_found": 0,
+          "details": "Pemindaian menyeluruh internal storage selesai dalam 1 menit 12 detik.",
+          "timestamp": "2026-10-04T08:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-108",
+          "module": "WEB_PROTECTION",
+          "scan_type": "ANTI-PHISHING",
+          "result": "CLEAN",
+          "items_scanned": 88,
+          "threats_found": 0,
+          "details": "Pengecekan database reputasi Kaspersky Security Network (KSN) aktif.",
+          "timestamp": "2026-10-04T02:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-109",
+          "module": "APP_CONTROL",
+          "scan_type": "PERMISSION_AUDIT",
+          "result": "CLEAN",
+          "items_scanned": 64,
+          "threats_found": 0,
+          "details": "Audit izin akses SMS, Kamera, dan Lokasi pada semua aplikasi pihak ketiga.",
+          "timestamp": "2026-10-03T20:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-110",
+          "module": "SYSTEM_AUDIT",
+          "scan_type": "HEALTH_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 5,
+          "threats_found": 0,
+          "details": "Basis data antivirus Kaspersky v2026.09 terpasang dan diperbarui otomatis.",
+          "timestamp": "2026-10-03T08:01:09.7141411+07:00"
+        }
+      ],
+      "data_retention_days": 30,
+      "retention_expires_at": "2026-10-31T08:01:09.7141411+07:00",
+      "is_archived": false,
+      "last_checked_at": "2026-10-05T07:51:09.7141411+07:00",
+      "created_at": "2026-10-01T08:01:09.7141411+07:00"
+    },
+    "081377889900": {
+      "id": "SUB-081377889900",
+      "msisdn": "081377889900",
+      "mobile_id": "MOB-339900AABBCC",
+      "device_model": "Vivo Y27 5G",
+      "os_version": "Android 13 / Funtouch OS",
+      "plan_name": "Telkomsel Secure Guard 30 Hari",
+      "purchase_timestamp": "2026-10-03T08:01:09.7141411+07:00",
+      "active_period_start": "2026-10-03T08:01:09.7141411+07:00",
+      "active_period_end": "2026-11-02T08:01:09.7141411+07:00",
+      "kaspersky_expiry_date": "2026-10-08T08:01:09.7141411+07:00",
+      "desync_days": 25,
+      "is_active": true,
+      "activation_code": "TK-118944",
+      "activation_status": "DESYNC_WARNING",
+      "kaspersky_license_key": "6KYKJ-65T6T-WMVBD-NNPEG",
+      "root_status": "CLEAN",
+      "hook_status": "CLEAN",
+      "bound_iccid": "89620101778899001122",
+      "current_iccid": "89620101778899001122",
+      "sim_slot": "Slot 1 (Telkomsel Prepaid)",
+      "quarantine_count": 0,
+      "device_migration_count": 0,
+      "purchase_history": [
+        {
+          "id": "ORD-20260924-044",
+          "package_name": "Telkomsel Secure Guard 30 Hari",
+          "purchased_at": "2026-10-03T08:01:09.7141411+07:00",
+          "duration_days": 30,
+          "price": 25000,
+          "channel": "MyTelkomsel App",
+          "status": "ACTIVE"
+        }
+      ],
+      "recent_scan_logs": [
+        {
+          "id": "SCAN-101",
+          "module": "ANTIVIRUS",
+          "scan_type": "QUICK_SCAN",
+          "result": "CLEAN",
+          "items_scanned": 1840,
+          "threats_found": 0,
+          "details": "Kaspersky Engine memindai sistem dan memori kerja. Tidak ada malware ditemukan.",
+          "timestamp": "2026-10-05T07:46:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-102",
+          "module": "WEB_PROTECTION",
+          "scan_type": "REALTIME_MONITOR",
+          "result": "CLEAN",
+          "items_scanned": 42,
+          "threats_found": 0,
+          "details": "Kaspersky Web Filter memverifikasi trafik DNS \u0026 browser Chrome.",
+          "timestamp": "2026-10-05T07:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-103",
+          "module": "SIM_WATCH",
+          "scan_type": "HARDWARE_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "Kartu SIM terdaftar resmi di slot utama.",
+          "timestamp": "2026-10-05T06:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-104",
+          "module": "RASP",
+          "scan_type": "TAMPER_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 14,
+          "threats_found": 0,
+          "details": "Integritas binary APK valid, tidak ada hooking dynamic.",
+          "timestamp": "2026-10-05T04:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-105",
+          "module": "ANTIVIRUS",
+          "scan_type": "FILE_DOWNLOAD",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "File lampiran aman dari trojan dan ransomware.",
+          "timestamp": "2026-10-05T00:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-106",
+          "module": "NETWORK_ATTACK_BLOCKER",
+          "scan_type": "WI-FI_INSPECTION",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "Wi-Fi SSID terlindungi dengan enkripsi WPA3, tidak ada serangan Man-in-the-Middle (MitM).",
+          "timestamp": "2026-10-04T20:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-107",
+          "module": "ANTIVIRUS",
+          "scan_type": "FULL_SCAN",
+          "result": "CLEAN",
+          "items_scanned": 15420,
+          "threats_found": 0,
+          "details": "Pemindaian menyeluruh internal storage selesai dalam 1 menit 12 detik.",
+          "timestamp": "2026-10-04T08:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-108",
+          "module": "WEB_PROTECTION",
+          "scan_type": "ANTI-PHISHING",
+          "result": "CLEAN",
+          "items_scanned": 88,
+          "threats_found": 0,
+          "details": "Pengecekan database reputasi Kaspersky Security Network (KSN) aktif.",
+          "timestamp": "2026-10-04T02:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-109",
+          "module": "APP_CONTROL",
+          "scan_type": "PERMISSION_AUDIT",
+          "result": "CLEAN",
+          "items_scanned": 64,
+          "threats_found": 0,
+          "details": "Audit izin akses SMS, Kamera, dan Lokasi pada semua aplikasi pihak ketiga.",
+          "timestamp": "2026-10-03T20:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-110",
+          "module": "SYSTEM_AUDIT",
+          "scan_type": "HEALTH_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 5,
+          "threats_found": 0,
+          "details": "Basis data antivirus Kaspersky v2026.09 terpasang dan diperbarui otomatis.",
+          "timestamp": "2026-10-03T08:01:09.7141411+07:00"
+        }
+      ],
+      "data_retention_days": 30,
+      "retention_expires_at": "2026-11-02T08:01:09.7141411+07:00",
+      "is_archived": false,
+      "last_checked_at": "2026-10-05T05:01:09.7141411+07:00",
+      "created_at": "2026-10-03T08:01:09.7141411+07:00"
+    },
+    "082199880011": {
+      "id": "SUB-082199880011",
+      "msisdn": "082199880011",
+      "mobile_id": "MOB-1930FA8190BCA771",
+      "device_model": "Xiaomi Redmi Note 13",
+      "os_version": "Android 13 / HyperOS",
+      "plan_name": "Telkomsel Secure Guard 30 Hari",
+      "purchase_timestamp": "2026-10-04T08:01:09.7141411+07:00",
+      "active_period_start": "2026-10-04T08:01:09.7141411+07:00",
+      "active_period_end": "2026-11-03T08:01:09.7141411+07:00",
+      "kaspersky_expiry_date": "2026-11-03T08:01:09.7141411+07:00",
+      "desync_days": 0,
+      "is_active": true,
+      "activation_code": "TK-441209",
+      "activation_status": "SMS_FAILED",
+      "kaspersky_license_key": "6KYKJ-65T6T-WMVBD-NNPEG",
+      "root_status": "CLEAN",
+      "hook_status": "CLEAN",
+      "bound_iccid": "89620101880011223344",
+      "current_iccid": "89620101880011223344",
+      "sim_slot": "Slot 1 (Telkomsel Prepaid)",
+      "quarantine_count": 0,
+      "device_migration_count": 0,
+      "purchase_history": [
+        {
+          "id": "ORD-20260925-012",
+          "package_name": "Telkomsel Secure Guard 30 Hari",
+          "purchased_at": "2026-10-04T08:01:09.7141411+07:00",
+          "duration_days": 30,
+          "price": 25000,
+          "channel": "USSD *363#",
+          "status": "ACTIVE"
+        }
+      ],
+      "recent_scan_logs": [
+        {
+          "id": "SCAN-101",
+          "module": "ANTIVIRUS",
+          "scan_type": "QUICK_SCAN",
+          "result": "CLEAN",
+          "items_scanned": 1840,
+          "threats_found": 0,
+          "details": "Kaspersky Engine memindai sistem dan memori kerja. Tidak ada malware ditemukan.",
+          "timestamp": "2026-10-05T07:46:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-102",
+          "module": "WEB_PROTECTION",
+          "scan_type": "REALTIME_MONITOR",
+          "result": "CLEAN",
+          "items_scanned": 42,
+          "threats_found": 0,
+          "details": "Kaspersky Web Filter memverifikasi trafik DNS \u0026 browser Chrome.",
+          "timestamp": "2026-10-05T07:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-103",
+          "module": "SIM_WATCH",
+          "scan_type": "HARDWARE_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "Kartu SIM terdaftar resmi di slot utama.",
+          "timestamp": "2026-10-05T06:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-104",
+          "module": "RASP",
+          "scan_type": "TAMPER_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 14,
+          "threats_found": 0,
+          "details": "Integritas binary APK valid, tidak ada hooking dynamic.",
+          "timestamp": "2026-10-05T04:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-105",
+          "module": "ANTIVIRUS",
+          "scan_type": "FILE_DOWNLOAD",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "File lampiran aman dari trojan dan ransomware.",
+          "timestamp": "2026-10-05T00:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-106",
+          "module": "NETWORK_ATTACK_BLOCKER",
+          "scan_type": "WI-FI_INSPECTION",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "Wi-Fi SSID terlindungi dengan enkripsi WPA3, tidak ada serangan Man-in-the-Middle (MitM).",
+          "timestamp": "2026-10-04T20:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-107",
+          "module": "ANTIVIRUS",
+          "scan_type": "FULL_SCAN",
+          "result": "CLEAN",
+          "items_scanned": 15420,
+          "threats_found": 0,
+          "details": "Pemindaian menyeluruh internal storage selesai dalam 1 menit 12 detik.",
+          "timestamp": "2026-10-04T08:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-108",
+          "module": "WEB_PROTECTION",
+          "scan_type": "ANTI-PHISHING",
+          "result": "CLEAN",
+          "items_scanned": 88,
+          "threats_found": 0,
+          "details": "Pengecekan database reputasi Kaspersky Security Network (KSN) aktif.",
+          "timestamp": "2026-10-04T02:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-109",
+          "module": "APP_CONTROL",
+          "scan_type": "PERMISSION_AUDIT",
+          "result": "CLEAN",
+          "items_scanned": 64,
+          "threats_found": 0,
+          "details": "Audit izin akses SMS, Kamera, dan Lokasi pada semua aplikasi pihak ketiga.",
+          "timestamp": "2026-10-03T20:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-110",
+          "module": "SYSTEM_AUDIT",
+          "scan_type": "HEALTH_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 5,
+          "threats_found": 0,
+          "details": "Basis data antivirus Kaspersky v2026.09 terpasang dan diperbarui otomatis.",
+          "timestamp": "2026-10-03T08:01:09.7141411+07:00"
+        }
+      ],
+      "data_retention_days": 30,
+      "retention_expires_at": "2026-11-03T08:01:09.7141411+07:00",
+      "is_archived": false,
+      "last_checked_at": "2026-10-04T08:01:09.7141411+07:00",
+      "created_at": "2026-10-04T08:01:09.7141411+07:00"
+    },
+    "085211223344": {
+      "id": "SUB-085211223344",
+      "msisdn": "085211223344",
+      "mobile_id": "MOB-POCO-X5P-9921",
+      "device_model": "Poco X5 Pro 5G",
+      "os_version": "Android 14 / HyperOS Mod",
+      "plan_name": "Telkomsel Secure Guard 30 Hari",
+      "purchase_timestamp": "2026-09-29T08:01:09.7141411+07:00",
+      "active_period_start": "2026-09-29T08:01:09.7141411+07:00",
+      "active_period_end": "2026-10-29T08:01:09.7141411+07:00",
+      "kaspersky_expiry_date": "2026-10-29T08:01:09.7141411+07:00",
+      "desync_days": 0,
+      "is_active": true,
+      "activation_code": "TK-774411",
+      "activation_status": "ACTIVATED",
+      "kaspersky_license_key": "6KYKJ-65T6T-WMVBD-NNPEG",
+      "root_status": "ROOT_DETECTED",
+      "hook_status": "HOOK_DETECTED",
+      "bound_iccid": "89620101554433221100",
+      "current_iccid": "89620101999988887777",
+      "sim_slot": "Slot 1 (Telkomsel Prepaid)",
+      "quarantine_count": 2,
+      "device_migration_count": 0,
+      "purchase_history": [
+        {
+          "id": "ORD-20260920-077",
+          "package_name": "Telkomsel Secure Guard 30 Hari",
+          "purchased_at": "2026-09-29T08:01:09.7141411+07:00",
+          "duration_days": 30,
+          "price": 25000,
+          "channel": "MyTelkomsel App",
+          "status": "ACTIVE"
+        }
+      ],
+      "recent_scan_logs": [
+        {
+          "id": "SCAN-101",
+          "module": "ANTIVIRUS",
+          "scan_type": "QUICK_SCAN",
+          "result": "CLEAN",
+          "items_scanned": 1840,
+          "threats_found": 0,
+          "details": "Kaspersky Engine memindai sistem dan memori kerja. Tidak ada malware ditemukan.",
+          "timestamp": "2026-10-05T07:46:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-102",
+          "module": "WEB_PROTECTION",
+          "scan_type": "REALTIME_MONITOR",
+          "result": "CLEAN",
+          "items_scanned": 42,
+          "threats_found": 0,
+          "details": "Kaspersky Web Filter memverifikasi trafik DNS \u0026 browser Chrome.",
+          "timestamp": "2026-10-05T07:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-103",
+          "module": "SIM_WATCH",
+          "scan_type": "HARDWARE_CHECK",
+          "result": "THREAT_BLOCKED",
+          "items_scanned": 1,
+          "threats_found": 1,
+          "details": "Deteksi ICCID mismatch! Kartu SIM fisik telah diganti.",
+          "timestamp": "2026-10-05T06:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-104",
+          "module": "RASP",
+          "scan_type": "TAMPER_CHECK",
+          "result": "TAMPER_PREVENTED",
+          "items_scanned": 14,
+          "threats_found": 1,
+          "details": "BlackWall RASP mendeteksi socket Frida / Magisk su binary.",
+          "timestamp": "2026-10-05T04:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-105",
+          "module": "ANTIVIRUS",
+          "scan_type": "FILE_DOWNLOAD",
+          "result": "FILE_QUARANTINED",
+          "items_scanned": 1,
+          "threats_found": 1,
+          "details": "File EICAR test signature diunduh ke folder Download dan langsung diisolasi.",
+          "timestamp": "2026-10-05T00:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-106",
+          "module": "NETWORK_ATTACK_BLOCKER",
+          "scan_type": "WI-FI_INSPECTION",
+          "result": "CLEAN",
+          "items_scanned": 1,
+          "threats_found": 0,
+          "details": "Wi-Fi SSID terlindungi dengan enkripsi WPA3, tidak ada serangan Man-in-the-Middle (MitM).",
+          "timestamp": "2026-10-04T20:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-107",
+          "module": "ANTIVIRUS",
+          "scan_type": "FULL_SCAN",
+          "result": "CLEAN",
+          "items_scanned": 15420,
+          "threats_found": 0,
+          "details": "Pemindaian menyeluruh internal storage selesai dalam 1 menit 12 detik.",
+          "timestamp": "2026-10-04T08:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-108",
+          "module": "WEB_PROTECTION",
+          "scan_type": "ANTI-PHISHING",
+          "result": "CLEAN",
+          "items_scanned": 88,
+          "threats_found": 0,
+          "details": "Pengecekan database reputasi Kaspersky Security Network (KSN) aktif.",
+          "timestamp": "2026-10-04T02:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-109",
+          "module": "APP_CONTROL",
+          "scan_type": "PERMISSION_AUDIT",
+          "result": "CLEAN",
+          "items_scanned": 64,
+          "threats_found": 0,
+          "details": "Audit izin akses SMS, Kamera, dan Lokasi pada semua aplikasi pihak ketiga.",
+          "timestamp": "2026-10-03T20:01:09.7141411+07:00"
+        },
+        {
+          "id": "SCAN-110",
+          "module": "SYSTEM_AUDIT",
+          "scan_type": "HEALTH_CHECK",
+          "result": "CLEAN",
+          "items_scanned": 5,
+          "threats_found": 0,
+          "details": "Basis data antivirus Kaspersky v2026.09 terpasang dan diperbarui otomatis.",
+          "timestamp": "2026-10-03T08:01:09.7141411+07:00"
+        }
+      ],
+      "data_retention_days": 30,
+      "retention_expires_at": "2026-10-29T08:01:09.7141411+07:00",
+      "is_archived": false,
+      "last_checked_at": "2026-10-05T07:31:09.7141411+07:00",
+      "created_at": "2026-09-29T08:01:09.7141411+07:00"
+    }
+  },
+  "threats": [
+    {
+      "id": "THR-20261003-001",
+      "mobile_id": "MOBILE_TEST",
+      "msisdn": "081299887766",
+      "threat_type": "PHISHING",
+      "target": "https://my-telkomsel-poin-klaim.xyz/login",
+      "severity": "CRITICAL",
+      "description": "Percobaan akses phishing credential harvesting Telkomsel Poin diblokir oleh Web Filter.",
+      "action_taken": "BLOCKED",
+      "latitude": -6.2088,
+      "longitude": 106.8456,
+      "city": "Jakarta Pusat",
+      "location_tag": "Kawasan Rasuna Said, Jakarta",
+      "network_type": "Telkomsel 5G",
+      "timestamp": "2026-10-05T07:46:09.7141411+07:00"
+    },
+    {
+      "id": "THR-20261003-002",
+      "mobile_id": "MOBILE_TEST",
+      "msisdn": "081299887766",
+      "threat_type": "MALWARE",
+      "target": "/storage/emulated/0/Download/apk_undangan_pernikahan.apk",
+      "severity": "CRITICAL",
+      "description": "Trojan-Banker.AndroidOS.FakeDoc berhasil diidentifikasi dan dikarantina.",
+      "action_taken": "ISOLATED",
+      "latitude": -6.1751,
+      "longitude": 106.865,
+      "city": "Jakarta Pusat",
+      "location_tag": "Cempaka Putih, Jakarta",
+      "network_type": "WiFi - Cafe_Net_Free",
+      "timestamp": "2026-10-05T07:16:09.7141411+07:00"
+    },
+    {
+      "id": "THR-20261003-003",
+      "mobile_id": "MOBILE_S24_02",
+      "msisdn": "081122334455",
+      "threat_type": "WIFI",
+      "target": "SSID: Orbit_Free_Public (Evil Twin)",
+      "severity": "HIGH",
+      "description": "Rogue Wi-Fi AP terdeteksi memalsukan Telkomsel Orbit tanpa enkripsi WPA.",
+      "action_taken": "BLOCKED",
+      "latitude": -6.9175,
+      "longitude": 107.6191,
+      "city": "Bandung",
+      "location_tag": "Dago Atas, Bandung",
+      "network_type": "WiFi - Rogue AP",
+      "timestamp": "2026-10-05T06:01:09.7141411+07:00"
+    },
+    {
+      "id": "THR-20261003-004",
+      "mobile_id": "MOBILE_ROG_03",
+      "msisdn": "085233445566",
+      "threat_type": "SIM_WATCH",
+      "target": "SIM Slot 1 (ICCID Changed)",
+      "severity": "HIGH",
+      "description": "Deteksi pergantian SIM Card tanpa otorisasi. Sinyal proteksi SIM Watch dikirimkan ke SOC.",
+      "action_taken": "REPORTED",
+      "latitude": -7.2575,
+      "longitude": 112.7521,
+      "city": "Surabaya",
+      "location_tag": "Gubeng, Surabaya",
+      "network_type": "Cellular - Telkomsel 4G",
+      "timestamp": "2026-10-05T04:01:09.7141411+07:00"
+    },
+    {
+      "id": "THR-20261003-005",
+      "mobile_id": "MOBILE_IP15_04",
+      "msisdn": "082155667788",
+      "threat_type": "PHISHING",
+      "target": "http://bca-klik-secure-update.com/auth",
+      "severity": "CRITICAL",
+      "description": "Situs perbankan palsu dicegah oleh Kaspersky Web Protection SDK.",
+      "action_taken": "BLOCKED",
+      "latitude": 3.5952,
+      "longitude": 98.6722,
+      "city": "Medan",
+      "location_tag": "Kesawan, Medan",
+      "network_type": "Telkomsel 5G",
+      "timestamp": "2026-10-05T01:01:09.7141411+07:00"
+    },
+    {
+      "id": "THR-20261003-006",
+      "mobile_id": "MOBILE_VIVO_05",
+      "msisdn": "081377889900",
+      "threat_type": "MALWARE",
+      "target": "/storage/emulated/0/Download/Surat_Tilang_Elektronik.apk",
+      "severity": "CRITICAL",
+      "description": "Malware pencuri SMS OTP SMS.AndroidOS.Agent diisolasi oleh antivirus engine.",
+      "action_taken": "ISOLATED",
+      "latitude": -8.6705,
+      "longitude": 115.2126,
+      "city": "Denpasar",
+      "location_tag": "Sanur, Denpasar, Bali",
+      "network_type": "WiFi - Hotel_Guest",
+      "timestamp": "2026-10-04T21:01:09.7141411+07:00"
+    },
+    {
+      "id": "THR-20261003-007",
+      "mobile_id": "MOBILE_POCO_06",
+      "msisdn": "085211223344",
+      "threat_type": "RASP",
+      "target": "Magisk SU Binary / System Tampered",
+      "severity": "HIGH",
+      "description": "Injeksi root binary terdeteksi. BlackWall RASP mengamankan keystore dan memutus sesi perbankan.",
+      "action_taken": "REPORTED",
+      "latitude": -7.7956,
+      "longitude": 110.3695,
+      "city": "Yogyakarta",
+      "location_tag": "Malioboro, Yogyakarta",
+      "network_type": "Telkomsel 4G LTE",
+      "timestamp": "2026-10-04T14:01:09.7141411+07:00"
+    },
+    {
+      "id": "THR-20261003-008",
+      "mobile_id": "MOBILE_OPPO_07",
+      "msisdn": "081288776655",
+      "threat_type": "WIFI",
+      "target": "SSID: Bandara_Free_Wifi (Unencrypted)",
+      "severity": "MEDIUM",
+      "description": "Jaringan Wi-Fi publik tanpa enkripsi WPA2/WPA3. Potensi intersepsi ARP Spoofing.",
+      "action_taken": "REPORTED",
+      "latitude": -5.1477,
+      "longitude": 119.4327,
+      "city": "Makassar",
+      "location_tag": "Sultan Hasanuddin, Makassar",
+      "network_type": "WiFi - Airport_Open",
+      "timestamp": "2026-10-04T09:01:09.7141411+07:00"
+    }
+  ],
+  "phishing_records": {
+    "bri-mo-verifikasi-keamanan.vip": {
+      "id": "PHISH-2026-003",
+      "url": "https://bri-mo-verifikasi-keamanan.vip/aktivasi",
+      "domain": "bri-mo-verifikasi-keamanan.vip",
+      "category": "SMISHING",
+      "target_brand": "Bank BRI",
+      "severity": "CRITICAL",
+      "status": "ACTIVE_THREAT",
+      "hit_count": 76,
+      "first_detected_at": "2026-10-03T20:01:09.7147002+07:00",
+      "last_detected_at": "2026-10-05T07:16:09.7147002+07:00",
+      "targeted_msisdns": [
+        "085298765432"
+      ],
+      "action_taken": "BLOCKED",
+      "ksn_verdict": "Phishing domain (Trojan-Banker redirect)",
+      "notes": "Distributed via WhatsApp/SMS APK scam redirect"
+    },
+    "dana-kaget-amplop-ramadhan.xyz": {
+      "id": "PHISH-2026-005",
+      "url": "https://dana-kaget-amplop-ramadhan.xyz/claim",
+      "domain": "dana-kaget-amplop-ramadhan.xyz",
+      "category": "PHISHING",
+      "target_brand": "E-Wallet \u0026 Fintech",
+      "severity": "MEDIUM",
+      "status": "ACTIVE_THREAT",
+      "hit_count": 52,
+      "first_detected_at": "2026-10-04T08:01:09.7147002+07:00",
+      "last_detected_at": "2026-10-05T07:51:09.7147002+07:00",
+      "targeted_msisdns": [
+        "087788990011"
+      ],
+      "action_taken": "BLOCKED",
+      "ksn_verdict": "Fraud / Social engineering",
+      "notes": "Fake DANA Kaget reward page soliciting PIN and OTP"
+    },
+    "djp-pajak-surat-peringatan.online": {
+      "id": "PHISH-2026-004",
+      "url": "https://djp-pajak-surat-peringatan.online/ebilling",
+      "domain": "djp-pajak-surat-peringatan.online",
+      "category": "MALWARE_URL",
+      "target_brand": "Instansi Pemerintah",
+      "severity": "HIGH",
+      "status": "TAKEN_DOWN",
+      "hit_count": 34,
+      "first_detected_at": "2026-09-30T08:01:09.7147002+07:00",
+      "last_detected_at": "2026-10-04T08:01:09.7147002+07:00",
+      "targeted_msisdns": [
+        "081344556677"
+      ],
+      "action_taken": "ISOLATED",
+      "ksn_verdict": "Known malicious host / Dropper",
+      "notes": "Spoofs Direktorat Jenderal Pajak (DJP) e-Billing notification"
+    },
+    "klik-bca-pembaruan-tarif.info": {
+      "id": "PHISH-2026-002",
+      "url": "https://klik-bca-pembaruan-tarif.info/auth",
+      "domain": "klik-bca-pembaruan-tarif.info",
+      "category": "FAKE_LOGIN",
+      "target_brand": "Bank BCA",
+      "severity": "CRITICAL",
+      "status": "REPORTED_KOMINFO",
+      "hit_count": 98,
+      "first_detected_at": "2026-10-03T08:01:09.7147002+07:00",
+      "last_detected_at": "2026-10-05T06:01:09.7147002+07:00",
+      "targeted_msisdns": [
+        "081122334455"
+      ],
+      "action_taken": "BLOCKED",
+      "ksn_verdict": "Malicious credential phishing",
+      "notes": "Impersonates KlikBCA Individual login with KeyBCA token sniffer"
+    },
+    "telkomsel-poin-tukar-hadiah.top": {
+      "id": "PHISH-2026-001",
+      "url": "https://telkomsel-poin-tukar-hadiah.top/login",
+      "domain": "telkomsel-poin-tukar-hadiah.top",
+      "category": "PHISHING",
+      "target_brand": "Telkomsel",
+      "severity": "CRITICAL",
+      "status": "ACTIVE_THREAT",
+      "hit_count": 142,
+      "first_detected_at": "2026-10-02T08:01:09.7147002+07:00",
+      "last_detected_at": "2026-10-05T07:46:09.7147002+07:00",
+      "targeted_msisdns": [
+        "081234567890",
+        "082199887766"
+      ],
+      "action_taken": "BLOCKED",
+      "ksn_verdict": "Dangerous URL / Phishing heuristic match",
+      "notes": "Fake login targeting MyTelkomsel points with SMS OTP harvester"
+    }
+  },
+  "operators": {
+    "admin@telkomsel.co.id": {
+      "id": "OP-001",
+      "name": "Budi Darmawan",
+      "email": "admin@telkomsel.co.id",
+      "role": "SUPERADMIN",
+      "badge_number": "TS-SEC-9901",
+      "is_active": true,
+      "last_login_at": "0001-01-01T00:00:00Z",
+      "created_at": "2026-07-07T08:01:09.7147002+07:00"
+    },
+    "analyst@telkomsel.co.id": {
+      "id": "OP-002",
+      "name": "Siti Rahmawati",
+      "email": "analyst@telkomsel.co.id",
+      "role": "SOC_ANALYST",
+      "badge_number": "TS-SOC-4412",
+      "is_active": true,
+      "last_login_at": "0001-01-01T00:00:00Z",
+      "created_at": "2026-08-06T08:01:09.7147002+07:00"
+    },
+    "auditor@telkomsel.co.id": {
+      "id": "OP-004",
+      "name": "Dewi Lestari",
+      "email": "auditor@telkomsel.co.id",
+      "role": "AUDITOR",
+      "badge_number": "TS-AUD-1088",
+      "is_active": true,
+      "last_login_at": "0001-01-01T00:00:00Z",
+      "created_at": "2026-09-20T08:01:09.7147002+07:00"
+    },
+    "helpdesk@telkomsel.co.id": {
+      "id": "OP-003",
+      "name": "Rian Pratama",
+      "email": "helpdesk@telkomsel.co.id",
+      "role": "CUSTOMER_CARE",
+      "badge_number": "TS-CARE-2105",
+      "is_active": true,
+      "last_login_at": "0001-01-01T00:00:00Z",
+      "created_at": "2026-09-05T08:01:09.7147002+07:00"
+    }
+  },
+  "audit_logs": [
+    {
+      "id": "AUDIT-INIT",
+      "operator_email": "system@telkomsel.co.id",
+      "operator_name": "TelkomSecure Security Core",
+      "action": "SYSTEM_INITIALIZE",
+      "target_resource": "SOC_RBAC",
+      "details": "Initialized default SOC operators and RBAC matrix",
+      "ip_address": "127.0.0.1",
+      "timestamp": "2026-10-05T08:01:09.7147002+07:00"
+    }
+  ],
+  "api_keys": {
+    "tk_sec_ndp_live_9921": {
+      "id": "KEY-NDP-01",
+      "name": "Telkomsel NDP Billing Core",
+      "key": "tk_sec_ndp_live_9921",
+      "source": "NDP_BILLING",
+      "is_active": true,
+      "created_at": "2026-08-06T08:01:09.7147002+07:00",
+      "last_used_at": "2026-10-05T07:51:09.7147002+07:00",
+      "request_count": 1420
+    },
+    "tk_sec_proxy_jkt_4410": {
+      "id": "KEY-PROXY-01",
+      "name": "Telkom Secure Web Gateway Proxy",
+      "key": "tk_sec_proxy_jkt_4410",
+      "source": "TELCO_PROXY",
+      "is_active": true,
+      "created_at": "2026-09-05T08:01:09.7147002+07:00",
+      "last_used_at": "2026-10-05T07:56:09.7147002+07:00",
+      "request_count": 890
+    }
+  },
+  "dlq_records": [
+    {
+      "id": "DLQ-2026-001",
+      "source": "NDP_BILLING",
+      "payload_raw": "{\"msisdn\":\"081299999999\",\"action\":\"PURCHASE\",\"duration_days\":-5,\"package_name\":\"\"}",
+      "error_message": "Invalid duration_days (-5) and empty package_name from legacy billing adapter",
+      "severity": "HIGH",
+      "status": "PENDING",
+      "timestamp": "2026-10-05T06:01:09.7147002+07:00",
+      "resolved_at": "0001-01-01T00:00:00Z",
+      "notes": "Awaiting schema transformation fix"
+    }
+  ],
+  "last_backup_at": "0001-01-01T00:00:00Z",
+  "last_retention_at": "0001-01-01T00:00:00Z"
 }

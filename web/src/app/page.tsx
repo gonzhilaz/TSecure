@@ -28,6 +28,7 @@ import {
   fetchRecentThreats,
   createEventSource,
   clearDashboardData,
+  resetMockData,
 } from '@/lib/api';
 import { DashboardStats, Subscriber, ThreatEvent, DashboardTab } from '@/types';
 
@@ -112,21 +113,25 @@ export default function SOCDashboard() {
     setThreats([]);
     setSubscribers([]);
     setStats({
-      total_subscribers: 0,
-      active_subscribers: 0,
-      expired_subscribers: 0,
-      pending_activation: 0,
-      sms_delivery_failed: 0,
-      desync_warnings: 0,
-      rooted_devices: 0,
-      sim_swap_alerts: 0,
-      total_threats_blocked: 0,
-      threats_today: 0,
-      kaspersky_quota_total: 100,
-      kaspersky_quota_used: 0,
-      average_security_score: 100,
-      recent_threats: [],
+      total_subscribers: 0, active_subscribers: 0, expired_subscribers: 0,
+      pending_activation: 0, sms_delivery_failed: 0, desync_warnings: 0,
+      rooted_devices: 0, sim_swap_alerts: 0, total_threats_blocked: 0,
+      threats_today: 0, kaspersky_quota_total: 100, kaspersky_quota_used: 0,
+      average_security_score: 100, recent_threats: [],
     });
+  };
+
+  const handleResetMockData = async () => {
+    try {
+      setIsRefreshing(true);
+      await resetMockData();
+      await handleManualRefresh();
+    } catch (err) {
+      console.warn('Backend reset mock failed:', err);
+      await handleManualRefresh();
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   useEffect(() => {
@@ -255,6 +260,7 @@ export default function SOCDashboard() {
           onRefresh={handleManualRefresh}
           isRefreshing={isRefreshing}
           onClearData={handleClearData}
+          onResetMockData={handleResetMockData}
           operator={operator}
           onLogout={handleLogout}
           onToggleMobileMenu={() => setMobileSidebarOpen(!mobileSidebarOpen)}

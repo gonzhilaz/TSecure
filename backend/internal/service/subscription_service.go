@@ -256,6 +256,10 @@ func (s *SubscriptionService) ClearAllData() {
 	s.store.ClearAllData()
 }
 
+func (s *SubscriptionService) ResetMockData() {
+	s.store.ResetToSeedData()
+}
+
 // Phishing Threat Intelligence delegations
 func (s *SubscriptionService) ListPhishingRecords(brand, status, query string) []*model.PhishingRecord {
 	return s.store.ListPhishingRecords(brand, status, query)

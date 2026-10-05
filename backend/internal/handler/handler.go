@@ -332,6 +332,16 @@ func (h *APIHandler) ClearDashboardData(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
+func (h *APIHandler) ResetMockData(w http.ResponseWriter, r *http.Request) {
+	h.svc.ResetMockData()
+	h.broker.Broadcast("subscribers_updated", h.svc.ListSubscribers())
+	h.broker.Broadcast("threats_updated", h.svc.ListThreats(20))
+	writeJSON(w, http.StatusOK, map[string]any{
+		"status":  "success",
+		"message": "Data mock (subscribers, threats, phishing, operators) berhasil dimuat ulang ke nilai default.",
+	})
+}
+
 func (h *APIHandler) CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

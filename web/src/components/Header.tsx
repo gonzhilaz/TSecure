@@ -12,6 +12,7 @@ import {
   VolumeX,
   Trash2,
   Menu,
+  RotateCcw,
 } from 'lucide-react';
 import { SOCOperator } from '@/lib/auth';
 import { isSoundEnabled, setSoundEnabled } from '@/lib/soundAlert';
@@ -21,6 +22,7 @@ interface HeaderProps {
   onRefresh: () => void;
   isRefreshing: boolean;
   onClearData?: () => void;
+  onResetMockData?: () => void;
   operator?: SOCOperator | null;
   onLogout?: () => void;
   onToggleMobileMenu?: () => void;
@@ -31,6 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
   onRefresh,
   isRefreshing,
   onClearData,
+  onResetMockData,
   operator,
   onLogout,
   onToggleMobileMenu,
@@ -151,15 +154,31 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="hidden sm:inline">Sync</span>
           </button>
 
+          {/* Reset Mock Data */}
+          {onResetMockData && (
+            <button
+              onClick={onResetMockData}
+              className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-xs font-bold text-emerald-700 transition-all active:scale-95 shadow-xs"
+              title="Muat ulang seluruh mock data standar POC (subscribers, ancaman & lisensi)"
+            >
+              <RotateCcw className="w-3 h-3 text-emerald-600" />
+              <span className="hidden md:inline">Muat Mock Data</span>
+            </button>
+          )}
+
           {/* Clear Data */}
           {onClearData && (
             <button
-              onClick={onClearData}
+              onClick={() => {
+                if (window.confirm('Apakah Anda yakin ingin mengosongkan seluruh data dashboard?')) {
+                  onClearData();
+                }
+              }}
               className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white hover:bg-[#fff0f0] border border-[#e2e8f0] text-xs font-semibold text-[#dc2626] transition-all active:scale-95"
               title="Bersihkan riwayat pengujian"
             >
               <Trash2 className="w-3 h-3" />
-              <span className="hidden md:inline">Reset</span>
+              <span className="hidden md:inline">Kosongkan</span>
             </button>
           )}
 

@@ -94,7 +94,9 @@ func main() {
 	mux.HandleFunc("/api/v1/dashboard/subscribers", apiHandler.ListSubscribers)
 	mux.HandleFunc("/api/v1/dashboard/threats", apiHandler.ListThreats)
 	mux.HandleFunc("/api/v1/dashboard/clear", apiHandler.ClearDashboardData)
+	mux.HandleFunc("/api/v1/dashboard/reset-mock", apiHandler.ResetMockData)
 	mux.HandleFunc("/api/v1/admin/clear-threats", apiHandler.ClearDashboardData)
+	mux.HandleFunc("/api/v1/admin/reset-mock", apiHandler.ResetMockData)
 	mux.Handle("/api/v1/dashboard/stream", broker)
 
 	// Big Data Streaming Export Endpoints (Chunked Transfer)

@@ -15,8 +15,16 @@ import {
 } from '@/types';
 import { getAuthToken } from './auth';
 
-const rawUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://backend-i3wy.vercel.app';
-const BASE_URL = rawUrl.replace(/\/+$/, '');
+function getBaseUrl(): string {
+  const rawUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api-telkomsel-secure.digit.co.id';
+  let url = rawUrl.replace(/\/+$/, '');
+  if (typeof window !== 'undefined' && window.location.protocol === 'https:' && url.startsWith('http://')) {
+    url = url.replace(/^http:\/\//, 'https://');
+  }
+  return url;
+}
+
+const BASE_URL = getBaseUrl();
 
 function authHeaders(): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -163,6 +171,18 @@ export async function clearDashboardData(): Promise<{ status: string; message: s
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
     throw new Error(errorData.error || `Clear dashboard data failed: ${res.statusText}`);
+  }
+  return res.json();
+}
+
+export async function resetMockData(): Promise<{ status: string; message: string }> {
+  const res = await fetch(`${BASE_URL}/api/v1/dashboard/reset-mock`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error || `Reset mock data failed: ${res.statusText}`);
   }
   return res.json();
 }

@@ -55,6 +55,7 @@ func NewStorage(persistPath string) *Storage {
 	if len(s.apiKeys) == 0 {
 		s.seedInitialApiKeys()
 	}
+	_ = s.saveToFile()
 	return s
 }
 
