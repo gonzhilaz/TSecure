@@ -39,6 +39,8 @@ backend/telkomsecure-backend*
 .env
 .env.local
 .env.*.local
+doc/vps_credentials.md
+scripts/vps_*.py
 
 # Temporary local screenshots & scratch files
 current_screen.png
